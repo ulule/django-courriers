@@ -1,16 +1,16 @@
 {% if previous_object %}
-	<p>Previous : <a href="{% url newsletter_detail previous_object.pk %}">{{ previous_object.name }}</a></p>
+    <p>Previous : <a href="{% url newsletter_detail previous_object.pk %}">{{ previous_object.name }}</a></p>
 {% endif %}
 {% if next_object %}
-	<p>Next : <a href="{% url newsletter_detail next_object.pk %}">{{ next_object.name }}</a></p>
+    <p>Next : <a href="{% url newsletter_detail next_object.pk %}">{{ next_object.name }}</a></p>
 {% endif %}
 
 {% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-    {% endfor %}
-</ul>
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
 {% endif %}
 
 
@@ -18,12 +18,12 @@
     {{ form.non_field_errors }}
 
     {% if form.subject.errors %}
-	    <ol>
-	    {% for error in form.receiver.errors %}
-	        <li><strong>{{ error|escape }}</strong></li>
-	    {% endfor %}
-	    </ol>
-	{% endif %}
+        <ol>
+            {% for error in form.receiver.errors %}
+                <li><strong>{{ error|escape }}</strong></li>
+            {% endfor %}
+        </ol>
+    {% endif %}
 
     <div class="fieldWrapper">
         {{ form.receiver.errors }}
