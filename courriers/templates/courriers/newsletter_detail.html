@@ -1,53 +1,37 @@
-{% extends "ulule/base.html" %}
+{% if previous_object %}
+	<p>Previous : <a href="{% url newsletter_detail previous_object.pk %}">{{ previous_object.name }}</a></p>
+{% endif %}
+{% if next_object %}
+	<p>Next : <a href="{% url newsletter_detail next_object.pk %}">{{ next_object.name }}</a></p>
+{% endif %}
 
-{% load semioutils compressed %}
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
 
-{% block extend_uncompressed_css %}
-    {% compressed_css "presale" %}
 
-    <link rel="stylesheet" href="{{ partner.staticfiles }}" type="text/css" media="screen" charset="utf-8" />
-{% endblock %}
+<form action="" method="post">{% csrf_token %}
+    {{ form.non_field_errors }}
 
-{% block title %}Ulule - The 1st European crowdfunding site{% endblock %}
-
-{% block site_content %}
-
-	{% if previous_object %}
-		<p>Previous : <a href="{% url newsletter_detail previous_object.pk %}">{{ previous_object.name }}</a></p>
-	{% endif %}
-	{% if next_object %}
-		<p>Next : <a href="{% url newsletter_detail next_object.pk %}">{{ next_object.name }}</a></p>
-	{% endif %}
-
-	{% if messages %}
-	<ul class="messages">
-	    {% for message in messages %}
-	    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% if form.subject.errors %}
+	    <ol>
+	    {% for error in form.receiver.errors %}
+	        <li><strong>{{ error|escape }}</strong></li>
 	    {% endfor %}
-	</ul>
+	    </ol>
 	{% endif %}
 
-
-	<form action="" method="post">{% csrf_token %}
-	    {{ form.non_field_errors }}
-
-	    {% if form.subject.errors %}
-		    <ol>
-		    {% for error in form.receiver.errors %}
-		        <li><strong>{{ error|escape }}</strong></li>
-		    {% endfor %}
-		    </ol>
-		{% endif %}
-
-	    <div class="fieldWrapper">
-	        {{ form.receiver.errors }}
-	        <label for="id_receiver">Your e-mail :</label>
-	        {{ form.receiver }}
-	    </div>
-	    <p><input type="submit" value="Submit"/></p>
-	</form>
+    <div class="fieldWrapper">
+        {{ form.receiver.errors }}
+        <label for="id_receiver">Your e-mail :</label>
+        {{ form.receiver }}
+    </div>
+    <p><input type="submit" value="Submit"/></p>
+</form>
 
 
-	<iframe src="{% url newsletterraw_detail newsletter.pk %}" width="100%" height="600px" style="border:1px solid #DCDCDB"></iframe>
-
-{% endblock %}
+<iframe src="{% url newsletterraw_detail newsletter.pk %}" width="100%" height="600px" style="border:1px solid #DCDCDB"></iframe>
