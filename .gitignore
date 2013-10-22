@@ -1,5 +1,6 @@
 *.log
 *.pot
 *.pyc
+*.orig
 local_settings.py
 .coverage

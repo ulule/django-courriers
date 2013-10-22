@@ -6,11 +6,11 @@
 {% endif %}
 
 {% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-    {% endfor %}
-</ul>
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
 {% endif %}
 
 
@@ -19,9 +19,9 @@
 
     {% if form.subject.errors %}
         <ol>
-        {% for error in form.receiver.errors %}
-            <li><strong>{{ error|escape }}</strong></li>
-        {% endfor %}
+            {% for error in form.receiver.errors %}
+                <li><strong>{{ error|escape }}</strong></li>
+            {% endfor %}
         </ol>
     {% endif %}
 

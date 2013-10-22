@@ -3,14 +3,11 @@ import os
 
 from django.db import models
 from django.db.models.query import QuerySet
-
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-
 from django.template.defaultfilters import slugify, truncatechars
 from django.utils.translation import ugettext_lazy as _
-
-from datetime import datetime
+from django.utils import timezone as datetime
 
 
 def get_file_path(instance, filename):
@@ -20,24 +17,44 @@ def get_file_path(instance, filename):
     return os.path.join('courriers', 'uploads', filename)
 
 
-
 class NewsletterQuerySet(QuerySet):
+
+    def first(self):
+        """
+        Returns the first object of a query, returns None if no match is found.
+        """
+        qs = self if self.ordered else self.order_by('pk')
+        try:
+            return qs[0]
+        except IndexError:
+            return None
+
+    def last(self):
+        """
+        Returns the last object of a query, returns None if no match is found.
+        """
+        qs = self.reverse() if self.ordered else self.order_by('-pk')
+        try:
+            return qs[0]
+        except IndexError:
+            return None
+
     def status_online(self):
-        return self.filter(status=Newsletter.STATUS_ONLINE, published_at__lt=datetime.now()) \
-                    .order_by('published_at')
+        return (self.filter(status=Newsletter.STATUS_ONLINE,
+                            published_at__lt=datetime.now())
+                .order_by('published_at'))
 
     def get_previous(self, current_date):
-        qs = self.filter(published_at__lt=current_date).order_by('-published_at')[:1]
-        if qs:
-            return qs.get()
-        return None
+        return (self.status_online()
+                .filter(published_at__lt=current_date)
+                .order_by('-published_at')
+                .first())
 
     def get_next(self, current_date):
-        qs = self.filter(published_at__gt=current_date)[:1]
-        if qs:
-            return qs.get()
-        return None
-
+        return (self.status_online()
+                .filter(published_at__gt=current_date)
+                .order_by('-published_at')
+                .first())
 
 
 class NewsletterManager(models.Manager):
@@ -48,11 +65,10 @@ class NewsletterManager(models.Manager):
         return self.get_query_set().status_online()
 
     def get_previous(self, current_date):
-        return self.status_online().get_previous(current_date)
+        return self.get_query_set().get_previous(current_date)
 
     def get_next(self, current_date):
-        return self.status_online().get_next(current_date)
-
+        return self.get_query_set().get_next(current_date)
 
 
 class Newsletter(models.Model):
@@ -68,16 +84,16 @@ class Newsletter(models.Model):
     published_at = models.DateTimeField(null=True)
     status = models.PositiveIntegerField(max_length=1,
                                          choices=STATUS_CHOICES,
-                                         default=STATUS_DRAFT, 
+                                         default=STATUS_DRAFT,
                                          db_index=True)
     headline = models.CharField(max_length=255, blank=True, null=True)
     cover = models.ImageField(upload_to=get_file_path, blank=True, null=True)
 
     objects = NewsletterManager()
 
+
     def __unicode__(self):
         return self.name
-
 
 
 class NewsletterItem(models.Model):
@@ -86,7 +102,6 @@ class NewsletterItem(models.Model):
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to=get_file_path, blank=True, null=True)
     url = models.URLField(blank=True, null=True)
-
 
 
 class NewsletterSubscriberQuerySet(QuerySet):

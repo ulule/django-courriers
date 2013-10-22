@@ -67,7 +67,6 @@ class NewsletterDetailView(View):
         return view(request, *args, **kwargs)
 
 
-
 class NewsletterRawDetailView(DetailView):
     model = Newsletter
     template_name = 'courriers/newsletterraw_detail.html'

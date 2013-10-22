@@ -57,7 +57,6 @@ class SubscribeFormTest(TestCase):
 
         self.assertEqual(is_valid, False)
 
-
     def test_subscription_logged_in(self):
         self.client.login(username='thoas', password='secret')
 

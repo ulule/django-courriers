@@ -3,7 +3,7 @@
 <p>Published: {{ object.published_at|date }}</p>
 
 <ul>
-{% for item in items %}
-    <li>{{ item.description }}</li>
-{% endfor %}
+    {% for item in items %}
+        <li>{{ item.description }}</li>
+    {% endfor %}
 </ul>
