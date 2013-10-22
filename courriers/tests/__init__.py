@@ -1,11 +1,12 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.utils import timezone as datetime
 
 from courriers.forms import SubscriptionForm
 from courriers.models import Newsletter, NewsletterSubscriber
+from courriers.backends import backend
 
-from datetime import datetime
 
 
 class NewslettersViewsTests(TestCase):
@@ -30,7 +31,6 @@ class NewslettersViewsTests(TestCase):
         response = self.client.get(reverse('newsletterraw_detail', kwargs={'pk': 1}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'courriers/newsletterraw_detail.html')
-
 
 
 class SubscribeFormTest(TestCase):
@@ -73,3 +73,48 @@ class SubscribeFormTest(TestCase):
         new_subscriber = NewsletterSubscriber.objects.filter(email=valid_data['receiver'], user=user)
 
         self.assertEqual(new_subscriber.count(), 1)
+
+
+
+class SimpleBackendTest(TestCase):
+
+    def setUp(self):
+        NewsletterSubscriber.objects.create(email='adele@ulule.com')
+
+        self.backend = backend()
+
+    def test_registration(self):
+
+        # Unsubscribe
+
+        subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com')
+
+        self.backend.unregister(subscriber)
+
+        unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=True)
+
+        self.assertEqual(unsubscriber.count(), 1)
+
+
+        # Subscribe
+
+        self.backend.register(unsubscriber.get())
+
+        subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
+
+        self.assertEqual(subscriber.count(), 1)
+
+
+
+class NewsletterModelsTest(TestCase):
+
+    def test_navigation(self):
+        n1 = Newsletter.objects.create(name='Newsletter1', status=1, published_at=datetime.now() - datetime.timedelta(hours=3))
+        n2 = Newsletter.objects.create(name='Newsletter2', status=1, published_at=datetime.now() - datetime.timedelta(hours=2))
+        n3 = Newsletter.objects.create(name='Newsletter3', status=1, published_at=datetime.now() - datetime.timedelta(hours=1))
+
+        prev = n2.prev()
+        self.assertEqual(prev, n1)
+
+        next = n2.next()
+        self.assertEqual(next, n3)

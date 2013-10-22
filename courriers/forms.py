@@ -22,5 +22,5 @@ class SubscriptionForm(forms.Form):
         return receiver
 
     def save(self, user=None):
-        self.backend.register(self.cleaned_data['receiver'],
+        self.backend.subscribe(self.cleaned_data['receiver'],
                               user or self.user)

@@ -91,9 +91,14 @@ class Newsletter(models.Model):
 
     objects = NewsletterManager()
 
-
     def __unicode__(self):
         return self.name
+
+    def prev(self):
+        return Newsletter.objects.get_previous(self.published_at)
+
+    def next(self):
+        return Newsletter.objects.get_next(self.published_at)
 
 
 class NewsletterItem(models.Model):
@@ -126,10 +131,18 @@ class NewsletterSubscriber(models.Model):
     objects = NewsletterSubscriberManager()
 
     def __unicode__(self):
-        return self.user.username
+        return self.email
+
+    def subscribe(self, commit=True):
+        self.is_unsubscribed = False
+
+        if commit:
+            #self.save(update_fields=['is_unsubscribed'])
+            self.save()
 
     def unsubscribe(self, commit=True):
         self.is_unsubscribed = True
 
         if commit:
-            self.save(updated_fields=('is_unsubscribed', ))
+            #self.save(updated_fields=['is_unsubscribed'])
+            self.save()
