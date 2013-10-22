@@ -1,0 +1,17 @@
+{% extends "ulule/base.html" %}
+
+{% load semioutils compressed %}
+
+{% block extend_uncompressed_css %}
+    {% compressed_css "presale" %}
+
+    <link rel="stylesheet" href="{{ partner.staticfiles }}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+
+{% block title %}Ulule - The 1st European crowdfunding site{% endblock %}
+
+{% block site_content %}
+	{% for newsletter in newsletters %}
+		<p><a href="{% url newsletter_detail newsletter.pk %}">{{ newsletter.name }}</a></p>
+	{% endfor %}
+{% endblock %}

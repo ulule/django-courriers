@@ -1,0 +1,9 @@
+<h1>{{ object.name }}</h1>
+<p>{{ object.headline }}</p>
+<p>Published: {{ object.published_at|date }}</p>
+
+<ul>
+{% for item in items %}
+	<li>{{ item.description }}</li>
+{% endfor %}
+</ul>
