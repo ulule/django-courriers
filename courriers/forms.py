@@ -5,20 +5,22 @@ from courriers.backends import backend
 
 
 class SubscriptionForm(forms.Form):
-	receiver = forms.EmailField(max_length=250, required=True)
+    receiver = forms.EmailField(max_length=250, required=True)
 
-	def __init__(self, *args, **kwargs):
-		self.user = kwargs.pop('user', None)
-		self.backend = backend()
-		super(SubscriptionForm, self).__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        self.backend = backend()
 
-	def clean_receiver(self):
-		receiver = self.cleaned_data['receiver']
+        super(SubscriptionForm, self).__init__(*args, **kwargs)
 
-		if self.backend.exists(receiver, user=self.user):
-			raise forms.ValidationError(_(u"You already subscribe to this newsletter."))
+    def clean_receiver(self):
+        receiver = self.cleaned_data['receiver']
 
-		return receiver
+        if self.backend.exists(receiver, user=self.user):
+            raise forms.ValidationError(_(u"You already subscribe to this newsletter."))
 
-	def save(self, user=None):
-		self.backend.register(self.cleaned_data['receiver'], user)
+        return receiver
+
+    def save(self, user=None):
+        self.backend.register(self.cleaned_data['receiver'],
+                              user or self.user)

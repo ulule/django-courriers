@@ -8,72 +8,68 @@ from courriers.models import NewsletterSubscriber
 
 class SubscribeFormTest(TestCase):
 
-	def test_subscription_logged_out(self):
-		valid_data = {'receiver': 'adele@ulule.com'}
+    def test_subscription_logged_out(self):
+        valid_data = {'receiver': 'adele@ulule.com'}
 
-		form = SubscriptionForm(data=valid_data)
+        form = SubscriptionForm(data=valid_data)
 
-		self.failUnless(form.is_valid())
+        self.failUnless(form.is_valid())
 
-		subscriber = form.save()
+        subscriber = form.save()
 
-		self.failUnlessEqual(subscriber.receiver, valid_data['receiver'])
+        self.failUnlessEqual(subscriber.receiver, valid_data['receiver'])
 
-		new_subscriber = NewsletterSubscriber.objects.get(email=subscriber.receiver)
+        new_subscriber = NewsletterSubscriber.objects.get(email=subscriber.receiver)
 
-		self.assertEqual(new_subscriber.count(), 1)
+        self.assertEqual(new_subscriber.count(), 1)
 
+        # if exists
+        form = SubscriptionForm(data=valid_data)
 
-		# if exists
+        subscriber = form.save()
 
-		form = SubscriptionForm(data=valid_data)
+        new_subscriber = NewsletterSubscriber.objects.get(email=subscriber.receiver)
 
-		subscriber = form.save()
+        self.assertEqual(new_subscriber.count(), 1)
 
-		new_subscriber = NewsletterSubscriber.objects.get(email=subscriber.receiver)
+    def test_subscription_logged_in(self):
+        self.client.login(username='adele', password='secret')
 
-		self.assertEqual(new_subscriber.count(), 1)
+        valid_data = {'receiver': 'adele@ulule.com'}
 
+        form = SubscriptionForm(data=valid_data)
 
+        self.failUnless(form.is_valid())
 
-	def test_subscription_logged_in(self):
-		self.client.login(username='adele', password='secret')
+        user = User.objects.get(username='adele')
 
-		valid_data = {'receiver': 'adele@ulule.com'}
+        subscriber = form.save(user)
 
-		form = SubscriptionForm(data=valid_data)
+        new_subscriber = NewsletterSubscriber.objects.get(email=subscriber.receiver, user=user)
 
-		self.failUnless(form.is_valid())
-
-		user = User.objects.get(username='adele')
-
-		subscriber = form.save(user)
-
-		new_subscriber = NewsletterSubscriber.objects.get(email=subscriber.receiver, user=user)
-
-		self.assertEqual(new_subscriber.count(), 1)
+        self.assertEqual(new_subscriber.count(), 1)
 
 
 class NewslettersViewsTests(TestCase):
 
-	def test_newsletter_list(self):
-		response = self.client.get(reverse('newsletter_list'))
+    def test_newsletter_list(self):
+        response = self.client.get(reverse('newsletter_list'))
 
-		self.assertEqual(response.status_code, 200)
-		self.assertTemplateUsed(response, 'courriers/newsletter_list.html')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'courriers/newsletter_list.html')
 
-	def test_newsletter_detail(self):
-		self.client.login(username='adele', password='secret')
-		response = self.client.get(reverse('newsletter_detail', kwargs={'pk': 2}))
+    def test_newsletter_detail(self):
+        self.client.login(username='adele', password='secret')
+        response = self.client.get(reverse('newsletter_detail', kwargs={'pk': 2}))
 
-		self.assertEqual(response.status_code, 200)
-		self.assertTemplateUsed(response, 'courriers/newsletter_detail.html')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'courriers/newsletter_detail.html')
 
-		self.failUnless(isinstance(response.context['form'], SubscriptionForm))
+        self.failUnless(isinstance(response.context['form'], SubscriptionForm))
 
-	def test_newsletterraw_detail(self):
-		self.client.login(username='adele', password='secret')
-		response = self.client.get(reverse('newsletterraw_detail', kwargs={'pk': 2}))
+    def test_newsletterraw_detail(self):
+        self.client.login(username='adele', password='secret')
+        response = self.client.get(reverse('newsletterraw_detail', kwargs={'pk': 2}))
 
-		self.assertEqual(response.status_code, 200)
-		self.assertTemplateUsed(response, 'courriers/newsletterraw_detail.html')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'courriers/newsletterraw_detail.html')
