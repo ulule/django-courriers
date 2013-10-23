@@ -1,5 +1,5 @@
 <h1>{{ object.name }}</h1>
-<p>{{ object.headline }}</p>
+{% if object.headline %}<p>{{ object.headline }}</p>{% endif %}
 <p>Published: {{ object.published_at|date }}</p>
 
 <ul>

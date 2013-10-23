@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.utils import timezone as datetime
@@ -10,42 +11,61 @@ from courriers.backends import backend
 
 
 
-class BackendsTest(TestCase):
+class SimpleBackendTest(TestCase):
 
     def setUp(self):
         self.backend = backend()
 
-    def test_registration(self):
+    def test_simple_registration(self):
 
+        """
         n = Newsletter.objects.create(name="3000 projets financés !", 
                                       published_at=datetime.now() - datetime.timedelta(hours=2),
                                       status=Newsletter.STATUS_ONLINE)
         self.backend.send_mails(n)
+        """
 
-
+        
         # Subscribe
 
-        """self.backend.register('adele@ulule.com', 'fr')
+        self.backend.register('adele@ulule.com', 'fr')
 
         subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
 
-        self.assertEqual(subscriber.count(), 1)"""
+        self.assertEqual(subscriber.count(), 1)
 
-        """
+        
         # Unsubscribe
 
         subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com')
 
         self.assertEqual(subscriber.lang, 'fr')
 
+
         self.backend.unregister(subscriber.email)
 
         unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=True)
 
-        self.assertEqual(unsubscriber.count(), 1)"""
+        self.assertEqual(unsubscriber.count(), 1)
+SimpleBackendTest = override_settings(COURRIERS_BACKEND='courriers.backends.simple.SimpleBackend')(SimpleBackendTest)
 
 
-"""
+
+class MailchimpBackendTest(TestCase):
+
+    def setUp(self):
+        self.backend = backend()
+
+    def test_mailchimp_registration(self):
+        # Subscribe
+        self.backend.register('adele.delamarche@gmail.com')
+
+        # Unsubscribe
+        self.backend.unregister('adele@ulule.com')
+MailchimpBackendTest = override_settings(COURRIERS_BACKEND='courriers.backends.mailchimp.MailchimpBackend')(MailchimpBackendTest)
+
+
+
 class NewslettersViewsTests(TestCase):
     def setUp(self):
         Newsletter.objects.create(name='Newsletter1', published_at=datetime.now())
@@ -71,6 +91,7 @@ class NewslettersViewsTests(TestCase):
 
 
 class SubscribeFormTest(TestCase):
+
     def test_subscription_logged_out(self):
         valid_data = {'receiver': 'adele@ulule.com'}
 
@@ -124,4 +145,3 @@ class NewsletterModelsTest(TestCase):
 
         self.assertEqual(n2.get_previous(), n1)
         self.assertEqual(n2.get_next(), n3)
-"""
