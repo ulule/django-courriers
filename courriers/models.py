@@ -3,11 +3,13 @@ import os
 
 from django.db import models
 from django.db.models.query import QuerySet
-from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify, truncatechars
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone as datetime
+
+
+from .compat import User, updated_fields
 
 
 def get_file_path(instance, filename):
@@ -137,12 +139,10 @@ class NewsletterSubscriber(models.Model):
         self.is_unsubscribed = False
 
         if commit:
-            #self.save(update_fields=['is_unsubscribed'])
-            self.save()
+            updated_fields(self, fields=('is_unsubscribed', ))
 
     def unsubscribe(self, commit=True):
         self.is_unsubscribed = True
 
         if commit:
-            #self.save(updated_fields=['is_unsubscribed'])
-            self.save()
+            updated_fields(self, fields=('is_unsubscribed', ))
