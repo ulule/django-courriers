@@ -101,5 +101,5 @@ class NewsletterModelsTest(TestCase):
                                        status=Newsletter.STATUS_ONLINE,
                                        published_at=datetime.now() - datetime.timedelta(hours=1))
 
-        self.assertEqual(n2.prev(), n1)
-        self.assertEqual(n2.next(), n3)
+        self.assertEqual(n2.get_previous(), n1)
+        self.assertEqual(n2.get_next(), n3)
