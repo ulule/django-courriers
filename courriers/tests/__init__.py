@@ -8,9 +8,7 @@ from courriers.models import Newsletter, NewsletterSubscriber
 from courriers.backends import backend
 
 
-
 class NewslettersViewsTests(TestCase):
-
     def setUp(self):
         Newsletter.objects.create(name='Newsletter1', published_at=datetime.now())
 
@@ -25,7 +23,7 @@ class NewslettersViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'courriers/newsletter_detail.html')
 
-        self.failUnless(isinstance(response.context['form'], SubscriptionForm))
+        self.assertTrue(isinstance(response.context['form'], SubscriptionForm))
 
     def test_newsletterraw_detail(self):
         response = self.client.get(reverse('newsletterraw_detail', kwargs={'pk': 1}))
@@ -34,13 +32,12 @@ class NewslettersViewsTests(TestCase):
 
 
 class SubscribeFormTest(TestCase):
-
     def test_subscription_logged_out(self):
         valid_data = {'receiver': 'adele@ulule.com'}
 
         form = SubscriptionForm(data=valid_data)
 
-        self.failUnless(form.is_valid())
+        self.assertTrue(form.is_valid())
 
         form.save()
 
@@ -48,9 +45,7 @@ class SubscribeFormTest(TestCase):
 
         self.assertEqual(new_subscriber.count(), 1)
 
-
         # Test duplicate
-
         form2 = SubscriptionForm(data=valid_data)
 
         is_valid = form2.is_valid()
@@ -64,7 +59,7 @@ class SubscribeFormTest(TestCase):
 
         form = SubscriptionForm(data=valid_data)
 
-        self.failUnless(form.is_valid())
+        self.assertTrue(form.is_valid())
 
         user = User.objects.create(username='thoas')
 
@@ -75,46 +70,36 @@ class SubscribeFormTest(TestCase):
         self.assertEqual(new_subscriber.count(), 1)
 
 
-
 class SimpleBackendTest(TestCase):
-
     def setUp(self):
         NewsletterSubscriber.objects.create(email='adele@ulule.com')
 
         self.backend = backend()
 
     def test_registration(self):
-
         # Unsubscribe
-
         subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com')
-
         self.backend.unregister(subscriber)
-
         unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=True)
-
         self.assertEqual(unsubscriber.count(), 1)
 
-
         # Subscribe
-
         self.backend.register(unsubscriber.get())
-
         subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
-
         self.assertEqual(subscriber.count(), 1)
 
 
-
 class NewsletterModelsTest(TestCase):
-
     def test_navigation(self):
-        n1 = Newsletter.objects.create(name='Newsletter1', status=1, published_at=datetime.now() - datetime.timedelta(hours=3))
-        n2 = Newsletter.objects.create(name='Newsletter2', status=1, published_at=datetime.now() - datetime.timedelta(hours=2))
-        n3 = Newsletter.objects.create(name='Newsletter3', status=1, published_at=datetime.now() - datetime.timedelta(hours=1))
+        n1 = Newsletter.objects.create(name='Newsletter1',
+                                       status=Newsletter.STATUS_ONLINE,
+                                       published_at=datetime.now() - datetime.timedelta(hours=3))
+        n2 = Newsletter.objects.create(name='Newsletter2',
+                                       status=Newsletter.STATUS_ONLINE,
+                                       published_at=datetime.now() - datetime.timedelta(hours=2))
+        n3 = Newsletter.objects.create(name='Newsletter3',
+                                       status=Newsletter.STATUS_ONLINE,
+                                       published_at=datetime.now() - datetime.timedelta(hours=1))
 
-        prev = n2.prev()
-        self.assertEqual(prev, n1)
-
-        next = n2.next()
-        self.assertEqual(next, n3)
+        self.assertEqual(n2.prev(), n1)
+        self.assertEqual(n2.next(), n3)

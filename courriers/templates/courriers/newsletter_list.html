@@ -1,3 +1,3 @@
 {% for newsletter in newsletters %}
-    <p><a href="{% url newsletter_detail newsletter.pk %}">{{ newsletter.name }}</a></p>
+    <p><a href="{% url "newsletter_detail" newsletter.pk %}">{{ newsletter.name }}</a></p>
 {% endfor %}

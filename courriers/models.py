@@ -9,7 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone as datetime
 
 
-from .compat import User, updated_fields
+from .compat import User, update_fields
 
 
 def get_file_path(instance, filename):
@@ -139,10 +139,10 @@ class NewsletterSubscriber(models.Model):
         self.is_unsubscribed = False
 
         if commit:
-            updated_fields(self, fields=('is_unsubscribed', ))
+            update_fields(self, fields=('is_unsubscribed', ))
 
     def unsubscribe(self, commit=True):
         self.is_unsubscribed = True
 
         if commit:
-            updated_fields(self, fields=('is_unsubscribed', ))
+            update_fields(self, fields=('is_unsubscribed', ))
