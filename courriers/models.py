@@ -7,7 +7,6 @@ from django.template.defaultfilters import slugify, truncatechars
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone as datetime
 
-
 from .compat import User, update_fields
 from .core import QuerySet
 

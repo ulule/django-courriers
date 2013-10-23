@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
-from courriers.backends import backend
+from .backends import backend
 
 
 class SubscriptionForm(forms.Form):
