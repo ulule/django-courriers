@@ -1,5 +1,6 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import get_language
 
 from .backends import backend
 
@@ -22,5 +23,6 @@ class SubscriptionForm(forms.Form):
         return receiver
 
     def save(self, user=None):
-        self.backend.subscribe(self.cleaned_data['receiver'],
+        self.backend.subscribe(self.cleaned_data['receiver'], 
+                              get_language,
                               user or self.user)

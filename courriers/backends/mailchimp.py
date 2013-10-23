@@ -16,10 +16,10 @@ class MailchimpBackend(SimpleBackend):
 
     def __init__(self):
         self.mc = Mailchimp(MAILCHIMP_APIKEY, True) # TODO : load from user settings
-        self.list_id = self.get_list_id()
+        self.global_list_id = self.get_global_list_id()
 
 
-    def get_list_id(self):
+    def get_global_list_id(self):
         lists = self.mc.lists.list()
 
         for l in lists['data']:
@@ -28,29 +28,59 @@ class MailchimpBackend(SimpleBackend):
         return None
 
 
-    def register(self, email, user=None):
-        super(MailchimpBackend, self).register(email, user)
+    def get_lang_list_id(self, lang):
+        lists = self.mc.lists.list()
+
+        list_name = "Courriers_%s" % lang
+
+        for l in lists['data']:
+            if l['name'] == list_name:
+                return l['id']
+        return None
+
+
+    def register(self, email, lang=None, user=None):
+        super(MailchimpBackend, self).register(email, lang, user)
+
+        self.mc_subscribe(self.global_list_id, email)       
+
+        if lang:
+            list_id = self.get_lang_list_id(lang)
         
-        self.mc.lists.subscribe(self.list_id, {'email':email}, merge_vars=None, 
-            email_type='html', double_optin=True, update_existing=False, 
-            replace_interests=True, send_welcome=False)
+            self.mc_subscribe(list_id, email) 
 
 
     def unregister(self, email, user=None):
         super(MailchimpBackend, self).unregister(email, user)
 
-        self.mc.lists.unsubscribe(self.list_id, {'email':email}, delete_member=False, 
-            send_goodbye=False, send_notify=False)
+        if self.exists(email):
+            self.mc_unsubscribe(self.global_list_id, email)
+
+            subscriber = self.model.objects.get(email=email)
+
+            if subscriber.lang:
+                list_id = self.get_lang_list_id(subscriber.lang)
+
+                self.mc_unsubscribe(list_id, email)
+
+
+    def mc_subscribe(self, list_id, email):
+        self.mc.lists.subscribe(list_id, {'email':email}, merge_vars=None, 
+                                email_type='html', double_optin=True, update_existing=False, 
+                                replace_interests=True, send_welcome=False)
+
+
+    def mc_unsubscribe(self, list_id, email):
+        self.mc.lists.unsubscribe(list_id, {'email':email}, delete_member=False, 
+                                send_goodbye=False, send_notify=False)
 
 
     def create_campaign(self, newsletter):
-        # TODO : Set tokens for subscribers
 
         options = {
-           'list_id': self.list_id,
+           'list_id': self.global_list_id,
            'subject': newsletter.name,
            'from_email': settings.DEFAULT_FROM_EMAIL,
-           'from_name': 'Ulule',
         }
 
         content = {
@@ -59,9 +89,11 @@ class MailchimpBackend(SimpleBackend):
                     })
         }
 
-        self.mc.campaigns.create('regular', options, content, segment_opts=None, type_opts=None)
+        campaign = self.mc.campaigns.create('regular', options, content, segment_opts=None, type_opts=None)
+
+        return campaign
 
 
     def send_mails(self, newsletter):
-        #TODO : Send campaign
-        pass
+        campaign = self.create_campaign(newsletter)
+        self.mc.campaigns.send_test(campaign.cid, ['adele@ulule.com'], 'html')
