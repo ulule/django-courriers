@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.utils import timezone as datetime
+from django.utils import timezone as datetime, translation
 
 from courriers.forms import SubscriptionForm
 from courriers.models import Newsletter, NewsletterSubscriber
@@ -17,8 +17,9 @@ class BackendsTest(TestCase):
     def test_registration(self):
 
         # Subscribe
+        lang = translation.get_language()
 
-        self.backend.register('adele@ulule.com')
+        self.backend.register('adele@ulule.com', lang)
 
         subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
 

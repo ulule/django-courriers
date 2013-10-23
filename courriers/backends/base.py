@@ -1,6 +1,6 @@
 class BaseBackend(object):
 
-    def register(self, email, user=None):
+    def register(self, email, user=None, lang=None):
         raise NotImplemented
 
     def unregister(self, email, user=None):

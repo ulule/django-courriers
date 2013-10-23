@@ -9,16 +9,16 @@ from courriers.models import NewsletterSubscriber
 class Backend(BaseBackend):
     model = NewsletterSubscriber
 
-    def subscribe(self, email, user=None):
+    def subscribe(self, email, user=None, lang=None):
         if user:
-            new_subscriber = self.model(email=email, user=user)
+            new_subscriber = self.model(email=email, user=user, lang=lang)
         else:
-            new_subscriber = self.model(email=email)
+            new_subscriber = self.model(email=email, lang=lang)
         new_subscriber.save()
 
-    def register(self, email, user=None):
+    def register(self, email, user=None, lang=None):
         if not self.exists(email):
-            self.subscribe(email, user)
+            self.subscribe(email, user, lang)
 
     def unregister(self, email, user=None):
         if self.exists(email):
