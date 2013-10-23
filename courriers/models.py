@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone as datetime
 
 from .compat import User, update_fields
-from .core import QuerySet
+from .core import QuerySet, Manager
 
 
 def get_file_path(instance, filename):
@@ -37,7 +37,7 @@ class NewsletterQuerySet(QuerySet):
                 .first())
 
 
-class NewsletterManager(models.Manager):
+class NewsletterManager(Manager):
     def get_query_set(self):
         return NewsletterQuerySet(self.model)
 

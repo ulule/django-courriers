@@ -1,4 +1,5 @@
 from django.db.models.query import QuerySet as BaseQuerySet
+from django.db import models
 
 
 class QuerySet(BaseQuerySet):
@@ -21,3 +22,14 @@ class QuerySet(BaseQuerySet):
             return qs[0]
         except IndexError:
             return None
+
+
+class Manager(models.Manager):
+    def get_query_set(self):
+        return QuerySet(self.model)
+
+    def first(self):
+        return self.get_query_set().first()
+
+    def last(self):
+        return self.get_query_set().last()
