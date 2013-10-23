@@ -76,10 +76,10 @@ class Newsletter(models.Model):
         return self.name
 
     def get_previous(self):
-        return Newsletter.objects.get_previous(self.published_at)
+        return self.__class__.objects.get_previous(self.published_at)
 
     def get_next(self):
-        return Newsletter.objects.get_next(self.published_at)
+        return self.__class__.objects.get_next(self.published_at)
 
 
 class NewsletterItem(models.Model):
