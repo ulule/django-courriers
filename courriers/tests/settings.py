@@ -25,3 +25,8 @@ INSTALLED_APPS = [
 SECRET_KEY = 'blabla'
 
 ROOT_URLCONF = 'courriers.urls'
+
+try:
+    from .temp import *
+except ImportError:
+    pass

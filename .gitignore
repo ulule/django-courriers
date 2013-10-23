@@ -4,3 +4,4 @@
 *.orig
 local_settings.py
 .coverage
+temp.py

@@ -2,12 +2,13 @@
 import os
 
 from django.db import models
-from django.db.models.query import QuerySet
-from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify, truncatechars
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone as datetime
+
+from .compat import User, update_fields
+from .core import QuerySet, Manager
 
 
 def get_file_path(instance, filename):
@@ -18,27 +19,6 @@ def get_file_path(instance, filename):
 
 
 class NewsletterQuerySet(QuerySet):
-
-    def first(self):
-        """
-        Returns the first object of a query, returns None if no match is found.
-        """
-        qs = self if self.ordered else self.order_by('pk')
-        try:
-            return qs[0]
-        except IndexError:
-            return None
-
-    def last(self):
-        """
-        Returns the last object of a query, returns None if no match is found.
-        """
-        qs = self.reverse() if self.ordered else self.order_by('-pk')
-        try:
-            return qs[0]
-        except IndexError:
-            return None
-
     def status_online(self):
         return (self.filter(status=Newsletter.STATUS_ONLINE,
                             published_at__lt=datetime.now())
@@ -57,7 +37,7 @@ class NewsletterQuerySet(QuerySet):
                 .first())
 
 
-class NewsletterManager(models.Manager):
+class NewsletterManager(Manager):
     def get_query_set(self):
         return NewsletterQuerySet(self.model)
 
@@ -94,11 +74,11 @@ class Newsletter(models.Model):
     def __unicode__(self):
         return self.name
 
-    def prev(self):
-        return Newsletter.objects.get_previous(self.published_at)
+    def get_previous(self):
+        return self.__class__.objects.get_previous(self.published_at)
 
-    def next(self):
-        return Newsletter.objects.get_next(self.published_at)
+    def get_next(self):
+        return self.__class__.objects.get_next(self.published_at)
 
 
 class NewsletterItem(models.Model):
@@ -137,12 +117,10 @@ class NewsletterSubscriber(models.Model):
         self.is_unsubscribed = False
 
         if commit:
-            #self.save(update_fields=['is_unsubscribed'])
-            self.save()
+            update_fields(self, fields=('is_unsubscribed', ))
 
     def unsubscribe(self, commit=True):
         self.is_unsubscribed = True
 
         if commit:
-            #self.save(updated_fields=['is_unsubscribed'])
-            self.save()
+            update_fields(self, fields=('is_unsubscribed', ))
