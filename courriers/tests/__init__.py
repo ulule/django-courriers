@@ -9,6 +9,34 @@ from courriers.backends import backend
 
 
 
+class BackendsTest(TestCase):
+
+    def setUp(self):
+        self.backend = backend()
+
+    def test_registration(self):
+
+        # Subscribe
+
+        self.backend.register('adele@ulule.com')
+
+        subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
+
+        self.assertEqual(subscriber.count(), 1)
+
+
+        # Unsubscribe
+
+        subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com')
+
+        self.backend.unregister(subscriber.email)
+
+        unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=True)
+
+        self.assertEqual(unsubscriber.count(), 1)
+
+
+
 class NewslettersViewsTests(TestCase):
 
     def setUp(self):
@@ -31,6 +59,7 @@ class NewslettersViewsTests(TestCase):
         response = self.client.get(reverse('newsletterraw_detail', kwargs={'pk': 1}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'courriers/newsletterraw_detail.html')
+
 
 
 class SubscribeFormTest(TestCase):
@@ -73,36 +102,6 @@ class SubscribeFormTest(TestCase):
         new_subscriber = NewsletterSubscriber.objects.filter(email=valid_data['receiver'], user=user)
 
         self.assertEqual(new_subscriber.count(), 1)
-
-
-
-class SimpleBackendTest(TestCase):
-
-    def setUp(self):
-        NewsletterSubscriber.objects.create(email='adele@ulule.com')
-
-        self.backend = backend()
-
-    def test_registration(self):
-
-        # Unsubscribe
-
-        subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com')
-
-        self.backend.unregister(subscriber)
-
-        unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=True)
-
-        self.assertEqual(unsubscriber.count(), 1)
-
-
-        # Subscribe
-
-        self.backend.register(unsubscriber.get())
-
-        subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
-
-        self.assertEqual(subscriber.count(), 1)
 
 
 

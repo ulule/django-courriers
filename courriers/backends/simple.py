@@ -17,8 +17,8 @@ class Backend(BaseBackend):
         new_subscriber.save()
 
     def register(self, email, user=None):
-        if self.exists(email):
-            self.model.objects.get(email=email).subscribe()
+        if not self.exists(email):
+            self.subscribe(email, user)
 
     def unregister(self, email, user=None):
         if self.exists(email):
