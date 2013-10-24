@@ -2,7 +2,7 @@ from django.conf import settings
 from courriers.tests.temp import MAILCHIMP_API_KEY
 
 
-BACKEND_CLASS = getattr(settings, 'COURRIERS_BACKEND', 'courriers.backends.mailchimp.MailchimpBackend')
+BACKEND_CLASS = getattr(settings, 'COURRIERS_BACKEND', 'courriers.backends.simple.SimpleBackend')
 
 MAILCHIMP_API_KEY = getattr(settings, 'COURRIERS_MAILCHIMP_API_KEY', MAILCHIMP_API_KEY)
 

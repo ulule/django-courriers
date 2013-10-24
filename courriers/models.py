@@ -94,6 +94,9 @@ class NewsletterSubscriberQuerySet(QuerySet):
     def subscribed(self):
         return self.filter(is_unsubscribed=False)
 
+    def has_lang(self, lang):
+        return self.filter(lang=lang)
+
 
 class NewsletterSubscriberManager(models.Manager):
     def get_query_set(self):
@@ -101,6 +104,9 @@ class NewsletterSubscriberManager(models.Manager):
 
     def subscribed(self):
         return self.get_query_set().subscribed()
+
+    def has_lang(self, lang):
+        return self.get_query_set().has_lang(lang)
 
 
 class NewsletterSubscriber(models.Model):

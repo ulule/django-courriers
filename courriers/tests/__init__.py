@@ -17,6 +17,7 @@ class BackendsTest(TestCase):
         self.backend = backend()
 
 
+    @override_settings(COURRIERS_BACKEND='courriers.backends.simple.SimpleBackend')
     def test_simple_registration(self):
 
         # Subscribe
@@ -28,9 +29,10 @@ class BackendsTest(TestCase):
         self.assertEqual(subscriber.count(), 1)
 
 
-        n = Newsletter.objects.create(name="3000 projets financés !", 
+        n = Newsletter.objects.create(name="3000 projets finances", 
                                       published_at=datetime.now() - datetime.timedelta(hours=2),
                                       status=Newsletter.STATUS_ONLINE)
+
         self.backend.send_mails(n)
 
         
@@ -47,7 +49,7 @@ class BackendsTest(TestCase):
 
         self.assertEqual(unsubscriber.count(), 1)
 
-
+    """
     @override_settings(COURRIERS_BACKEND='courriers.backends.mailchimp.MailchimpBackend')
     def test_mailchimp_registration(self):
 
@@ -67,7 +69,7 @@ class BackendsTest(TestCase):
 
 
         # Unsubscribe
-        self.backend.unregister('adele@ulule.com')
+        self.backend.unregister('adele@ulule.com')"""
 
 
 

@@ -1,9 +1,10 @@
+# -*- coding: utf-8 -*-
 from .base import BaseBackend
 
 from django.template.loader import render_to_string
 from django.core.mail import send_mass_mail
 
-from courriers.models import NewsletterSubscriber
+from courriers.models import Newsletter, NewsletterSubscriber
 
 
 class SimpleBackend(BaseBackend):
@@ -27,17 +28,31 @@ class SimpleBackend(BaseBackend):
     def exists(self, email, user=None):
         return self.model.objects.filter(email=email).exists()
 
-    def send_mails(self, newsletter):
-        subscribers = self.model.objects.subscribed().prefetch_related('user')
+    def send_mails(self, newsletter=None, lang=None):
 
-        emails = [(
-            newsletter.name,
-            render_to_string('courriers/newsletterraw_detail.html', {
-                'object': newsletter,
-                'subscriber': subscriber
-            }),
-            None,
-            [subscriber.email],
-        ) for subscriber in subscribers]
+        newsletters = Newsletter.objects.filter(status=Newsletter.STATUS_ONLINE)
 
-        send_mass_mail(emails, fail_silently=False)
+        if newsletter:
+            newsletters = [newsletter]
+        elif lang:
+            newsletters = Newsletter.objects.filter(status=Newsletter.STATUS_ONLINE, lang=lang)
+
+
+        for n in newsletters:
+            
+            if n.lang:
+                subscribers = self.model.objects.subscribed().has_lang(n.lang).prefetch_related('user')
+            else:
+                subscribers = self.model.objects.subscribed().prefetch_related('user')
+
+            emails = [(
+                n.name,
+                render_to_string('courriers/newsletterraw_detail.html', {
+                    'object': n,
+                    'subscriber': subscriber
+                }),
+                None,
+                [subscriber.email],
+            ) for subscriber in subscribers]
+
+            send_mass_mail(emails, fail_silently=False)
