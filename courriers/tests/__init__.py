@@ -4,9 +4,11 @@ from django.test.utils import override_settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.utils import timezone as datetime
+from django.core import mail
 
 from courriers.forms import SubscriptionForm
 from courriers.models import Newsletter, NewsletterSubscriber
+
 
 
 class BackendTest(TestCase):
@@ -23,9 +25,9 @@ class BackendTest(TestCase):
         # Subscribe
 
         self.backend.register('adele@ulule.com', 'FR')
+        self.backend.register('adele.delamarche@gmail.com')
 
         subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
-
         self.assertEqual(subscriber.count(), 1)
 
 
@@ -33,26 +35,26 @@ class BackendTest(TestCase):
                                       published_at=datetime.now() - datetime.timedelta(hours=2),
                                       status=Newsletter.STATUS_ONLINE)
 
-        n2 = Newsletter.objects.create(name="3000 projets finances", 
+        n2 = Newsletter.objects.create(name="3000 projets finances [FR]", 
                                       published_at=datetime.now() - datetime.timedelta(hours=2),
                                       status=Newsletter.STATUS_ONLINE, lang='FR')
 
-        self.backend.send_mails()
         self.backend.send_mails(n1)
-        self.backend.send_mails(None, 'FR')
+
+        #self.assertEqual(len(mail.outbox), NewsletterSubscriber.objects.subscribed().count())
+
+        self.backend.send_mails(n2)
 
         
         # Unsubscribe
-
+        
         subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com')
-
         self.assertEqual(subscriber.lang, 'FR')
 
 
         self.backend.unregister(subscriber.email)
 
         unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=True)
-
         self.assertEqual(unsubscriber.count(), 1)
 
 
@@ -88,7 +90,6 @@ class NewslettersViewsTests(TestCase):
 
 
 class SubscribeFormTest(TestCase):
-
     def test_subscription_logged_out(self):
         valid_data = {'receiver': 'adele@ulule.com'}
 
@@ -128,6 +129,11 @@ class SubscribeFormTest(TestCase):
         self.assertEqual(new_subscriber.count(), 1)
         self.assertNotEqual(new_subscriber.get().lang, None)
 
+
+class SubscribeMailchimpFormTest(SubscribeFormTest):
+    pass
+
+override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')(SubscribeMailchimpFormTest)
 
 
 class NewsletterModelsTest(TestCase):

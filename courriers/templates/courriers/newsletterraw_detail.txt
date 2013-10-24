@@ -1,0 +1,6 @@
+{{ object.name }}
+{% if object.headline %}{{ object.headline }}{% endif %}
+
+{% for item in items %}
+    {{ item.description }}
+{% endfor %}

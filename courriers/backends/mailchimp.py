@@ -20,17 +20,20 @@ class MailchimpBackend(SimpleBackend):
         self.mc = self.mailchimp_class(MAILCHIMP_API_KEY, True)
 
 
-    def get_list_ids(self, lang=None):
-        return dict((l['name'], l['id']) for l in self.mc.lists.list())
+    def get_list_ids(self):
+        return dict((l['name'], l['id']) for l in self.mc.lists.list()['data'])
 
 
     def register(self, email, lang=None, user=None):
         super(MailchimpBackend, self).register(email, lang, user)
 
-        list_ids = self.get_list_ids(lang)
+        list_ids = self.get_list_ids()
 
-        for key, list_id in list_ids.iteritems():
-            self.mc_subscribe(list_id, email)
+        self.mc_subscribe(list_ids[MAILCHIMP_LIST_NAME], email)
+
+        if lang:
+            key = "%s_%s" % (MAILCHIMP_LIST_NAME, lang)
+            self.mc_subscribe(list_ids[key], email)
 
 
     def unregister(self, email, user=None):
@@ -39,8 +42,13 @@ class MailchimpBackend(SimpleBackend):
         if self.exists(email):
             list_ids = self.get_list_ids()
 
-            for key, list_id in list_ids.iteritems():
-                self.mc_unsubscribe(list_id, email)
+            self.mc_unsubscribe(list_ids[MAILCHIMP_LIST_NAME], email)
+
+            subscriber = NewsletterSubscriber.objects.get(email=email)
+
+            if subscriber.lang:
+                key = "%s_%s" % (MAILCHIMP_LIST_NAME, subscriber.lang)
+                self.mc_unsubscribe(list_ids[key], email)
 
 
     def mc_subscribe(self, list_id, email):
