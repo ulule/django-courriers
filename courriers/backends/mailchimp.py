@@ -66,7 +66,7 @@ class MailchimpBackend(SimpleBackend):
                                 send_goodbye=False, send_notify=False)
 
 
-    def create_campaign(self, newsletter, lang):
+    def send_campaign(self, newsletter, lang):
 
         list_ids = self.get_list_ids(lang)
 
@@ -87,7 +87,7 @@ class MailchimpBackend(SimpleBackend):
 
             campaign = self.mc.campaigns.create('regular', options, content, segment_opts=None, type_opts=None)
 
-            return campaign
+            self.mc.campaigns.send(campaign['id'])
 
 
     def send_mails(self, newsletter=None, lang=None):
@@ -101,5 +101,4 @@ class MailchimpBackend(SimpleBackend):
 
 
         for n in newsletters:
-            campaign = self.create_campaign(n, n.lang)
-            self.mc.campaigns.send_test(campaign['id'])
+            self.send_campaign(n, n.lang)

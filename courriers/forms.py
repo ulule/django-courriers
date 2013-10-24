@@ -24,5 +24,5 @@ class SubscriptionForm(forms.Form):
 
     def save(self, user=None):
         self.backend.subscribe(self.cleaned_data['receiver'], 
-                              get_language,
+                              get_language(),
                               user or self.user)

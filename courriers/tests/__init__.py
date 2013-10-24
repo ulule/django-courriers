@@ -22,7 +22,7 @@ class BackendsTest(TestCase):
 
         # Subscribe
 
-        self.backend.register('adele@ulule.com', 'fr')
+        self.backend.register('adele@ulule.com', 'FR')
 
         subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
 
@@ -46,7 +46,7 @@ class BackendsTest(TestCase):
 
         subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com')
 
-        self.assertEqual(subscriber.lang, 'fr')
+        self.assertEqual(subscriber.lang, 'FR')
 
 
         self.backend.unregister(subscriber.email)
@@ -60,7 +60,7 @@ class BackendsTest(TestCase):
     def test_mailchimp_registration(self):
 
         # Subscribe
-        self.backend.register('adele@ulule.com', 'fr')
+        self.backend.register('adele@ulule.com', 'FR')
 
 
         # Send test mail
@@ -68,14 +68,14 @@ class BackendsTest(TestCase):
                                       published_at=datetime.now() - datetime.timedelta(hours=2),
                                       status=Newsletter.STATUS_ONLINE)
 
-        n2 = Newsletter.objects.create(name="3000 projets finances", 
+        n2 = Newsletter.objects.create(name="3000 projets finances [FR]", 
                                       published_at=datetime.now() - datetime.timedelta(hours=2),
                                       status=Newsletter.STATUS_ONLINE, lang='FR')
 
         self.backend.send_mails()
         self.backend.send_mails(n1)
         self.backend.send_mails(None, 'FR')
-        
+
 
         # Exists
         subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
@@ -125,6 +125,7 @@ class SubscribeFormTest(TestCase):
         new_subscriber = NewsletterSubscriber.objects.filter(email=valid_data['receiver'])
 
         self.assertEqual(new_subscriber.count(), 1)
+        self.assertNotEqual(new_subscriber.get().lang, None)
 
         # Test duplicate
         form2 = SubscriptionForm(data=valid_data)
@@ -149,6 +150,7 @@ class SubscribeFormTest(TestCase):
         new_subscriber = NewsletterSubscriber.objects.filter(email=valid_data['receiver'], user=user)
 
         self.assertEqual(new_subscriber.count(), 1)
+        self.assertNotEqual(new_subscriber.get().lang, None)
 
 
 
