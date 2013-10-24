@@ -2,9 +2,12 @@
 from .base import BaseBackend
 
 from django.template.loader import render_to_string
-from django.core.mail import send_mass_mail
+from django.core import mail
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
 
 from courriers.models import NewsletterSubscriber
+from courriers.settings import DEFAULT_FROM_EMAIL
 
 
 class SimpleBackend(BaseBackend):
@@ -28,21 +31,31 @@ class SimpleBackend(BaseBackend):
     def exists(self, email, user=None):
         return self.model.objects.filter(email=email).exists()
 
-    def send_mails(self, newsletter):
+    def send_mails(self, newsletter, fail_silently=False):
+
+        qs = self.model.objects.subscribed()
 
         if newsletter.lang:
-            subscribers = self.model.objects.subscribed().has_lang(newsletter.lang).prefetch_related('user')
+            subscribers = qs.has_lang(newsletter.lang).prefetch_related('user')
         else:
-            subscribers = self.model.objects.subscribed().prefetch_related('user')
+            subscribers = qs.prefetch_related('user')
 
-        emails = [(
-            newsletter.name,
-            render_to_string('courriers/newsletterraw_detail.html', {
+        connection = mail.get_connection(fail_silently=fail_silently)
+
+        emails = []
+        for subscriber in subscribers:
+            email = EmailMultiAlternatives(newsletter.name, render_to_string('courriers/newsletterraw_detail.txt', {
                 'object': newsletter,
                 'subscriber': subscriber
-            }),
-            None,
-            [subscriber.email],
-        ) for subscriber in subscribers]
+            }), DEFAULT_FROM_EMAIL, [subscriber.email, ], connection=connection)
 
-        send_mass_mail(emails, fail_silently=False)
+            email.attach_alternative(render_to_string('courriers/newsletterraw_detail.html', {
+                'object': newsletter,
+                'subscriber': subscriber
+            }), 'text/html')
+
+            emails.append(email)
+
+        results = connection.send_messages(emails)
+
+        return results

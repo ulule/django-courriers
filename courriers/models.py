@@ -82,9 +82,7 @@ class Newsletter(models.Model):
         return self.__class__.objects.get_next(self.published_at)
 
     def is_online(self):
-        if self.status == self.STATUS_ONLINE:
-            return True
-        return False
+        return self.status == self.STATUS_ONLINE
 
 
 class NewsletterItem(models.Model):

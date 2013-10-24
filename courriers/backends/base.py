@@ -9,5 +9,5 @@ class BaseBackend(object):
     def exists(self, email, user=None):
         raise NotImplemented
 
-    def send_mails(self, newsletter=None, lang=None):
+    def send_mails(self, newsletter):
         raise NotImplemented
