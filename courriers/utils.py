@@ -3,7 +3,7 @@ from django.core import exceptions
 from django.utils.importlib import import_module
 
 
-CLASS_PATH_ERROR = 'django-newsletters is unable to interpret settings value for %s. '\
+CLASS_PATH_ERROR = 'django-courriers is unable to interpret settings value for %s. '\
                    '%s should be in the form of a tupple: '\
                    '(\'path.to.models.Class\', \'app_label\').'
 
