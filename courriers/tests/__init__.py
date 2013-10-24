@@ -11,21 +11,14 @@ from courriers.backends import backend
 
 
 
-class SimpleBackendTest(TestCase):
+class BackendsTest(TestCase):
 
     def setUp(self):
         self.backend = backend()
 
+
     def test_simple_registration(self):
 
-        """
-        n = Newsletter.objects.create(name="3000 projets financés !", 
-                                      published_at=datetime.now() - datetime.timedelta(hours=2),
-                                      status=Newsletter.STATUS_ONLINE)
-        self.backend.send_mails(n)
-        """
-
-        
         # Subscribe
 
         self.backend.register('adele@ulule.com', 'fr')
@@ -33,6 +26,12 @@ class SimpleBackendTest(TestCase):
         subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
 
         self.assertEqual(subscriber.count(), 1)
+
+
+        n = Newsletter.objects.create(name="3000 projets financés !", 
+                                      published_at=datetime.now() - datetime.timedelta(hours=2),
+                                      status=Newsletter.STATUS_ONLINE)
+        self.backend.send_mails(n)
 
         
         # Unsubscribe
@@ -47,22 +46,28 @@ class SimpleBackendTest(TestCase):
         unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=True)
 
         self.assertEqual(unsubscriber.count(), 1)
-SimpleBackendTest = override_settings(COURRIERS_BACKEND='courriers.backends.simple.SimpleBackend')(SimpleBackendTest)
 
 
-
-class MailchimpBackendTest(TestCase):
-
-    def setUp(self):
-        self.backend = backend()
-
+    @override_settings(COURRIERS_BACKEND='courriers.backends.mailchimp.MailchimpBackend')
     def test_mailchimp_registration(self):
+
         # Subscribe
-        self.backend.register('adele.delamarche@gmail.com')
+        self.backend.register('adele@ulule.com', 'fr')
+
+
+        # Send test mail
+        n = Newsletter.objects.create(name="3000 projets financés !", 
+                                      published_at=datetime.now() - datetime.timedelta(hours=2),
+                                      status=Newsletter.STATUS_ONLINE)
+        self.backend.send_mails(n)
+
+        # Exists
+        subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
+        self.assertEqual(subscriber.count(), 1)
+
 
         # Unsubscribe
         self.backend.unregister('adele@ulule.com')
-MailchimpBackendTest = override_settings(COURRIERS_BACKEND='courriers.backends.mailchimp.MailchimpBackend')(MailchimpBackendTest)
 
 
 

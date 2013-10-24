@@ -28,7 +28,7 @@ class SimpleBackend(BaseBackend):
         return self.model.objects.filter(email=email).exists()
 
     def send_mails(self, newsletter):
-        subscribers = self.model.objects.subscribed()
+        subscribers = self.model.objects.subscribed().prefetch_related('user')
 
         emails = [(
             newsletter.name,

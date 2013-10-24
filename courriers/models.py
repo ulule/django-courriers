@@ -100,7 +100,7 @@ class NewsletterSubscriberManager(models.Manager):
         return NewsletterSubscriberQuerySet(self.model)
 
     def subscribed(self):
-        return self.get_queryset().subscribed()
+        return self.get_query_set().subscribed()
 
 
 class NewsletterSubscriber(models.Model):

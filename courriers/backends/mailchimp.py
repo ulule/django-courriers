@@ -5,7 +5,7 @@ from django.template.loader import render_to_string
 
 from courriers.backends.simple import SimpleBackend
 from courriers.models import NewsletterSubscriber
-from courriers.settings import MAILCHIMP_APIKEY, MAILCHIMP_LIST_NAME, DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME
+from courriers.settings import MAILCHIMP_API_KEY, MAILCHIMP_LIST_NAME, DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME
 
 from mailchimp import Mailchimp
 
@@ -15,12 +15,13 @@ class MailchimpBackend(SimpleBackend):
     mailchimp_class = Mailchimp
 
     def __init__(self):
-        self.mc = self.mailchimp_class(MAILCHIMP_APIKEY, True) # TODO : load from user settings
+        self.mc = self.mailchimp_class(MAILCHIMP_API_KEY, True)
 
 
     def get_list_ids(self, lang=None):
         lists = self.mc.lists.list()
 
+        ids = []
         names = [MAILCHIMP_LIST_NAME]
 
         if lang:
@@ -28,8 +29,8 @@ class MailchimpBackend(SimpleBackend):
 
         for l in lists['data']:
             if l['name'] in names:
-                return l['id']
-        return None
+                ids.append(l['id'])
+        return ids
 
 
     def register(self, email, lang=None, user=None):
@@ -56,7 +57,7 @@ class MailchimpBackend(SimpleBackend):
 
     def mc_subscribe(self, list_id, email):
         self.mc.lists.subscribe(list_id, {'email':email}, merge_vars=None, 
-                                email_type='html', double_optin=True, update_existing=False, 
+                                email_type='html', double_optin=False, update_existing=False, 
                                 replace_interests=True, send_welcome=False)
 
 
@@ -68,7 +69,7 @@ class MailchimpBackend(SimpleBackend):
     def create_campaign(self, newsletter):
 
         options = {
-           'list_id': self.global_list_id,
+           'list_id': self.get_list_ids()[0],
            'subject': newsletter.name,
            'from_email': DEFAULT_FROM_EMAIL,
            'from_name': DEFAULT_FROM_NAME
@@ -86,5 +87,6 @@ class MailchimpBackend(SimpleBackend):
 
 
     def send_mails(self, newsletter):
+        # TODO : get sheduled newsletters
         campaign = self.create_campaign(newsletter)
         self.mc.campaigns.send_test(campaign['id'])
