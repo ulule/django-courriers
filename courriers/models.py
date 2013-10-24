@@ -81,6 +81,11 @@ class Newsletter(models.Model):
     def get_next(self):
         return self.__class__.objects.get_next(self.published_at)
 
+    def is_online(self):
+        if self.status == self.STATUS_ONLINE:
+            return True
+        return False
+
 
 class NewsletterItem(models.Model):
     newsletter = models.ForeignKey(Newsletter, related_name="items")

@@ -7,18 +7,18 @@ from django.utils import timezone as datetime
 
 from courriers.forms import SubscriptionForm
 from courriers.models import Newsletter, NewsletterSubscriber
-from courriers.backends import backend
 
 
-
-class BackendsTest(TestCase):
+class BackendTest(TestCase):
 
     def setUp(self):
-        self.backend = backend()
+        from courriers.backends import get_backend
+
+        self.backend = get_backend()()
 
 
     @override_settings(COURRIERS_BACKEND='courriers.backends.simple.SimpleBackend')
-    def test_simple_registration(self):
+    def test_registration(self):
 
         # Subscribe
 
@@ -56,34 +56,10 @@ class BackendsTest(TestCase):
         self.assertEqual(unsubscriber.count(), 1)
 
 
-    @override_settings(COURRIERS_BACKEND='courriers.backends.mailchimp.MailchimpBackend')
-    def test_mailchimp_registration(self):
+class MailchimpBackendTests(BackendTest):
+    pass
 
-        # Subscribe
-        self.backend.register('adele@ulule.com', 'FR')
-
-
-        # Send test mail
-        n1 = Newsletter.objects.create(name="3000 projets finances", 
-                                      published_at=datetime.now() - datetime.timedelta(hours=2),
-                                      status=Newsletter.STATUS_ONLINE)
-
-        n2 = Newsletter.objects.create(name="3000 projets finances [FR]", 
-                                      published_at=datetime.now() - datetime.timedelta(hours=2),
-                                      status=Newsletter.STATUS_ONLINE, lang='FR')
-
-        self.backend.send_mails()
-        self.backend.send_mails(n1)
-        self.backend.send_mails(None, 'FR')
-
-
-        # Exists
-        subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
-        self.assertEqual(subscriber.count(), 1)
-
-
-        # Unsubscribe
-        self.backend.unregister('adele@ulule.com')
+override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')(MailchimpBackendTests)
 
 
 

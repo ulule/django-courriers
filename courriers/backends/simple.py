@@ -4,7 +4,7 @@ from .base import BaseBackend
 from django.template.loader import render_to_string
 from django.core.mail import send_mass_mail
 
-from courriers.models import Newsletter, NewsletterSubscriber
+from courriers.models import NewsletterSubscriber
 
 
 class SimpleBackend(BaseBackend):
@@ -28,31 +28,21 @@ class SimpleBackend(BaseBackend):
     def exists(self, email, user=None):
         return self.model.objects.filter(email=email).exists()
 
-    def send_mails(self, newsletter=None, lang=None):
+    def send_mails(self, newsletter):
 
-        newsletters = Newsletter.objects.filter(status=Newsletter.STATUS_ONLINE)
+        if newsletter.lang:
+            subscribers = self.model.objects.subscribed().has_lang(newsletter.lang).prefetch_related('user')
+        else:
+            subscribers = self.model.objects.subscribed().prefetch_related('user')
 
-        if newsletter:
-            newsletters = [newsletter]
-        elif lang:
-            newsletters = Newsletter.objects.filter(status=Newsletter.STATUS_ONLINE, lang=lang)
+        emails = [(
+            newsletter.name,
+            render_to_string('courriers/newsletterraw_detail.html', {
+                'object': newsletter,
+                'subscriber': subscriber
+            }),
+            None,
+            [subscriber.email],
+        ) for subscriber in subscribers]
 
-
-        for n in newsletters:
-            
-            if n.lang:
-                subscribers = self.model.objects.subscribed().has_lang(n.lang).prefetch_related('user')
-            else:
-                subscribers = self.model.objects.subscribed().prefetch_related('user')
-
-            emails = [(
-                n.name,
-                render_to_string('courriers/newsletterraw_detail.html', {
-                    'object': n,
-                    'subscriber': subscriber
-                }),
-                None,
-                [subscriber.email],
-            ) for subscriber in subscribers]
-
-            send_mass_mail(emails, fail_silently=False)
+        send_mass_mail(emails, fail_silently=False)

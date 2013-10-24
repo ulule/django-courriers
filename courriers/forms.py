@@ -2,7 +2,7 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import get_language
 
-from .backends import backend
+from .backends import get_backend
 
 
 class SubscriptionForm(forms.Form):
@@ -10,7 +10,10 @@ class SubscriptionForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
-        self.backend = backend()
+
+        backend_klass = get_backend()
+
+        self.backend = backend_klass()
 
         super(SubscriptionForm, self).__init__(*args, **kwargs)
 
