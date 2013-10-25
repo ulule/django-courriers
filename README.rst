@@ -18,10 +18,14 @@ django-courriers has three models :
     - NewsletterSubscriber - which represents a user who subscribed to a newsletter.
 
 
+
 You have the choice between three backends to manage and send your emails :
-SimpleBackend - A simple backend to send emails with Django
-Mailchimp backend
-MailJet backend (coming soon)
+
+    - SimpleBackend - A simple backend to send emails with Django
+
+    - Mailchimp backend
+
+    - MailJet backend (coming soon)
 
 
 
@@ -43,6 +47,7 @@ Installation
 
 
 4. Configure settings
+
 
 You have to specify which backend to use in your settings ::
 
@@ -70,6 +75,7 @@ courriers.backends.mailchimp.MailchimpBackend
 A backend to manage your newsletters with Mailchimp.
 
 
+
 What you need to do :
 +++++++++++++++++++++
 
@@ -90,6 +96,7 @@ Additional settings to set ::
         COURRIERS_DEFAULT_FROM_NAME = 'Your name'
 
 COURRIERS_MAILCHIMP_LIST_NAME is the default name for lists of subscribers.
+
 
 
 Multilingual :
