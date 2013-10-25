@@ -25,7 +25,6 @@ class BackendTest(TestCase):
         # Subscribe
 
         self.backend.register('adele@ulule.com', 'FR')
-        self.backend.register('adele.delamarche@gmail.com')
 
         subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
         self.assertEqual(subscriber.count(), 1)
