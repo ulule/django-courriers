@@ -55,10 +55,14 @@ class SimpleBackendTests(TestCase):
 
             self.backend.send_mails(n3)
             self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().has_lang('en-us').count())
+        else:
+            self.backend.send_mails(n1)
+            self.backend.send_mails(n2)
+            self.backend.send_mails(n3)
 
 
         # Unsubscribe
-        
+
         subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com')
         self.assertEqual(subscriber.lang, 'FR')
 
@@ -166,6 +170,9 @@ override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.Mailchim
 
 class NewsletterModelsTest(TestCase):
     def test_navigation(self):
+    	Newsletter.objects.create(name='Newsletter4',
+                                       status=Newsletter.STATUS_DRAFT,
+                                       published_at=datetime.now() - datetime.timedelta(hours=4))
         n1 = Newsletter.objects.create(name='Newsletter1',
                                        status=Newsletter.STATUS_ONLINE,
                                        published_at=datetime.now() - datetime.timedelta(hours=3))
@@ -178,3 +185,4 @@ class NewsletterModelsTest(TestCase):
 
         self.assertEqual(n2.get_previous(), n1)
         self.assertEqual(n2.get_next(), n3)
+        self.assertEqual(n1.get_previous(), None)
