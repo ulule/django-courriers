@@ -164,9 +164,9 @@ class SubscribeMailchimpFormTest(SubscribeFormTest):
 
 class NewsletterModelsTest(TestCase):
     def test_navigation(self):
-    	Newsletter.objects.create(name='Newsletter4',
-                                       status=Newsletter.STATUS_DRAFT,
-                                       published_at=datetime.now() - datetime.timedelta(hours=4))
+        Newsletter.objects.create(name='Newsletter4',
+                                  status=Newsletter.STATUS_DRAFT,
+                                  published_at=datetime.now() - datetime.timedelta(hours=4))
         n1 = Newsletter.objects.create(name='Newsletter1',
                                        status=Newsletter.STATUS_ONLINE,
                                        published_at=datetime.now() - datetime.timedelta(hours=3))
