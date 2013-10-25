@@ -11,7 +11,7 @@ from courriers.models import Newsletter, NewsletterSubscriber
 
 
 
-class BackendTest(TestCase):
+class SimpleBackendTests(TestCase):
 
     def setUp(self):
         from courriers.backends import get_backend
@@ -19,10 +19,7 @@ class BackendTest(TestCase):
         self.backend_klass = get_backend()
         self.backend = self.backend_klass()
 
-
-    @override_settings(COURRIERS_BACKEND='courriers.backends.simple.SimpleBackend')
     def test_registration(self):
-
         # Subscribe
 
         self.backend.register('adele@ulule.com', 'FR')
@@ -46,14 +43,18 @@ class BackendTest(TestCase):
                                       published_at=datetime.now() - datetime.timedelta(hours=2),
                                       status=Newsletter.STATUS_ONLINE, lang='en-us')
 
-        self.backend.send_mails(n1)
 
         if self.backend_klass.__name__ == "SimpleBackend":
+            self.backend.send_mails(n1)
             self.assertEqual(len(mail.outbox), NewsletterSubscriber.objects.subscribed().count())
+            out = len(mail.outbox)
 
-        self.backend.send_mails(n2)
+            self.backend.send_mails(n2)
+            self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().has_lang('FR').count())
+            out = len(mail.outbox)
 
-        self.backend.send_mails(n3)
+            self.backend.send_mails(n3)
+            self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().has_lang('en-us').count())
 
 
         # Unsubscribe
@@ -68,11 +69,13 @@ class BackendTest(TestCase):
         self.backend.unregister(subscriber.email)
         self.backend.unregister(subscriber2.email)
 
+        self.backend.unregister('florent@ulule.com') # Subscriber does not exist
+
         unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=True)
         self.assertEqual(unsubscriber.count(), 1)
 
 
-class MailchimpBackendTests(BackendTest):
+class MailchimpBackendTests(SimpleBackendTests):
     pass
 
 override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')(MailchimpBackendTests)
@@ -104,6 +107,12 @@ class NewslettersViewsTests(TestCase):
 
 
 class SubscribeFormTest(TestCase):
+    def setUp(self):
+        from courriers.backends import get_backend
+
+        self.backend_klass = get_backend()
+        self.backend = self.backend_klass()
+
     def test_subscription_logged_out(self):
         valid_data = {'receiver': 'adele@ulule.com'}
 
@@ -125,6 +134,8 @@ class SubscribeFormTest(TestCase):
 
         self.assertEqual(is_valid, False)
 
+        self.backend.unregister('adele@ulule.com')
+
     def test_subscription_logged_in(self):
         self.client.login(username='thoas', password='secret')
 
@@ -142,6 +153,8 @@ class SubscribeFormTest(TestCase):
 
         self.assertEqual(new_subscriber.count(), 1)
         self.assertNotEqual(new_subscriber.get().lang, None)
+
+        self.backend.unregister('florent@ulule.com')
 
 
 class SubscribeMailchimpFormTest(SubscribeFormTest):
