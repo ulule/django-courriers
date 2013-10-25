@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 
 from django.template.loader import render_to_string
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext as _
 
 from .simple import SimpleBackend
 from ..models import NewsletterSubscriber
@@ -34,7 +34,7 @@ class MailchimpBackend(SimpleBackend):
 
             if not key in list_ids:
                 raise Exception(_('List %s does not exist') % key)
-                
+
             self.mc_subscribe(list_ids[key], email)
 
     def unregister(self, email, user=None):

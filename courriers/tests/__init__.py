@@ -10,76 +10,77 @@ from courriers.forms import SubscriptionForm
 from courriers.models import Newsletter, NewsletterSubscriber
 
 
-
-class SimpleBackendTests(TestCase):
-
+class BaseBackendTests(TestCase):
     def setUp(self):
+        from courriers import settings
+        reload(settings)
+
         from courriers.backends import get_backend
 
         self.backend_klass = get_backend()
         self.backend = self.backend_klass()
 
+        n1 = Newsletter.objects.create(name="3000 projets finances",
+                                       published_at=datetime.now() - datetime.timedelta(hours=2),
+                                       status=Newsletter.STATUS_ONLINE)
+
+        n2 = Newsletter.objects.create(name="3000 projets finances [FR]",
+                                       published_at=datetime.now() - datetime.timedelta(hours=2),
+                                       status=Newsletter.STATUS_ONLINE, lang='FR')
+
+        n3 = Newsletter.objects.create(name="3000 projets finances [en-us]",
+                                       published_at=datetime.now() - datetime.timedelta(hours=2),
+                                       status=Newsletter.STATUS_ONLINE, lang='en-us')
+
+        self.newsletters = [n1, n2, n3]
+
     def test_registration(self):
         # Subscribe
-
         self.backend.register('adele@ulule.com', 'FR')
         self.backend.register('adele.delamarche@gmail.com')
 
         subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
         self.assertEqual(subscriber.count(), 1)
 
-
-        # Send emails
-
-        n1 = Newsletter.objects.create(name="3000 projets finances", 
-                                      published_at=datetime.now() - datetime.timedelta(hours=2),
-                                      status=Newsletter.STATUS_ONLINE)
-
-        n2 = Newsletter.objects.create(name="3000 projets finances [FR]", 
-                                      published_at=datetime.now() - datetime.timedelta(hours=2),
-                                      status=Newsletter.STATUS_ONLINE, lang='FR')
-
-        n3 = Newsletter.objects.create(name="3000 projets finances [en-us]", 
-                                      published_at=datetime.now() - datetime.timedelta(hours=2),
-                                      status=Newsletter.STATUS_ONLINE, lang='en-us')
-
-
-        if self.backend_klass.__name__ == "SimpleBackend":
-            self.backend.send_mails(n1)
-            self.assertEqual(len(mail.outbox), NewsletterSubscriber.objects.subscribed().count())
-            out = len(mail.outbox)
-
-            self.backend.send_mails(n2)
-            self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().has_lang('FR').count())
-            out = len(mail.outbox)
-
-            self.backend.send_mails(n3)
-            self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().has_lang('en-us').count())
-
-
         # Unsubscribe
-        
         subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com')
         self.assertEqual(subscriber.lang, 'FR')
 
         subscriber2 = NewsletterSubscriber.objects.get(email='adele.delamarche@gmail.com')
         self.assertEqual(subscriber2.lang, None)
 
-
         self.backend.unregister(subscriber.email)
         self.backend.unregister(subscriber2.email)
 
-        self.backend.unregister('florent@ulule.com') # Subscriber does not exist
+        self.backend.unregister('florent@ulule.com')  # Subscriber does not exist
 
         unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=True)
         self.assertEqual(unsubscriber.count(), 1)
 
 
-class MailchimpBackendTests(SimpleBackendTests):
-    pass
+class SimpleBackendTests(BaseBackendTests):
+    def test_registration(self):
+        super(SimpleBackendTests, self).test_registration()
 
-override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')(MailchimpBackendTests)
+        self.backend.send_mails(self.newsletters[0])
+        self.assertEqual(len(mail.outbox), NewsletterSubscriber.objects.subscribed().count())
+        out = len(mail.outbox)
 
+        self.backend.send_mails(self.newsletters[1])
+        self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().has_lang('FR').count())
+        out = len(mail.outbox)
+
+        self.backend.send_mails(self.newsletters[2])
+        self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().has_lang('en-us').count())
+
+
+@override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')
+class MailchimpBackendTests(BaseBackendTests):
+    def test_registration(self):
+        super(MailchimpBackendTests, self).test_registration()
+
+        for newsletter in self.newsletters:
+            self.backend.send_mails(newsletter)
 
 
 class NewslettersViewsTests(TestCase):
@@ -103,7 +104,6 @@ class NewslettersViewsTests(TestCase):
         response = self.client.get(reverse('newsletterraw_detail', kwargs={'pk': 1}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'courriers/newsletterraw_detail.html')
-
 
 
 class SubscribeFormTest(TestCase):
@@ -157,11 +157,9 @@ class SubscribeFormTest(TestCase):
         self.backend.unregister('florent@ulule.com')
 
 
+@override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')
 class SubscribeMailchimpFormTest(SubscribeFormTest):
     pass
-
-override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')(SubscribeMailchimpFormTest)
-
 
 
 class NewsletterModelsTest(TestCase):

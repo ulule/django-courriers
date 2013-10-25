@@ -13,11 +13,8 @@ class SimpleBackend(BaseBackend):
     model = NewsletterSubscriber
 
     def subscribe(self, email, lang=None, user=None):
-        if user:
-            new_subscriber = self.model(email=email, user=user, lang=lang)
-        else:
-            new_subscriber = self.model(email=email, lang=lang)
-        new_subscriber.save()
+        return self.model.objects.create(email=email, user=user,
+                                         lang=lang)
 
     def register(self, email, lang=None, user=None):
         if not self.exists(email):
@@ -31,7 +28,6 @@ class SimpleBackend(BaseBackend):
         return self.model.objects.filter(email=email).exists()
 
     def send_mails(self, newsletter, fail_silently=False):
-
         qs = self.model.objects.subscribed()
 
         if newsletter.lang:
