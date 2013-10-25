@@ -16,7 +16,8 @@ class BackendTest(TestCase):
     def setUp(self):
         from courriers.backends import get_backend
 
-        self.backend = get_backend()()
+        self.backend_klass = get_backend()
+        self.backend = self.backend_klass()
 
 
     @override_settings(COURRIERS_BACKEND='courriers.backends.simple.SimpleBackend')
@@ -25,10 +26,13 @@ class BackendTest(TestCase):
         # Subscribe
 
         self.backend.register('adele@ulule.com', 'FR')
+        self.backend.register('adele.delamarche@gmail.com')
 
         subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
         self.assertEqual(subscriber.count(), 1)
 
+
+        # Send emails
 
         n1 = Newsletter.objects.create(name="3000 projets finances", 
                                       published_at=datetime.now() - datetime.timedelta(hours=2),
@@ -38,20 +42,31 @@ class BackendTest(TestCase):
                                       published_at=datetime.now() - datetime.timedelta(hours=2),
                                       status=Newsletter.STATUS_ONLINE, lang='FR')
 
+        n3 = Newsletter.objects.create(name="3000 projets finances [en-us]", 
+                                      published_at=datetime.now() - datetime.timedelta(hours=2),
+                                      status=Newsletter.STATUS_ONLINE, lang='en-us')
+
         self.backend.send_mails(n1)
 
-        #self.assertEqual(len(mail.outbox), NewsletterSubscriber.objects.subscribed().count())
+        if self.backend_klass.__name__ == "SimpleBackend":
+            self.assertEqual(len(mail.outbox), NewsletterSubscriber.objects.subscribed().count())
 
         self.backend.send_mails(n2)
 
-        
+        self.backend.send_mails(n3)
+
+
         # Unsubscribe
         
         subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com')
         self.assertEqual(subscriber.lang, 'FR')
 
+        subscriber2 = NewsletterSubscriber.objects.get(email='adele.delamarche@gmail.com')
+        self.assertEqual(subscriber2.lang, None)
+
 
         self.backend.unregister(subscriber.email)
+        self.backend.unregister(subscriber2.email)
 
         unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=True)
         self.assertEqual(unsubscriber.count(), 1)
@@ -133,6 +148,7 @@ class SubscribeMailchimpFormTest(SubscribeFormTest):
     pass
 
 override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')(SubscribeMailchimpFormTest)
+
 
 
 class NewsletterModelsTest(TestCase):
