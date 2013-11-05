@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone as datetime
 from django.core import mail
 
-from courriers.forms import SubscriptionForm
+from courriers.forms import SubscriptionForm, UnsubscriptionForm
 from courriers.models import Newsletter, NewsletterSubscriber
 
 
@@ -155,6 +155,37 @@ class SubscribeFormTest(TestCase):
         self.assertNotEqual(new_subscriber.get().lang, None)
 
         self.backend.unregister('florent@ulule.com')
+
+
+@override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.simple.SimpleBackend')
+class UnsubscribeFormTest(TestCase):
+    def setUp(self):
+        from courriers.backends import get_backend
+
+        self.backend_klass = get_backend()
+        self.backend = self.backend_klass()
+
+    def test_unsubscription(self):
+        self.backend.register('adele@ulule.com', 'FR')
+
+        valid_data = {'receiver': 'adele@ulule.com'}
+
+        form = UnsubscriptionForm(data=valid_data)
+
+        self.assertTrue(form.is_valid())
+
+        form.save()
+
+        old_subscriber = NewsletterSubscriber.objects.filter(email=valid_data['receiver'])
+
+        self.assertEqual(old_subscriber.get().is_unsubscribed, True)
+
+        # Test not registered
+        form2 = UnsubscriptionForm(data=valid_data)
+
+        is_valid = form2.is_valid()
+
+        self.assertEqual(is_valid, False)
 
 
 @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')

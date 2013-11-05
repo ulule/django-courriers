@@ -4,9 +4,12 @@ from django.views.generic.detail import SingleObjectMixin
 
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
+from django.utils.translation import ugettext as _
+from django.contrib import messages
 
 from .models import Newsletter
-from .forms import SubscriptionForm
+from .forms import SubscriptionForm, UnsubscriptionForm
 
 
 class NewsletterListView(ListView):
@@ -77,3 +80,31 @@ class NewsletterRawDetailView(DetailView):
         context['items'] = self.object.items.all()
 
         return context
+
+
+class NewsletterUnsubscribeView(FormView):
+    template_name = 'courriers/newsletter_unsubscribe.html'
+    form_class = UnsubscriptionForm
+    model = Newsletter
+    context_object_name = 'newsletter'
+
+    def form_valid(self, form):
+        form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        self.object = self.get_object()
+        return reverse('newsletter_detail', kwargs={'pk': self.object.pk})
+
+
+def send_newsletter(request, newsletter_id):
+    from courriers.backends import get_backend
+
+    backend_klass = get_backend()
+    backend = backend_klass()
+
+    newsletter = get_object_or_404(Newsletter, pk=newsletter_id)
+    backend.send_mails(newsletter)
+
+    messages.success(request, _('This newsletter has been sent.'))
+    return HttpResponseRedirect(reverse('admin:courriers_newsletter_change', args=(newsletter.id,)))

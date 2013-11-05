@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
+from django.conf import settings
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify, truncatechars
@@ -68,7 +69,7 @@ class Newsletter(models.Model):
                                          db_index=True)
     headline = models.CharField(max_length=255, blank=True, null=True)
     cover = models.ImageField(upload_to=get_file_path, blank=True, null=True)
-    lang = models.CharField(max_length=10, blank=True, null=True)
+    lang = models.CharField(max_length=10, blank=True, null=True, choices=settings.ALLOWED_LANGUAGES)
 
     objects = NewsletterManager()
 
@@ -91,6 +92,9 @@ class NewsletterItem(models.Model):
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to=get_file_path, blank=True, null=True)
     url = models.URLField(blank=True, null=True)
+
+    def __unicode__(self):
+        return self.description
 
 
 class NewsletterSubscriberQuerySet(QuerySet):
@@ -117,7 +121,7 @@ class NewsletterSubscriber(models.Model):
     user = models.ForeignKey(User, null=True)
     is_unsubscribed = models.BooleanField(default=False, db_index=True)
     email = models.EmailField(max_length=250, unique=True)
-    lang = models.CharField(max_length=10, blank=True, null=True)
+    lang = models.CharField(max_length=10, blank=True, null=True, choices=settings.ALLOWED_LANGUAGES)
 
     objects = NewsletterSubscriberManager()
 

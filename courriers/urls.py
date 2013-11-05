@@ -2,7 +2,9 @@ from django.conf.urls.defaults import patterns, url
 
 from .views import (NewsletterListView,
                     NewsletterDetailView,
-                    NewsletterRawDetailView)
+                    NewsletterRawDetailView,
+                    NewsletterUnsubscribeView,
+                    send_newsletter)
 
 
 urlpatterns = patterns(
@@ -18,4 +20,12 @@ urlpatterns = patterns(
     url(r'^(?P<pk>(\d+))/raw/$',
         NewsletterRawDetailView.as_view(),
         name="newsletterraw_detail"),
+
+    url(r'^unsubscribe/$',
+        NewsletterUnsubscribeView.as_view(),
+        name="newsletterraw_unsubscribe"),
+
+    url(r'^send/(?P<newsletter_id>(\d+))/$',
+        send_newsletter,
+        name='send_newsletter'),
 )

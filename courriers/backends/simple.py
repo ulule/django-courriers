@@ -22,7 +22,7 @@ class SimpleBackend(BaseBackend):
 
     def unregister(self, email, user=None):
         if self.exists(email):
-            self.model.objects.get(email=email).unsubscribe()
+            self.model.objects.get(email=email).unsubscribe(commit=True)
 
     def exists(self, email, user=None):
         return self.model.objects.filter(email=email).exists()
