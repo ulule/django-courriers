@@ -19,6 +19,10 @@ class SimpleBackend(BaseBackend):
     def register(self, email, lang=None, user=None):
         if not self.exists(email):
             self.subscribe(email, lang, user)
+        else:
+            subscriber = self.model.objects.get(email=email)
+            if subscriber.is_unsubscribed:
+                subscriber.subscribe()
 
     def unregister(self, email, user=None):
         if self.exists(email):

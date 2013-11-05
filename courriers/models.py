@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 
-from django.conf import settings
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify, truncatechars
@@ -10,6 +9,7 @@ from django.utils import timezone as datetime
 
 from .compat import User, update_fields
 from .core import QuerySet, Manager
+from .settings import ALLOWED_LANGUAGES
 
 
 def get_file_path(instance, filename):
@@ -69,7 +69,7 @@ class Newsletter(models.Model):
                                          db_index=True)
     headline = models.CharField(max_length=255, blank=True, null=True)
     cover = models.ImageField(upload_to=get_file_path, blank=True, null=True)
-    lang = models.CharField(max_length=10, blank=True, null=True, choices=settings.ALLOWED_LANGUAGES)
+    lang = models.CharField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
 
     objects = NewsletterManager()
 
@@ -121,7 +121,7 @@ class NewsletterSubscriber(models.Model):
     user = models.ForeignKey(User, null=True)
     is_unsubscribed = models.BooleanField(default=False, db_index=True)
     email = models.EmailField(max_length=250, unique=True)
-    lang = models.CharField(max_length=10, blank=True, null=True, choices=settings.ALLOWED_LANGUAGES)
+    lang = models.CharField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
 
     objects = NewsletterSubscriberManager()
 

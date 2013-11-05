@@ -22,7 +22,10 @@ class SubscriptionForm(forms.Form):
         receiver = self.cleaned_data['receiver']
 
         if self.backend.exists(receiver, user=self.user):
-            raise forms.ValidationError(_(u"You already subscribe to this newsletter."))
+            subscriber = NewsletterSubscriber.objects.get(email=receiver)
+
+            if not subscriber.is_unsubscribed:
+                raise forms.ValidationError(_(u"You already subscribe to this newsletter."))
 
         return receiver
 
@@ -44,8 +47,9 @@ class UnsubscriptionForm(forms.Form):
         receiver = self.cleaned_data['receiver']
 
         if self.backend.exists(receiver):
-            obj = NewsletterSubscriber.objects.get(email=receiver)
-            if obj.is_unsubscribed:
+            subscriber = NewsletterSubscriber.objects.get(email=receiver)
+
+            if subscriber.is_unsubscribed:
                 raise forms.ValidationError(_(u"You are not subscribed to this newsletter."))
         else:
             raise forms.ValidationError(_(u"You are not subscribed to this newsletter."))
