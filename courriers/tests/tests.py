@@ -9,6 +9,8 @@ from django.core import mail
 from courriers.forms import SubscriptionForm, UnsubscriptionForm
 from courriers.models import Newsletter, NewsletterSubscriber
 
+from django.conf import settings
+
 
 class BaseBackendTests(TestCase):
     def setUp(self):
@@ -72,15 +74,6 @@ class SimpleBackendTests(BaseBackendTests):
 
         self.backend.send_mails(self.newsletters[2])
         self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().has_lang('en-us').count())
-
-
-@override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')
-class MailchimpBackendTests(BaseBackendTests):
-    def test_registration(self):
-        super(MailchimpBackendTests, self).test_registration()
-
-        for newsletter in self.newsletters:
-            self.backend.send_mails(newsletter)
 
 
 class NewslettersViewsTests(TestCase):
@@ -188,9 +181,18 @@ class UnsubscribeFormTest(TestCase):
         self.assertEqual(is_valid, False)
 
 
-@override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')
-class SubscribeMailchimpFormTest(SubscribeFormTest):
-    pass
+if hasattr(settings, 'COURRIERS_MAILCHIMP_API_KEY'):
+    @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')
+    class SubscribeMailchimpFormTest(SubscribeFormTest):
+        pass
+
+    @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')
+    class MailchimpBackendTests(BaseBackendTests):
+        def test_registration(self):
+            super(MailchimpBackendTests, self).test_registration()
+
+            for newsletter in self.newsletters:
+                self.backend.send_mails(newsletter)
 
 
 class NewsletterModelsTest(TestCase):
