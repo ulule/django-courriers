@@ -1,3 +1,5 @@
+import django
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -33,3 +35,6 @@ except ImportError:
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+if django.VERSION <= (1, 6):
+    TEST_RUNNER = 'discover_runner.DiscoverRunner'

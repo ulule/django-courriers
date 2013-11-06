@@ -69,7 +69,7 @@ class Newsletter(models.Model):
                                          db_index=True)
     headline = models.CharField(max_length=255, blank=True, null=True)
     cover = models.ImageField(upload_to=get_file_path, blank=True, null=True)
-    lang = models.CharField(max_length=10, blank=True, null=True, choices=settings.ALLOWED_LANGUAGES)
+    lang = models.CharField(max_length=10, blank=True, null=True, choices=settings.LANGUAGES)
 
     objects = NewsletterManager()
 
@@ -121,7 +121,8 @@ class NewsletterSubscriber(models.Model):
     user = models.ForeignKey(User, null=True)
     is_unsubscribed = models.BooleanField(default=False, db_index=True)
     email = models.EmailField(max_length=250, unique=True)
-    lang = models.CharField(max_length=10, blank=True, null=True, choices=settings.ALLOWED_LANGUAGES)
+    lang = models.CharField(max_length=10, blank=True, null=True,
+                            choices=settings.LANGUAGES)
 
     objects = NewsletterSubscriberManager()
 
