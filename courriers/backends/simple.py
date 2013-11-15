@@ -51,12 +51,12 @@ class SimpleBackend(BaseBackend):
 
         emails = []
         for subscriber in subscribers:
-            email = EmailMultiAlternatives(newsletter.name, render_to_string('courriers/newsletterraw_detail.txt', {
+            email = EmailMultiAlternatives(newsletter.name, render_to_string('courriers/newsletter_raw_detail.txt', {
                 'object': newsletter,
                 'subscriber': subscriber
             }), DEFAULT_FROM_EMAIL, [subscriber.email, ], connection=connection)
 
-            email.attach_alternative(render_to_string('courriers/newsletterraw_detail.html', {
+            email.attach_alternative(render_to_string('courriers/newsletter_raw_detail.html', {
                 'object': newsletter,
                 'subscriber': subscriber
             }), 'text/html')

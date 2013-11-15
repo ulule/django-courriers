@@ -82,7 +82,7 @@ class NewsletterDetailView(View):
 
 class NewsletterRawDetailView(DetailView):
     model = Newsletter
-    template_name = 'courriers/newsletterraw_detail.html'
+    template_name = 'courriers/newsletter_raw_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super(NewsletterRawDetailView, self).get_context_data(**kwargs)
@@ -93,7 +93,7 @@ class NewsletterRawDetailView(DetailView):
 
 
 class NewsletterListUnsubscribeView(FormMixin, DetailView):
-    template_name = 'courriers/newsletter_unsubscribe_from_list.html'
+    template_name = 'courriers/newsletter_unsubscribe.html'
     form_class = UnsubscribeForm
     model = NewsletterSubscriber
     context_object_name = 'newsletter_list'
