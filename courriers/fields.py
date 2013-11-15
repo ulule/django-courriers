@@ -63,5 +63,8 @@ class SeparatedValuesField(models.CharField):
     def formfield(self, **kwargs):
         return MultipleChoiceField(choices=self.choices)
 
-from south.modelsinspector import add_introspection_rules
-add_introspection_rules([], ["^courriers\.fields\.SeparatedValuesField"])
+try:
+    from south.modelsinspector import add_introspection_rules
+    add_introspection_rules([], ["^courriers\.fields\.SeparatedValuesField"])
+except ImportError:
+    pass
