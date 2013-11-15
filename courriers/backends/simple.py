@@ -28,7 +28,7 @@ class SimpleBackend(BaseBackend):
     def unregister(self, email, newsletter_list=None, user=None):
         if not newsletter_list:
             for subscriber in self.model.objects.filter(email=email):
-                subscriber.unsubscribe()
+                subscriber.unsubscribe(commit=True)
         else:
             if self.exists(email, newsletter_list):
                 self.model.objects.get(email=email, newsletter_list=newsletter_list).unsubscribe()
@@ -37,13 +37,13 @@ class SimpleBackend(BaseBackend):
         return self.model.objects.filter(email=email, newsletter_list=newsletter_list).exists()
 
     def subscribed(self, email, newsletter_list, user=None):
-        return self.model.objects.filter(email=email, newsletter_list=newsletter_list, is_unsubscribed=True).exists()
+        return self.model.objects.filter(email=email, newsletter_list=newsletter_list, is_unsubscribed=False).exists()
 
     def send_mails(self, newsletter, fail_silently=False):
         qs = self.model.objects.filter(newsletter_list=newsletter.newsletter_list).subscribed()
 
-        if newsletter.lang:
-            subscribers = qs.has_lang(newsletter.lang).prefetch_related('user')
+        if newsletter.languages:
+            subscribers = qs.has_langs(newsletter.languages).prefetch_related('user')
         else:
             subscribers = qs.prefetch_related('user')
 

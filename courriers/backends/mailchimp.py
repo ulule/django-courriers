@@ -6,7 +6,7 @@ from django.utils.translation import ugettext as _
 
 from .simple import SimpleBackend
 from ..models import NewsletterSubscriber
-from ..settings import (MAILCHIMP_API_KEY, MAILCHIMP_LIST_NAME,
+from ..settings import (MAILCHIMP_API_KEY,
                         DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME)
 
 from mailchimp import Mailchimp
@@ -22,33 +22,33 @@ class MailchimpBackend(SimpleBackend):
     def get_list_ids(self):
         return dict((l['name'], l['id']) for l in self.mc.lists.list()['data'])
 
-    def register(self, email, lang=None, user=None):
-        super(MailchimpBackend, self).register(email, lang, user)
+    def register(self, email, newsletter_list, lang=None, user=None):
+        super(MailchimpBackend, self).register(email, newsletter_list, lang=lang, user=user)
 
         list_ids = self.get_list_ids()
 
-        self.mc_subscribe(list_ids[MAILCHIMP_LIST_NAME], email)
+        self.mc_subscribe(list_ids[newsletter_list.slug], email)
 
         if lang:
-            key = "%s_%s" % (MAILCHIMP_LIST_NAME, lang)
+            key = "%s_%s" % (newsletter_list.slug, lang)
 
             if not key in list_ids:
                 raise Exception(_('List %s does not exist') % key)
 
             self.mc_subscribe(list_ids[key], email)
 
-    def unregister(self, email, user=None):
-        super(MailchimpBackend, self).unregister(email, user)
+    def unregister(self, email, newsletter_list, user=None):
+        super(MailchimpBackend, self).unregister(email, newsletter_list, user=user)
 
         if self.exists(email):
             list_ids = self.get_list_ids()
 
-            self.mc_unsubscribe(list_ids[MAILCHIMP_LIST_NAME], email)
+            self.mc_unsubscribe(list_ids[newsletter_list.slug], email)
 
             subscriber = NewsletterSubscriber.objects.get(email=email)
 
             if subscriber.lang:
-                key = "%s_%s" % (MAILCHIMP_LIST_NAME, subscriber.lang)
+                key = "%s_%s" % (newsletter_list.slug, subscriber.lang)
                 self.mc_unsubscribe(list_ids[key], email)
 
     def mc_subscribe(self, list_id, email):
@@ -65,9 +65,9 @@ class MailchimpBackend(SimpleBackend):
         lists = self.get_list_ids()
 
         if newsletter.lang:
-            key = "%s_%s" % (MAILCHIMP_LIST_NAME, newsletter.lang)
+            key = "%s_%s" % (newsletter.newsletter_list.slug, newsletter.lang)
         else:
-            key = MAILCHIMP_LIST_NAME
+            key = newsletter.newsletter_list.slug
 
         if not key in lists:
             raise Exception(_('List %s does not exist') % key)

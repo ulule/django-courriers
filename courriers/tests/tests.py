@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone as datetime
 from django.core import mail
 
-from courriers.forms import SubscriptionForm, UnsubscriptionForm
+from courriers.forms import SubscriptionForm, NewsletterListUnsubscribeForm
 from courriers.models import Newsletter, NewsletterList, NewsletterSubscriber
 
 from django.conf import settings
@@ -34,13 +34,13 @@ class BaseBackendTests(TestCase):
                                        published_at=datetime.now() - datetime.timedelta(hours=2),
                                        status=Newsletter.STATUS_ONLINE,
                                        newsletter_list=self.monthly,
-                                       lang='FR')
+                                       languages=['FR'])
 
         n3 = Newsletter.objects.create(name="3000 projets finances [en-us]",
                                        published_at=datetime.now() - datetime.timedelta(hours=2),
                                        status=Newsletter.STATUS_ONLINE,
-                                       newsletter_list=self.newsletter_list,
-                                       lang='en-us')
+                                       newsletter_list=self.weekly,
+                                       languages=['en-us'])
 
         self.newsletters = [n1, n2, n3]
 
@@ -60,27 +60,29 @@ class BaseBackendTests(TestCase):
         self.assertEqual(subscriber2.count(), 1)
 
         # Unsubscribe from all
-        self.backend.unregister(subscriber.email)
+        subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com')
+        for s in subscriber:
+            self.backend.unregister(s.email)
 
         subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
                                                          is_unsubscribed=True)
-        self.assertEqual(subscriber.count(), 1)  # subscriber is unsubscribed from all
+        self.assertEqual(subscriber.count(), 2)  # subscriber is unsubscribed from all
 
         # Subscribe to all
         self.backend.register('adele@ulule.com', self.monthly, 'FR')
         self.backend.register('adele@ulule.com', self.weekly, 'FR')
 
-        subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
-                                                         newsletter_list=self.monthly,
-                                                         is_unsubscribed=False)
-        self.assertEqual(subscriber.count(), 1)
+        subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com',
+                                                      newsletter_list=self.monthly,
+                                                      is_unsubscribed=False)
 
         # Unsubscribe from monthly
         self.backend.unregister(subscriber.email, self.monthly)
 
         unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
-                                                           newsletter_list=self.monthly)
-        self.assertEqual(unsubscriber.count(), 0)
+                                                           newsletter_list=self.monthly,
+                                                           is_unsubscribed=True)
+        self.assertEqual(unsubscriber.count(), 1)
 
         unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
                                                            newsletter_list=self.weekly,
@@ -99,21 +101,28 @@ class SimpleBackendTests(BaseBackendTests):
     def test_registration(self):
         super(SimpleBackendTests, self).test_registration()
 
+        self.backend.register('adele@ulule.com', self.newsletters[0])
+
         self.backend.send_mails(self.newsletters[0])
-        self.assertEqual(len(mail.outbox), NewsletterSubscriber.objects.subscribed().count())
+        self.assertEqual(len(mail.outbox), NewsletterSubscriber.objects.subscribed().filter(newsletter_list=self.newsletters[0].newsletter_list).count())
         out = len(mail.outbox)
+
+        self.backend.register('adele@ulule.com', self.newsletters[0], 'FR')
 
         self.backend.send_mails(self.newsletters[1])
-        self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().has_lang('FR').count())
+        self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().filter(newsletter_list=self.newsletters[1].newsletter_list).has_lang('FR').count())
         out = len(mail.outbox)
 
+        self.backend.register('adele@ulule.com', self.newsletters[0], 'en-us')
+
         self.backend.send_mails(self.newsletters[2])
-        self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().has_lang('en-us').count())
+        self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().filter(newsletter_list=self.newsletters[2].newsletter_list).has_lang('en-us').count())
 
 
 class NewslettersViewsTests(TestCase):
     def setUp(self):
-        Newsletter.objects.create(name='Newsletter1', published_at=datetime.now())
+        self.monthly = NewsletterList.objects.create(name="Monthly", slug="monthly")
+        Newsletter.objects.create(name='Newsletter1', newsletter_list=self.monthly, published_at=datetime.now())
 
     def test_newsletter_list(self):
         response = self.client.get(reverse('newsletter_list'))
@@ -141,10 +150,12 @@ class SubscribeFormTest(TestCase):
         self.backend_klass = get_backend()
         self.backend = self.backend_klass()
 
+        self.monthly = NewsletterList.objects.create(name="Monthly", slug="monthly")
+
     def test_subscription_logged_out(self):
         valid_data = {'receiver': 'adele@ulule.com'}
 
-        form = SubscriptionForm(data=valid_data)
+        form = SubscriptionForm(data=valid_data, **{'newsletter_list': self.monthly})
 
         self.assertTrue(form.is_valid())
 
@@ -156,7 +167,7 @@ class SubscribeFormTest(TestCase):
         self.assertNotEqual(new_subscriber.get().lang, None)
 
         # Test duplicate
-        form2 = SubscriptionForm(data=valid_data)
+        form2 = SubscriptionForm(data=valid_data, **{'newsletter_list': self.monthly})
 
         is_valid = form2.is_valid()
 
@@ -169,7 +180,7 @@ class SubscribeFormTest(TestCase):
 
         valid_data = {'receiver': 'florent@ulule.com'}
 
-        form = SubscriptionForm(data=valid_data)
+        form = SubscriptionForm(data=valid_data, **{'newsletter_list': self.monthly})
 
         self.assertTrue(form.is_valid())
 
@@ -193,23 +204,50 @@ class UnsubscribeFormTest(TestCase):
         self.backend_klass = get_backend()
         self.backend = self.backend_klass()
 
+        self.monthly = NewsletterList.objects.create(name="Monthly", slug="monthly")
+        self.weekly = NewsletterList.objects.create(name="Weekly", slug="weekly")
+        self.daily = NewsletterList.objects.create(name="Daily", slug="daily")
+
     def test_unsubscription(self):
-        self.backend.register('adele@ulule.com', 'FR')
+        self.backend.register('adele@ulule.com', self.monthly, 'FR')
+        self.backend.register('adele@ulule.com', self.weekly, 'FR')
+        self.backend.register('adele@ulule.com', self.daily, 'FR')
 
-        valid_data = {'receiver': 'adele@ulule.com'}
+        # Unsubscribe from monthly
+        valid_data = {'email': 'adele@ulule.com', 'from_all': False}
 
-        form = UnsubscriptionForm(data=valid_data)
+        form = NewsletterListUnsubscribeForm(data=valid_data, **{'newsletter_list': self.monthly})
 
         self.assertTrue(form.is_valid())
 
         form.save()
 
-        old_subscriber = NewsletterSubscriber.objects.filter(email=valid_data['receiver'])
+        old_subscriber = NewsletterSubscriber.objects.get(email=valid_data['email'],
+                                                          newsletter_list=self.monthly)
+        old_subscriber2 = NewsletterSubscriber.objects.get(email=valid_data['email'],
+                                                           newsletter_list=self.weekly)
+
+        self.assertEqual(old_subscriber.is_unsubscribed, True)
+        self.assertEqual(old_subscriber2.is_unsubscribed, False)
+
+        # Unsubscribe from all
+        valid_data = {'email': 'adele@ulule.com', 'from_all': True}
+
+        form = NewsletterListUnsubscribeForm(data=valid_data, newsletter_list=self.weekly)
+
+        self.assertTrue(form.is_valid())
+
+        form.save()
+
+        old_subscriber = NewsletterSubscriber.objects.filter(email=valid_data['email'],
+                                                             newsletter_list=self.weekly)
+        old_subscriber2 = NewsletterSubscriber.objects.filter(email=valid_data['email'],
+                                                              newsletter_list=self.daily)
 
         self.assertEqual(old_subscriber.get().is_unsubscribed, True)
+        self.assertEqual(old_subscriber2.get().is_unsubscribed, True)
 
-        # Test not registered
-        form2 = UnsubscriptionForm(data=valid_data)
+        form2 = NewsletterListUnsubscribeForm(data=valid_data, newsletter_list=self.weekly)
 
         is_valid = form2.is_valid()
 
@@ -232,18 +270,24 @@ if hasattr(settings, 'COURRIERS_MAILCHIMP_API_KEY'):
 
 class NewsletterModelsTest(TestCase):
     def test_navigation(self):
+        monthly = NewsletterList.objects.create(name="Monthly", slug="monthly")
+
         Newsletter.objects.create(name='Newsletter4',
                                   status=Newsletter.STATUS_DRAFT,
-                                  published_at=datetime.now() - datetime.timedelta(hours=4))
+                                  published_at=datetime.now() - datetime.timedelta(hours=4),
+                                  newsletter_list=monthly)
         n1 = Newsletter.objects.create(name='Newsletter1',
                                        status=Newsletter.STATUS_ONLINE,
-                                       published_at=datetime.now() - datetime.timedelta(hours=3))
+                                       published_at=datetime.now() - datetime.timedelta(hours=3),
+                                       newsletter_list=monthly)
         n2 = Newsletter.objects.create(name='Newsletter2',
                                        status=Newsletter.STATUS_ONLINE,
-                                       published_at=datetime.now() - datetime.timedelta(hours=2))
+                                       published_at=datetime.now() - datetime.timedelta(hours=2),
+                                       newsletter_list=monthly)
         n3 = Newsletter.objects.create(name='Newsletter3',
                                        status=Newsletter.STATUS_ONLINE,
-                                       published_at=datetime.now() - datetime.timedelta(hours=1))
+                                       published_at=datetime.now() - datetime.timedelta(hours=1),
+                                       newsletter_list=monthly)
 
         self.assertEqual(n2.get_previous(), n1)
         self.assertEqual(n2.get_next(), n3)

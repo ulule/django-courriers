@@ -22,7 +22,7 @@ class SubscriptionForm(forms.Form):
     def clean_receiver(self):
         receiver = self.cleaned_data['receiver']
 
-        if self.backend.exists(receiver, user=self.user):
+        if self.backend.exists(receiver, self.newsletter_list, user=self.user):
             subscriber = NewsletterSubscriber.objects.get(email=receiver)
 
             if not subscriber.is_unsubscribed:
@@ -35,11 +35,11 @@ class SubscriptionForm(forms.Form):
 
 
 class NewsletterListUnsubscribeForm(forms.Form):
-    from_all = forms.BooleanField()
+    email = forms.EmailField(max_length=250, required=True)
+    from_all = forms.BooleanField(required=False)
 
     def __init__(self, *args, **kwargs):
-        self.newsletter_list = kwargs.pop('newsletter_list')
-        self.receiver = kwargs.pop('receiver', None)
+        self.newsletter_list = kwargs.pop('newsletter_list', None)
 
         backend_klass = get_backend()
 
@@ -47,18 +47,18 @@ class NewsletterListUnsubscribeForm(forms.Form):
 
         super(NewsletterListUnsubscribeForm, self).__init__(*args, **kwargs)
 
-    def clean_receiver(self):
-        receiver = self.cleaned_data['receiver']
+    def clean_email(self):
+        email = self.cleaned_data['email']
 
-        if not self.backend.subscribed(receiver):
+        if not self.backend.subscribed(email, self.newsletter_list):
             raise forms.ValidationError(_(u"You are not subscribed to this newsletter."))
 
-        return receiver
+        return email
 
     def save(self):
         from_all = self.cleaned_data['from_all']
 
         if from_all:
-            self.backend.unregister(self.receiver)
+            self.backend.unregister(self.cleaned_data['email'])
         else:
-            self.backend.unregister(self.receiver, self.newsletter_list)
+            self.backend.unregister(self.cleaned_data['email'], self.newsletter_list)

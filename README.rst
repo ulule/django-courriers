@@ -22,6 +22,7 @@ What it does?
 
 django-courriers has three models:
 
+- ``NewsletterList`` which represents a newsletter list.
 - ``Newsletter`` which represents a newsletter.
 - ``NewsletterItem`` an item of a newsletter. It could be a content-type you want.
 - ``NewsletterSubscriber`` which represents a user who is subscribed to a newsletter.
@@ -82,23 +83,8 @@ What you need to do for mailchimp
 Which this backend you have to provide additional settings ::
 
     COURRIERS_MAILCHIMP_API_KEY = 'You API key'
-    COURRIERS_MAILCHIMP_LIST_NAME = 'The name of a list of users'
     COURRIERS_DEFAULT_FROM_NAME = 'Your name'
 
-
-``COURRIERS_MAILCHIMP_LIST_NAME`` is the default name for lists of subscribers.
-
-Multilingual
-............
-
-If you want to send multilingual newsletters you have to create one list
-of users per language with the following syntax ::
-
-    [COURRIERS_MAILCHIMP_LIST_NAME]_us-en
-    [COURRIERS_MAILCHIMP_LIST_NAME]_fr
-    [COURRIERS_MAILCHIMP_LIST_NAME]_es
-    [COURRIERS_MAILCHIMP_LIST_NAME]_it
-    [COURRIERS_MAILCHIMP_LIST_NAME]_pt-br
 
 Where the suffix language code is one of Django language code.
 

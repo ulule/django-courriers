@@ -10,6 +10,7 @@ from django.utils import timezone as datetime
 from .compat import User, update_fields
 from .core import QuerySet, Manager
 from .settings import ALLOWED_LANGUAGES
+from .fields import SeparatedValuesField
 
 
 def get_file_path(instance, filename):
@@ -24,6 +25,7 @@ class NewsletterList(models.Model):
     slug = models.SlugField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    languages = SeparatedValuesField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
 
     def __unicode__(self):
         return self.name
@@ -79,7 +81,7 @@ class Newsletter(models.Model):
                                          db_index=True)
     headline = models.CharField(max_length=255, blank=True, null=True)
     cover = models.ImageField(upload_to=get_file_path, blank=True, null=True)
-    lang = models.CharField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
+    languages = SeparatedValuesField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
     newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletters')
 
     objects = NewsletterManager()
@@ -88,10 +90,12 @@ class Newsletter(models.Model):
         return self.name
 
     def get_previous(self):
-        return self.__class__.objects.get_previous(self.published_at)
+        return (self.__class__.objects.filter(newsletter_list=self.newsletter_list_id)
+                .get_previous(self.published_at))
 
     def get_next(self):
-        return self.__class__.objects.get_next(self.published_at)
+        return (self.__class__.objects.filter(newsletter_list=self.newsletter_list_id)
+                .get_next(self.published_at))
 
     def is_online(self):
         return self.status == self.STATUS_ONLINE
@@ -115,6 +119,17 @@ class NewsletterSubscriberQuerySet(QuerySet):
     def has_lang(self, lang):
         return self.filter(lang=lang)
 
+    def has_langs(self, langs):
+        filter_q = None
+
+        for lang in langs:
+            if filter_q is None:
+                filter_q = models.Q(lang=lang)
+            else:
+                filter_q |= models.Q(lang=lang)
+
+        return self.filter(filter_q)
+
 
 class NewsletterSubscriberManager(models.Manager):
     def get_query_set(self):
@@ -131,14 +146,14 @@ class NewsletterSubscriber(models.Model):
     subscribed_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, null=True)
     is_unsubscribed = models.BooleanField(default=False, db_index=True)
-    email = models.EmailField(max_length=250, unique=True)
+    email = models.EmailField(max_length=250)
     lang = models.CharField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
     newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletter_subscribers')
 
     objects = NewsletterSubscriberManager()
 
     def __unicode__(self):
-        return self.email
+        return u'%s for %s' % (self.email, self.newsletter_list)
 
     def subscribe(self, commit=True):
         self.is_unsubscribed = False
