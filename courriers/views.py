@@ -32,9 +32,6 @@ class NewsletterDisplayView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(NewsletterDisplayView, self).get_context_data(**kwargs)
 
-        context['previous_object'] = self.model.objects.get_previous(self.object.published_at)
-        context['next_object'] = self.model.objects.get_next(self.object.published_at)
-
         context['form'] = SubscriptionForm(user=self.request.user,
                                            newsletter_list=self.model.newsletter_list)
 
