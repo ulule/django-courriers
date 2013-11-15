@@ -11,7 +11,7 @@ from .models import Newsletter, NewsletterSubscriber, NewsletterList
 from .forms import SubscriptionForm, UnsubscribeForm
 
 
-class NewsletterListView(ListView):
+class NewsletterListDetailView(ListView):
     model = Newsletter
     context_object_name = 'newsletters'
     template_name = 'courriers/newsletter_list.html'
