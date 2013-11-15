@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
+from django.conf import settings
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify, truncatechars
