@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone as datetime
 from django.core import mail
 
-from courriers.forms import SubscriptionForm, NewsletterListUnsubscribeForm
+from courriers.forms import SubscriptionForm, UnsubscribeForm
 from courriers.models import Newsletter, NewsletterList, NewsletterSubscriber
 
 from django.conf import settings
@@ -216,7 +216,7 @@ class UnsubscribeFormTest(TestCase):
         # Unsubscribe from monthly
         valid_data = {'email': 'adele@ulule.com', 'from_all': False}
 
-        form = NewsletterListUnsubscribeForm(data=valid_data, **{'newsletter_list': self.monthly})
+        form = UnsubscribeForm(data=valid_data, **{'newsletter_list': self.monthly})
 
         self.assertTrue(form.is_valid())
 
@@ -233,7 +233,7 @@ class UnsubscribeFormTest(TestCase):
         # Unsubscribe from all
         valid_data = {'email': 'adele@ulule.com', 'from_all': True}
 
-        form = NewsletterListUnsubscribeForm(data=valid_data, newsletter_list=self.weekly)
+        form = UnsubscribeForm(data=valid_data, newsletter_list=self.weekly)
 
         self.assertTrue(form.is_valid())
 
@@ -247,7 +247,7 @@ class UnsubscribeFormTest(TestCase):
         self.assertEqual(old_subscriber.get().is_unsubscribed, True)
         self.assertEqual(old_subscriber2.get().is_unsubscribed, True)
 
-        form2 = NewsletterListUnsubscribeForm(data=valid_data, newsletter_list=self.weekly)
+        form2 = UnsubscribeForm(data=valid_data, newsletter_list=self.weekly)
 
         is_valid = form2.is_valid()
 

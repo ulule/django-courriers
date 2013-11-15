@@ -34,7 +34,7 @@ class SubscriptionForm(forms.Form):
         self.backend.register(self.cleaned_data['receiver'], self.newsletter_list, get_language(), user or self.user)
 
 
-class NewsletterListUnsubscribeForm(forms.Form):
+class UnsubscribeForm(forms.Form):
     email = forms.EmailField(max_length=250, required=True)
     from_all = forms.BooleanField(required=False)
 
@@ -45,7 +45,7 @@ class NewsletterListUnsubscribeForm(forms.Form):
 
         self.backend = backend_klass()
 
-        super(NewsletterListUnsubscribeForm, self).__init__(*args, **kwargs)
+        super(UnsubscribeForm, self).__init__(*args, **kwargs)
 
     def clean_email(self):
         email = self.cleaned_data['email']

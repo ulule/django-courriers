@@ -2,13 +2,13 @@
 from django.views.generic import View, ListView, DetailView, FormView
 from django.views.generic.edit import FormMixin
 from django.views.generic.detail import SingleObjectMixin
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 
 from .models import Newsletter, NewsletterSubscriber, NewsletterList
-from .forms import SubscriptionForm, NewsletterListUnsubscribeForm
+from .forms import SubscriptionForm, UnsubscribeForm
 
 
 class NewsletterListView(ListView):
@@ -97,7 +97,7 @@ class NewsletterRawDetailView(DetailView):
 
 class NewsletterListUnsubscribeView(FormMixin, DetailView):
     template_name = 'courriers/newsletter_unsubscribe_from_list.html'
-    form_class = NewsletterListUnsubscribeForm
+    form_class = UnsubscribeForm
     model = NewsletterSubscriber
     context_object_name = 'newsletter_list'
     success_url = reverse_lazy('newsletter_list')
