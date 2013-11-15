@@ -154,6 +154,9 @@ class NewsletterSubscriberManager(models.Manager):
     def has_lang(self, lang):
         return self.get_query_set().has_lang(lang)
 
+    def has_langs(self, langs):
+        return self.get_query_set().has_langs(langs)
+
 
 @python_2_unicode_compatible
 class NewsletterSubscriber(models.Model):
