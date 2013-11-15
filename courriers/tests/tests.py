@@ -7,7 +7,7 @@ from django.utils import timezone as datetime
 from django.core import mail
 
 from courriers.forms import SubscriptionForm, UnsubscriptionForm
-from courriers.models import Newsletter, NewsletterSubscriber
+from courriers.models import Newsletter, NewsletterList, NewsletterSubscriber
 
 from django.conf import settings
 
@@ -22,42 +22,77 @@ class BaseBackendTests(TestCase):
         self.backend_klass = get_backend()
         self.backend = self.backend_klass()
 
+        self.monthly = NewsletterList.objects.create(name="Monthly", slug="monthly")
+        self.weekly = NewsletterList.objects.create(name="Weekly", slug="weekly")
+
         n1 = Newsletter.objects.create(name="3000 projets finances",
                                        published_at=datetime.now() - datetime.timedelta(hours=2),
-                                       status=Newsletter.STATUS_ONLINE)
+                                       status=Newsletter.STATUS_ONLINE,
+                                       newsletter_list=self.monthly)
 
         n2 = Newsletter.objects.create(name="3000 projets finances [FR]",
                                        published_at=datetime.now() - datetime.timedelta(hours=2),
-                                       status=Newsletter.STATUS_ONLINE, lang='FR')
+                                       status=Newsletter.STATUS_ONLINE,
+                                       newsletter_list=self.monthly,
+                                       lang='FR')
 
         n3 = Newsletter.objects.create(name="3000 projets finances [en-us]",
                                        published_at=datetime.now() - datetime.timedelta(hours=2),
-                                       status=Newsletter.STATUS_ONLINE, lang='en-us')
+                                       status=Newsletter.STATUS_ONLINE,
+                                       newsletter_list=self.newsletter_list,
+                                       lang='en-us')
 
         self.newsletters = [n1, n2, n3]
 
     def test_registration(self):
-        # Subscribe
-        self.backend.register('adele@ulule.com', 'FR')
-        self.backend.register('adele.delamarche@gmail.com')
+        # Subscribe to all
+        self.backend.register('adele@ulule.com', self.monthly, 'FR')
+        self.backend.register('adele@ulule.com', self.weekly, 'FR')
 
-        subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
+        subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
+                                                         newsletter_list=self.monthly,
+                                                         is_unsubscribed=False)
         self.assertEqual(subscriber.count(), 1)
 
-        # Unsubscribe
-        subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com')
-        self.assertEqual(subscriber.lang, 'FR')
+        subscriber2 = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
+                                                          newsletter_list=self.weekly,
+                                                          is_unsubscribed=False)
+        self.assertEqual(subscriber2.count(), 1)
 
-        subscriber2 = NewsletterSubscriber.objects.get(email='adele.delamarche@gmail.com')
-        self.assertEqual(subscriber2.lang, None)
-
+        # Unsubscribe from all
         self.backend.unregister(subscriber.email)
-        self.backend.unregister(subscriber2.email)
+
+        subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
+                                                         is_unsubscribed=True)
+        self.assertEqual(subscriber.count(), 1)  # subscriber is unsubscribed from all
+
+        # Subscribe to all
+        self.backend.register('adele@ulule.com', self.monthly, 'FR')
+        self.backend.register('adele@ulule.com', self.weekly, 'FR')
+
+        subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
+                                                         newsletter_list=self.monthly,
+                                                         is_unsubscribed=False)
+        self.assertEqual(subscriber.count(), 1)
+
+        # Unsubscribe from monthly
+        self.backend.unregister(subscriber.email, self.monthly)
+
+        unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
+                                                           newsletter_list=self.monthly)
+        self.assertEqual(unsubscriber.count(), 0)
+
+        unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
+                                                           newsletter_list=self.weekly,
+                                                           is_unsubscribed=False)
+        self.assertEqual(unsubscriber.count(), 1)
+
+        unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
+                                                           newsletter_list=self.weekly,
+                                                           is_unsubscribed=True)
+        self.assertEqual(unsubscriber.count(), 0)
 
         self.backend.unregister('florent@ulule.com')  # Subscriber does not exist
-
-        unsubscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=True)
-        self.assertEqual(unsubscriber.count(), 1)
 
 
 class SimpleBackendTests(BaseBackendTests):

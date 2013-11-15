@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from django.views.generic import View, ListView, DetailView, FormView
+from django.views.generic.edit import FormMixin
 from django.views.generic.detail import SingleObjectMixin
 
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect
 
-from .models import Newsletter
-from .forms import SubscriptionForm, UnsubscriptionForm
+from .models import Newsletter, NewsletterSubscriber
+from .forms import SubscriptionForm, NewsletterListUnsubscribeForm
 
 
 class NewsletterListView(ListView):
@@ -14,7 +15,7 @@ class NewsletterListView(ListView):
     context_object_name = 'newsletters'
 
     def get_queryset(self):
-        return self.model.objects.all().status_online().order_by('published_at')
+        return self.model.objects.status_online().order_by('published_at')
 
 
 class NewsletterDisplayView(DetailView):
@@ -28,28 +29,38 @@ class NewsletterDisplayView(DetailView):
         context['previous_object'] = self.model.objects.get_previous(self.object.published_at)
         context['next_object'] = self.model.objects.get_next(self.object.published_at)
 
-        context['form'] = SubscriptionForm(user=self.request.user)
+        initial = {'newsletter_list': self.model.newsletter_list}
+        context['form'] = SubscriptionForm(user=self.request.user, initial=initial)
 
         return context
 
 
-class NewsletterFormView(FormView, SingleObjectMixin):
+class NewsletterFormView(SingleObjectMixin, FormView):
     template_name = 'courriers/newsletter_detail.html'
     form_class = SubscriptionForm
     model = Newsletter
     context_object_name = 'newsletter'
 
-    def get_context_data(self, **kwargs):
+    def post(self, request, *args, **kwargs):
         self.object = self.get_object()
+        return super(NewsletterFormView, self).post(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
         context = super(NewsletterFormView, self).get_context_data(**kwargs)
         context.update(SingleObjectMixin.get_context_data(self, **kwargs))
         return context
+
+    def get_form_kwargs(self):
+        return dict(super(NewsletterFormView, self).get_form_kwargs(), **{
+            'newsletter_list': self.object.newsletter_list
+        })
 
     def form_valid(self, form):
         if self.request.user.is_authenticated():
             form.save(self.request.user)
         else:
             form.save()
+
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
@@ -79,13 +90,34 @@ class NewsletterRawDetailView(DetailView):
         return context
 
 
-class NewsletterUnsubscribeView(FormView):
-    template_name = 'courriers/newsletter_unsubscribe.html'
-    form_class = UnsubscriptionForm
-    model = Newsletter
-    context_object_name = 'newsletter'
+class NewsletterListUnsubscribeView(FormMixin, DetailView):
+    template_name = 'courriers/newsletter_unsubscribe_from_list.html'
+    form_class = NewsletterListUnsubscribeForm
+    model = NewsletterSubscriber
+    context_object_name = 'newsletter_list'
     success_url = reverse_lazy('newsletter_list')
 
+    def get_form_kwargs(self):
+        return dict(super(NewsletterListUnsubscribeView, self).get_form_kwargs(), **{
+            'newsletter_list': self.object
+        })
+
+    def get_context_data(self, **kwargs):
+        context = super(NewsletterListUnsubscribeView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        if form.is_valid():
+            return self.form_valid(form)
+
+        return self.form_invalid(form)
+
     def form_valid(self, form):
-        super(FormView, self).form_valid(form)
         form.save()
+
+        return super(NewsletterListUnsubscribeView, self).form_valid(form)

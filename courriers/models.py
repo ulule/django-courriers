@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 
-from django.conf import settings
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify, truncatechars
@@ -18,6 +17,16 @@ def get_file_path(instance, filename):
     filename = unicode('%s%s' % (slugify(truncatechars(fname, 50)), ext))
 
     return os.path.join('courriers', 'uploads', filename)
+
+
+class NewsletterList(models.Model):
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True)
+    description = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return self.name
 
 
 class NewsletterQuerySet(QuerySet):
@@ -71,6 +80,7 @@ class Newsletter(models.Model):
     headline = models.CharField(max_length=255, blank=True, null=True)
     cover = models.ImageField(upload_to=get_file_path, blank=True, null=True)
     lang = models.CharField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
+    newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletters')
 
     objects = NewsletterManager()
 
@@ -123,6 +133,7 @@ class NewsletterSubscriber(models.Model):
     is_unsubscribed = models.BooleanField(default=False, db_index=True)
     email = models.EmailField(max_length=250, unique=True)
     lang = models.CharField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
+    newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletter_subscribers')
 
     objects = NewsletterSubscriberManager()
 

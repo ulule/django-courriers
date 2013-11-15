@@ -3,7 +3,7 @@ from django.conf.urls import patterns, url
 from .views import (NewsletterListView,
                     NewsletterDetailView,
                     NewsletterRawDetailView,
-                    NewsletterUnsubscribeView)
+                    NewsletterListUnsubscribeView)
 
 
 urlpatterns = patterns(
@@ -20,7 +20,7 @@ urlpatterns = patterns(
         NewsletterRawDetailView.as_view(),
         name="newsletterraw_detail"),
 
-    url(r'^unsubscribe/$',
-        NewsletterUnsubscribeView.as_view(),
-        name="newsletterraw_unsubscribe"),
+    url(r'^(?P<slug>(\w+))/unsubscribe/$',
+        NewsletterListUnsubscribeView.as_view(),
+        name="newsletterlist_unsubscribe"),
 )

@@ -5,13 +5,13 @@ from django.utils.translation import ugettext as _
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
-from .models import Newsletter, NewsletterItem, NewsletterSubscriber
+from .models import Newsletter, NewsletterItem, NewsletterSubscriber, NewsletterList
 
 
 class NewsletterAdmin(admin.ModelAdmin):
     change_form_template = 'admin/courriers/newsletter/change_form.html'
 
-    list_display = ('name', 'headline', 'lang', 'published_at', 'status',)
+    list_display = ('name', 'headline', 'lang', 'published_at', 'status', 'newsletter_list',)
     list_filter = ('lang', 'published_at', 'status',)
 
     def get_urls(self):
@@ -46,6 +46,11 @@ class NewsletterSubscriberAdmin(admin.ModelAdmin):
     list_filter = ('lang', 'is_unsubscribed',)
 
 
+class NewsletterListAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug', 'created_at',)
+
+
 admin.site.register(Newsletter, NewsletterAdmin)
 admin.site.register(NewsletterItem, NewsletterItemAdmin)
 admin.site.register(NewsletterSubscriber, NewsletterSubscriberAdmin)
+admin.site.register(NewsletterList, NewsletterListAdmin)

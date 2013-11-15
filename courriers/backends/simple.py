@@ -12,27 +12,35 @@ from ..settings import DEFAULT_FROM_EMAIL
 class SimpleBackend(BaseBackend):
     model = NewsletterSubscriber
 
-    def subscribe(self, email, lang=None, user=None):
+    def subscribe(self, email, newsletter_list, lang=None, user=None):
         return self.model.objects.create(email=email, user=user,
-                                         lang=lang)
+                                         newsletter_list=newsletter_list, lang=lang)
 
-    def register(self, email, lang=None, user=None):
-        if not self.exists(email):
-            self.subscribe(email, lang, user)
+    def register(self, email, newsletter_list, lang=None, user=None):
+        if not self.exists(email, newsletter_list):
+            subscriber = self.subscribe(email, newsletter_list, lang, user)
         else:
-            subscriber = self.model.objects.get(email=email)
+            subscriber = self.model.objects.get(email=email, newsletter_list=newsletter_list)
+
             if subscriber.is_unsubscribed:
                 subscriber.subscribe()
 
-    def unregister(self, email, user=None):
-        if self.exists(email):
-            self.model.objects.get(email=email).unsubscribe(commit=True)
+    def unregister(self, email, newsletter_list=None, user=None):
+        if not newsletter_list:
+            for subscriber in self.model.objects.filter(email=email):
+                subscriber.unsubscribe()
+        else:
+            if self.exists(email, newsletter_list):
+                self.model.objects.get(email=email, newsletter_list=newsletter_list).unsubscribe()
 
-    def exists(self, email, user=None):
-        return self.model.objects.filter(email=email).exists()
+    def exists(self, email, newsletter_list, user=None):
+        return self.model.objects.filter(email=email, newsletter_list=newsletter_list).exists()
+
+    def subscribed(self, email, newsletter_list, user=None):
+        return self.model.objects.filter(email=email, newsletter_list=newsletter_list, is_unsubscribed=True).exists()
 
     def send_mails(self, newsletter, fail_silently=False):
-        qs = self.model.objects.subscribed()
+        qs = self.model.objects.filter(newsletter_list=newsletter.newsletter_list).subscribed()
 
         if newsletter.lang:
             subscribers = qs.has_lang(newsletter.lang).prefetch_related('user')
