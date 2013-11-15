@@ -1,6 +1,7 @@
 from django.forms.fields import MultipleChoiceField
 from django.core import validators
 from django.db import models
+from django.core import exceptions
 
 
 class SeparatedValuesField(models.CharField):
