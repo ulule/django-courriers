@@ -138,7 +138,7 @@ class NewslettersViewsTests(TestCase):
         self.assertTrue(isinstance(response.context['form'], SubscriptionForm))
 
     def test_newsletterraw_detail(self):
-        response = self.client.get(reverse('newsletterraw_detail', kwargs={'pk': 1}))
+        response = self.client.get(reverse('newsletter_raw_detail', kwargs={'pk': 1}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'courriers/newsletter_raw_detail.html')
 

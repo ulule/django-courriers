@@ -18,9 +18,9 @@ urlpatterns = patterns(
 
     url(r'^(?P<pk>(\d+))/raw/$',
         NewsletterRawDetailView.as_view(),
-        name="newsletterraw_detail"),
+        name="newsletter_raw_detail"),
 
     url(r'^(?P<slug>(\w+))/unsubscribe/$',
         NewsletterListUnsubscribeView.as_view(),
-        name="newsletterlist_unsubscribe"),
+        name="newsletter_list_unsubscribe"),
 )
