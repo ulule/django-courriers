@@ -2,20 +2,26 @@
 from django.views.generic import View, ListView, DetailView, FormView
 from django.views.generic.edit import FormMixin
 from django.views.generic.detail import SingleObjectMixin
-
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
+from django.utils.functional import cached_property
 
-from .models import Newsletter, NewsletterSubscriber
+from .models import Newsletter, NewsletterSubscriber, NewsletterList
 from .forms import SubscriptionForm, NewsletterListUnsubscribeForm
 
 
 class NewsletterListView(ListView):
     model = Newsletter
     context_object_name = 'newsletters'
+    template_name = 'courriers/newsletter_list.html'
+
+    @cached_property
+    def newsletter_list(self):
+        return get_object_or_404(NewsletterList, slug=self.kwargs.get('slug'))
 
     def get_queryset(self):
-        return self.model.objects.status_online().order_by('published_at')
+        return self.newsletter_list.newsletters.status_online().order_by('published_at')
 
 
 class NewsletterDisplayView(DetailView):
@@ -29,8 +35,8 @@ class NewsletterDisplayView(DetailView):
         context['previous_object'] = self.model.objects.get_previous(self.object.published_at)
         context['next_object'] = self.model.objects.get_next(self.object.published_at)
 
-        initial = {'newsletter_list': self.model.newsletter_list}
-        context['form'] = SubscriptionForm(user=self.request.user, initial=initial)
+        context['form'] = SubscriptionForm(user=self.request.user,
+                                           newsletter_list=self.model.newsletter_list)
 
         return context
 
@@ -64,8 +70,7 @@ class NewsletterFormView(SingleObjectMixin, FormView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        self.object = self.get_object()
-        return reverse('newsletter_detail', kwargs={'pk': self.object.pk})
+        return self.object.get_absolute_url()
 
 
 class NewsletterDetailView(View):

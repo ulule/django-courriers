@@ -33,7 +33,7 @@ class NewsletterAdmin(admin.ModelAdmin):
         newsletter = get_object_or_404(Newsletter, pk=newsletter_id)
         backend.send_mails(newsletter)
 
-        self.message_user(request, _('The newsletter has been sent.'))
+        self.message_user(request, _('The newsletter %s has been sent.') % newsletter)
         return HttpResponseRedirect(reverse('admin:courriers_newsletter_change', args=(newsletter.id,)))
 
 

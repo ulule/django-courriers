@@ -125,7 +125,7 @@ class NewslettersViewsTests(TestCase):
         Newsletter.objects.create(name='Newsletter1', newsletter_list=self.monthly, published_at=datetime.now())
 
     def test_newsletter_list(self):
-        response = self.client.get(reverse('newsletter_list'))
+        response = self.client.get(self.monthly.get_absolute_url())
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'courriers/newsletter_list.html')

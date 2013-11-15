@@ -6,6 +6,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify, truncatechars
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone as datetime
+from django.core.urlresolvers import reverse
+from django.utils.encoding import python_2_unicode_compatible
 
 from .compat import User, update_fields
 from .core import QuerySet, Manager
@@ -20,6 +22,7 @@ def get_file_path(instance, filename):
     return os.path.join('courriers', 'uploads', filename)
 
 
+@python_2_unicode_compatible
 class NewsletterList(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
@@ -27,8 +30,13 @@ class NewsletterList(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     languages = SeparatedValuesField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('newsletter_list', kwargs={
+            'slug': self.slug
+        })
 
 
 class NewsletterQuerySet(QuerySet):
@@ -64,6 +72,7 @@ class NewsletterManager(Manager):
         return self.get_query_set().get_next(current_date)
 
 
+@python_2_unicode_compatible
 class Newsletter(models.Model):
     STATUS_ONLINE = 1
     STATUS_DRAFT = 2
@@ -86,7 +95,7 @@ class Newsletter(models.Model):
 
     objects = NewsletterManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def get_previous(self):
@@ -100,7 +109,11 @@ class Newsletter(models.Model):
     def is_online(self):
         return self.status == self.STATUS_ONLINE
 
+    def get_absolute_url(self):
+        return reverse('newsletter_detail', args=[self.pk, ])
 
+
+@python_2_unicode_compatible
 class NewsletterItem(models.Model):
     newsletter = models.ForeignKey(Newsletter, related_name="items")
     content_type = models.ForeignKey(ContentType, blank=True, null=True)
@@ -108,7 +121,7 @@ class NewsletterItem(models.Model):
     image = models.ImageField(upload_to=get_file_path, blank=True, null=True)
     url = models.URLField(blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.description
 
 
@@ -142,6 +155,7 @@ class NewsletterSubscriberManager(models.Manager):
         return self.get_query_set().has_lang(lang)
 
 
+@python_2_unicode_compatible
 class NewsletterSubscriber(models.Model):
     subscribed_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, null=True)
@@ -152,8 +166,8 @@ class NewsletterSubscriber(models.Model):
 
     objects = NewsletterSubscriberManager()
 
-    def __unicode__(self):
-        return u'%s for %s' % (self.email, self.newsletter_list)
+    def __str__(self):
+        return '%s for %s' % (self.email, self.newsletter_list)
 
     def subscribe(self, commit=True):
         self.is_unsubscribed = False

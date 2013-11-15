@@ -8,11 +8,11 @@ from .views import (NewsletterListView,
 
 urlpatterns = patterns(
     '',
-    url(r'^$',
+    url(r'^(?P<slug>(\w+))$',
         NewsletterListView.as_view(),
         name="newsletter_list"),
 
-    url(r'^(?P<pk>(\d+))/$',
+    url(r'^(?P<pk>(\d+))/detail/$',
         NewsletterDetailView.as_view(),
         name="newsletter_detail"),
 
