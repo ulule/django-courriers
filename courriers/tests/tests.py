@@ -137,6 +137,30 @@ class NewslettersViewsTests(TestCase):
 
         self.assertTrue(isinstance(response.context['form'], SubscriptionForm))
 
+    def test_newsletter_detail_post(self):
+
+        response = self.client.get(reverse('newsletter_list_unsubscribe', kwargs={
+            'newsletter_list': 'monthly',
+            'email': 'adeleulule'
+        }))
+        self.assertEqual(response.status_code, 200)
+
+
+        valid_data = {'newsletter_list': 'monthly',
+                      'email': 'adeleulule'}
+
+        url = reverse('newsletter_list_unsubscribe', kwargs={
+            'newsletter_list': 'monthly',
+            'email': 'adeleulule'
+        }, data=valid_data)
+        response = self.client.post(url)
+
+        # Test that the initial data of the form is set.
+        #self.assertEqual(response.context['form'].initial['email'], ['adeleulule'])
+
+        self.assertEqual(response.status_code, 200)
+
+
     def test_newsletterraw_detail(self):
         response = self.client.get(reverse('newsletter_raw_detail', kwargs={'pk': 1}))
         self.assertEqual(response.status_code, 200)
@@ -216,7 +240,7 @@ class UnsubscribeFormTest(TestCase):
         # Unsubscribe from monthly
         valid_data = {'email': 'adele@ulule.com', 'from_all': False}
 
-        form = UnsubscribeForm(data=valid_data, **{'newsletter_list': self.monthly})
+        form = UnsubscribeForm(data=valid_data, initial={'email': 'adele@ulule.com'}, **{'newsletter_list': self.monthly})
 
         self.assertTrue(form.is_valid())
 

@@ -99,6 +99,14 @@ class NewsletterListUnsubscribeView(FormMixin, DetailView):
     context_object_name = 'newsletter_list'
     success_url = reverse_lazy('newsletter_list')
 
+    def get_initial(self):
+        initial = super(NewsletterListUnsubscribeView, self).get_initial()
+
+        if self.kwargs.get('email'):
+            initial['email'] = self.kwargs.get('email')
+
+        return initial.copy()
+
     def get_form_kwargs(self):
         return dict(super(NewsletterListUnsubscribeView, self).get_form_kwargs(), **{
             'newsletter_list': self.object

@@ -47,6 +47,7 @@ class UnsubscribeForm(forms.Form):
 
         super(UnsubscribeForm, self).__init__(*args, **kwargs)
 
+
     def clean_email(self):
         email = self.cleaned_data['email']
 
