@@ -131,3 +131,40 @@ class NewsletterListUnsubscribeView(FormMixin, DetailView):
         form.save()
 
         return super(NewsletterListUnsubscribeView, self).form_valid(form)
+
+
+class NewslettersUnsubscribeView(DetailView, FormMixin):
+    template_name = 'courriers/newsletters_unsubscribe.html'
+    form_class = UnsubscribeAllForm
+    model = NewsletterSubscriber
+    context_object_name = 'newsletters'
+    success_url = reverse_lazy('newsletter_list')
+
+    def get_initial(self):
+        initial = super(NewslettersUnsubscribeView, self).get_initial()
+
+        if self.kwargs.get('email'):
+            initial['email'] = self.kwargs.get('email')
+
+        return initial.copy()
+
+    def get_context_data(self, **kwargs):
+        context = super(NewslettersUnsubscribeView, self).get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        context['form'] = self.get_form(form_class)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+
+        if form.is_valid():
+            return self.form_valid(form)
+
+        return self.form_invalid(form)
+
+    def form_valid(self, form):
+        # Here, we would record the user's interest using the message
+        # passed in form.cleaned_data['message']
+        return super(NewslettersUnsubscribeView, self).form_valid(form)
