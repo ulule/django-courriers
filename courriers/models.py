@@ -92,6 +92,7 @@ class Newsletter(models.Model):
     cover = models.ImageField(upload_to=get_file_path, blank=True, null=True)
     languages = SeparatedValuesField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
     newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletters')
+    sent = models.BooleanField(default=False, db_index=True)
 
     objects = NewsletterManager()
 

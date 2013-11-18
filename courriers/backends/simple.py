@@ -65,4 +65,7 @@ class SimpleBackend(BaseBackend):
 
         results = connection.send_messages(emails)
 
+        newsletter.sent = True
+        newsletter.save()
+
         return results

@@ -96,6 +96,9 @@ class MailchimpBackend(SimpleBackend):
 
         self.mc.campaigns.send(campaign['id'])
 
+        newsletter.sent = True
+        newsletter.save()
+
     def send_mails(self, newsletter):
         if not newsletter.is_online():
             raise Exception(_("This newsletter is not online. You can't send it."))
