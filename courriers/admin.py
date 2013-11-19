@@ -11,8 +11,8 @@ from .models import Newsletter, NewsletterItem, NewsletterSubscriber, Newsletter
 class NewsletterAdmin(admin.ModelAdmin):
     change_form_template = 'admin/courriers/newsletter/change_form.html'
 
-    list_display = ('name', 'headline', 'lang', 'published_at', 'status', 'newsletter_list',)
-    list_filter = ('lang', 'published_at', 'status',)
+    list_display = ('name', 'headline', 'languages', 'published_at', 'status', 'newsletter_list',)
+    list_filter = ('published_at', 'status',)
 
     def get_urls(self):
         urls = super(NewsletterAdmin, self).get_urls()
@@ -36,21 +36,20 @@ class NewsletterAdmin(admin.ModelAdmin):
         self.message_user(request, _('The newsletter %s has been sent.') % newsletter)
         return HttpResponseRedirect(reverse('admin:courriers_newsletter_change', args=(newsletter.id,)))
 
-
 class NewsletterItemAdmin(admin.ModelAdmin):
     list_display = ('description', 'content_type', 'newsletter',)
 
 
 class NewsletterSubscriberAdmin(admin.ModelAdmin):
-    list_display = ('email', 'user', 'lang', 'is_unsubscribed',)
-    list_filter = ('lang', 'is_unsubscribed',)
+    list_display = ('email', 'user', 'languages', 'is_unsubscribed',)
+    list_filter = ('is_unsubscribed',)
 
 
 class NewsletterListAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'created_at',)
+    list_display = ('name', 'slug', 'languages', 'created_at',)
 
 
-admin.site.register(Newsletter, NewsletterAdmin)
+admin.site.register(NewsletterList, NewsletterListAdmin)
 admin.site.register(NewsletterItem, NewsletterItemAdmin)
 admin.site.register(NewsletterSubscriber, NewsletterSubscriberAdmin)
 admin.site.register(NewsletterList, NewsletterListAdmin)
