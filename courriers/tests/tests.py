@@ -95,6 +95,8 @@ class BaseBackendTests(TestCase):
 
         self.backend.unregister('florent@ulule.com')  # Subscriber does not exist
 
+        self.backend.unregister('adele@ulule.com', self.weekly, 'FR')
+
 
 class SimpleBackendTests(BaseBackendTests):
     def test_registration(self):
