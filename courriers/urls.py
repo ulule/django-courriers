@@ -21,11 +21,11 @@ urlpatterns = patterns(
         NewsletterRawDetailView.as_view(),
         name="newsletter_raw_detail"),
 
-    url(r'^(?P<newsletter_list>(\w+))/unsubscribe/(?P<email>(\w+))$',
+    url(r'^(?P<slug>(\w+))/unsubscribe/$',
         NewsletterListUnsubscribeView.as_view(),
         name="newsletter_list_unsubscribe"),
 
-    url(r'^unsubscribe/(?P<email>(\w+))$',
+    url(r'^unsubscribe/$',
         NewslettersUnsubscribeView.as_view(),
         name="newsletters_unsubscribe"),
 )

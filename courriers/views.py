@@ -2,13 +2,13 @@
 from django.views.generic import View, ListView, DetailView, FormView
 from django.views.generic.edit import FormMixin
 from django.views.generic.detail import SingleObjectMixin
-from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse_lazy, reverse
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 
-from .models import Newsletter, NewsletterSubscriber, NewsletterList
-from .forms import SubscriptionForm, UnsubscribeForm
+from .models import Newsletter, NewsletterList
+from .forms import SubscriptionForm, UnsubscribeForm, UnsubscribeAllForm
 
 
 class NewsletterListDetailView(ListView):
@@ -95,21 +95,21 @@ class NewsletterRawDetailView(DetailView):
 class NewsletterListUnsubscribeView(FormMixin, DetailView):
     template_name = 'courriers/newsletter_unsubscribe.html'
     form_class = UnsubscribeForm
-    model = NewsletterSubscriber
+    model = NewsletterList
     context_object_name = 'newsletter_list'
     success_url = reverse_lazy('newsletter_list')
 
     def get_initial(self):
         initial = super(NewsletterListUnsubscribeView, self).get_initial()
 
-        if self.kwargs.get('email'):
-            initial['email'] = self.kwargs.get('email')
+        if self.request.GET.get('email'):
+            initial['email'] = self.request.GET.get('email')
 
         return initial.copy()
 
     def get_form_kwargs(self):
         return dict(super(NewsletterListUnsubscribeView, self).get_form_kwargs(), **{
-            'newsletter_list': self.object
+            'slug': self.object
         })
 
     def get_context_data(self, **kwargs):
@@ -122,6 +122,7 @@ class NewsletterListUnsubscribeView(FormMixin, DetailView):
         self.object = self.get_object()
         form_class = self.get_form_class()
         form = self.get_form(form_class)
+
         if form.is_valid():
             return self.form_valid(form)
 
@@ -133,38 +134,19 @@ class NewsletterListUnsubscribeView(FormMixin, DetailView):
         return super(NewsletterListUnsubscribeView, self).form_valid(form)
 
 
-class NewslettersUnsubscribeView(DetailView, FormMixin):
+class NewslettersUnsubscribeView(FormView):
     template_name = 'courriers/newsletters_unsubscribe.html'
     form_class = UnsubscribeAllForm
-    model = NewsletterSubscriber
+    model = NewsletterList
     context_object_name = 'newsletters'
     success_url = reverse_lazy('newsletter_list')
 
     def get_initial(self):
         initial = super(NewslettersUnsubscribeView, self).get_initial()
 
-        if self.kwargs.get('email'):
-            initial['email'] = self.kwargs.get('email')
+        if self.request.GET.get('email'):
+            initial['email'] = self.request.GET.get('email')
+        else:
+            raise Http404
 
         return initial.copy()
-
-    def get_context_data(self, **kwargs):
-        context = super(NewslettersUnsubscribeView, self).get_context_data(**kwargs)
-        form_class = self.get_form_class()
-        context['form'] = self.get_form(form_class)
-        return context
-
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-
-        if form.is_valid():
-            return self.form_valid(form)
-
-        return self.form_invalid(form)
-
-    def form_valid(self, form):
-        # Here, we would record the user's interest using the message
-        # passed in form.cleaned_data['message']
-        return super(NewslettersUnsubscribeView, self).form_valid(form)

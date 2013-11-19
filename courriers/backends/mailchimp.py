@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
+import logging
+
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 
@@ -9,7 +11,9 @@ from ..models import NewsletterSubscriber
 from ..settings import (MAILCHIMP_API_KEY,
                         DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME)
 
-from mailchimp import Mailchimp
+from mailchimp import Mailchimp, ListNotSubscribedError
+
+logger = logging.getLogger('courriers')
 
 
 class MailchimpBackend(SimpleBackend):
@@ -37,19 +41,27 @@ class MailchimpBackend(SimpleBackend):
 
             self.mc_subscribe(list_ids[key], email)
 
-    def unregister(self, email, newsletter_list, user=None):
-        super(MailchimpBackend, self).unregister(email, newsletter_list, user=user)
+    def unregister(self, email, newsletter_list=None, user=None):
+        if newsletter_list:
+            super(MailchimpBackend, self).unregister(email, newsletter_list, user=user)
 
-        if self.exists(email):
             list_ids = self.get_list_ids()
 
-            self.mc_unsubscribe(list_ids[newsletter_list.slug], email)
+            ids = [list_ids[newsletter_list.slug]]
 
-            subscriber = NewsletterSubscriber.objects.get(email=email)
+            if newsletter_list.languages:
+                for lang in newsletter_list.languages:
+                    slug = u'%s_%s' % (newsletter_list.slug, lang)
+                    ids.append(list_ids[slug])
 
-            if subscriber.lang:
-                key = "%s_%s" % (newsletter_list.slug, subscriber.lang)
-                self.mc_unsubscribe(list_ids[key], email)
+            for lid in ids:
+                try:
+                    self.mc_unsubscribe(lid, email)
+                except ListNotSubscribedError as e:
+                    logger.error(e)
+        else:
+            for subscriber in self.all(email, user=user):
+                self.unregister(email, subscriber.newsletter_list, user=user)
 
     def mc_subscribe(self, list_id, email):
         self.mc.lists.subscribe(list_id, {'email': email}, merge_vars=None,
@@ -60,19 +72,7 @@ class MailchimpBackend(SimpleBackend):
         self.mc.lists.unsubscribe(list_id, {'email': email}, delete_member=False,
                                   send_goodbye=False, send_notify=False)
 
-    def send_campaign(self, newsletter):
-
-        lists = self.get_list_ids()
-
-        if newsletter.lang:
-            key = "%s_%s" % (newsletter.newsletter_list.slug, newsletter.lang)
-        else:
-            key = newsletter.newsletter_list.slug
-
-        if not key in lists:
-            raise Exception(_('List %s does not exist') % key)
-
-        list_id = lists[key]
+    def send_campaign(self, newsletter, list_id):
 
         if not DEFAULT_FROM_EMAIL:
             raise Exception(_("You have to specify a DEFAULT_FROM_EMAIL in settings."))
@@ -87,7 +87,7 @@ class MailchimpBackend(SimpleBackend):
         }
 
         content = {
-            'html': render_to_string('courriers/newsletterraw_detail.html', {
+            'html': render_to_string('courriers/newsletter_raw_detail.html', {
                 'object': newsletter,
             })
         }
@@ -97,10 +97,28 @@ class MailchimpBackend(SimpleBackend):
         self.mc.campaigns.send(campaign['id'])
 
         newsletter.sent = True
-        newsletter.save()
+        newsletter.save(update_fields=['sent'])
 
     def send_mails(self, newsletter):
         if not newsletter.is_online():
             raise Exception(_("This newsletter is not online. You can't send it."))
 
-        self.send_campaign(newsletter)
+        list_ids = self.get_list_ids()
+        ids = []
+
+        if newsletter.languages:
+            for lang in newsletter.languages:
+                slug = u'%s_%s' % (newsletter.newsletter_list.slug, lang)
+                if slug in list_ids:
+                    ids.append(list_ids[slug])
+        else:
+            ids.append(list_ids[newsletter.newsletter_list.slug])
+
+            if newsletter.newsletter_list.languages:
+                for lang in newsletter.newsletter_list.languages:
+                    slug = u'%s_%s' % (newsletter.newsletter_list.slug, lang)
+                    if slug in list_ids:
+                        ids.append(list_ids[slug])
+
+        for list_id in ids:
+            self.send_campaign(newsletter, list_id)

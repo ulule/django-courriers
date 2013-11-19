@@ -1,0 +1,18 @@
+<form action="" method="post">{% csrf_token %}
+    {{ form.non_field_errors }}
+
+    {% if form.subject.errors %}
+        <ol>
+            {% for error in form.email.errors %}
+                <li><strong>{{ error|escape }}</strong></li>
+            {% endfor %}
+        </ol>
+    {% endif %}
+
+    <div class="fieldWrapper">
+        {{ form.email.errors }}
+        <label for="id_receiver">Your e-mail :</label>
+        {{ form.email }}
+    </div>
+    <p><input type="submit" value="Submit"/></p>
+</form>

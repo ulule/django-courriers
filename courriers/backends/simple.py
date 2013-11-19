@@ -33,11 +33,26 @@ class SimpleBackend(BaseBackend):
             if self.exists(email, newsletter_list):
                 self.model.objects.get(email=email, newsletter_list=newsletter_list).unsubscribe()
 
-    def exists(self, email, newsletter_list, user=None):
-        return self.model.objects.filter(email=email, newsletter_list=newsletter_list).exists()
+    def exists(self, email, newsletter_list=None, user=None):
+        qs = self.all(email, user=user)
+
+        if newsletter_list:
+            qs = qs.filter(newsletter_list=newsletter_list)
+
+        return qs.exists()
+
+    def all(self, email, user=None):
+        qs = self.model.objects.filter(email=email).select_related('newsletter_list')
+
+        if user:
+            qs = qs.filter(user=user)
+
+        return qs
 
     def subscribed(self, email, newsletter_list, user=None):
-        return self.model.objects.filter(email=email, newsletter_list=newsletter_list, is_unsubscribed=False).exists()
+        return self.model.objects.filter(email=email,
+                                         newsletter_list=newsletter_list,
+                                         is_unsubscribed=False).exists()
 
     def send_mails(self, newsletter, fail_silently=False):
         qs = self.model.objects.filter(newsletter_list=newsletter.newsletter_list).subscribed()
@@ -66,6 +81,6 @@ class SimpleBackend(BaseBackend):
         results = connection.send_messages(emails)
 
         newsletter.sent = True
-        newsletter.save()
+        newsletter.save(update_fields=['sent'])
 
         return results

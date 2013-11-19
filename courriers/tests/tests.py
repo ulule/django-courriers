@@ -22,8 +22,8 @@ class BaseBackendTests(TestCase):
         self.backend_klass = get_backend()
         self.backend = self.backend_klass()
 
-        self.monthly = NewsletterList.objects.create(name="Monthly", slug="monthly")
-        self.weekly = NewsletterList.objects.create(name="Weekly", slug="weekly")
+        self.monthly = NewsletterList.objects.create(name="Monthly", slug="monthly", languages=['FR'])
+        self.weekly = NewsletterList.objects.create(name="Weekly", slug="weekly", languages=['FR'])
 
         n1 = Newsletter.objects.create(name="3000 projets finances",
                                        published_at=datetime.now() - datetime.timedelta(hours=2),
@@ -45,9 +45,14 @@ class BaseBackendTests(TestCase):
         self.newsletters = [n1, n2, n3]
 
     def test_registration(self):
+
+        self.backend.unregister('adele@ulule.com', self.monthly, 'FR')
+        self.backend.unregister('adele@ulule.com', self.weekly, 'FR')
+
         # Subscribe to all
         self.backend.register('adele@ulule.com', self.monthly, 'FR')
         self.backend.register('adele@ulule.com', self.weekly, 'FR')
+
 
         subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
                                                          newsletter_list=self.monthly,
@@ -60,9 +65,7 @@ class BaseBackendTests(TestCase):
         self.assertEqual(subscriber2.count(), 1)
 
         # Unsubscribe from all
-        subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com')
-        for s in subscriber:
-            self.backend.unregister(s.email)
+        self.backend.unregister('adele@ulule.com')
 
         subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
                                                          is_unsubscribed=True)
@@ -122,7 +125,7 @@ class SimpleBackendTests(BaseBackendTests):
 class NewslettersViewsTests(TestCase):
     def setUp(self):
         self.monthly = NewsletterList.objects.create(name="Monthly", slug="monthly")
-        Newsletter.objects.create(name='Newsletter1', newsletter_list=self.monthly, published_at=datetime.now())
+        self.n1 = Newsletter.objects.create(name='Newsletter1', newsletter_list=self.monthly, published_at=datetime.now())
 
     def test_newsletter_list(self):
         response = self.client.get(self.monthly.get_absolute_url())
@@ -131,42 +134,46 @@ class NewslettersViewsTests(TestCase):
         self.assertTemplateUsed(response, 'courriers/newsletter_list.html')
 
     def test_newsletter_detail(self):
-        response = self.client.get(reverse('newsletter_detail', kwargs={'pk': 1}))
+        response = self.client.get(self.n1.get_absolute_url())
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'courriers/newsletter_detail.html')
 
         self.assertTrue(isinstance(response.context['form'], SubscriptionForm))
 
-    """def test_newsletter_detail_post(self):
-
-        response = self.client.get(reverse('newsletter_list_unsubscribe', kwargs={
-            'newsletter_list': 'monthly',
-            'email': 'adeleulule'
-        }))
+    def test_newsletter_detail_post(self):
+        valid_data = {'newsletter_list': self.monthly}
+        response = self.client.post(self.n1.get_absolute_url(), data=valid_data)
         self.assertEqual(response.status_code, 200)
 
+    def test_newsletter_list_unsubscribe(self):
+        url = reverse('newsletter_list_unsubscribe', kwargs={'slug': 'monthly'}) + '?email=adele@ulule.com'
 
-        valid_data = {'newsletter_list': 'monthly',
-                      'email': 'adeleulule'}
+        # GET
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
 
-        url = reverse('newsletter_list_unsubscribe', kwargs={
-            'newsletter_list': 'monthly',
-            'email': 'adeleulule'
-        }, data=valid_data)
-        response = self.client.post(url)
+        # POST
+        # With email param
+        valid_data = {'slug': 'monthly'}
+        response = self.client.post(url, data=valid_data)
+        self.assertEqual(response.context['form'].initial['email'], 'adele@ulule.com')
+        self.assertEqual(response.status_code, 200)
 
-        # Test that the initial data of the form is set.
-        #self.assertEqual(response.context['form'].initial['email'], ['adeleulule'])
-
-        self.assertEqual(response.status_code, 200)"""
+        # Without email param
+        valid_data = {'slug': 'monthly',
+                      'email': 'adele@ulule.com'}
+        response = self.client.post(reverse('newsletter_list_unsubscribe', kwargs={'slug': 'monthly'}), data=valid_data)
+        self.assertEqual(response.status_code, 200)
 
     def test_newsletters_unsubscribe(self):
-        valid_data = {'email': 'adeleulule'}
+        response = self.client.post(reverse('newsletters_unsubscribe'))
+        self.assertEqual(response.status_code, 404)
 
-        url = reverse('newsletter_list_unsubscribe', kwargs=valid_data, data=valid_data)
-        response = self.client.post(url)
-
+        response = self.client.post(reverse('newsletters_unsubscribe') + '?email=adele@ulule.com')
         self.assertEqual(response.status_code, 200)
+
+        # Test that the initial data of the form is set.
+        self.assertEqual(response.context['form'].initial['email'], 'adele@ulule.com')
 
     def test_newsletterraw_detail(self):
         response = self.client.get(reverse('newsletter_raw_detail', kwargs={'pk': 1}))
@@ -247,7 +254,7 @@ class UnsubscribeFormTest(TestCase):
         # Unsubscribe from monthly
         valid_data = {'email': 'adele@ulule.com', 'from_all': False}
 
-        form = UnsubscribeForm(data=valid_data, initial={'email': 'adele@ulule.com'}, **{'newsletter_list': self.monthly})
+        form = UnsubscribeForm(data=valid_data, initial={'email': 'adele@ulule.com'}, **{'slug': self.monthly})
 
         self.assertTrue(form.is_valid())
 
@@ -264,7 +271,7 @@ class UnsubscribeFormTest(TestCase):
         # Unsubscribe from all
         valid_data = {'email': 'adele@ulule.com', 'from_all': True}
 
-        form = UnsubscribeForm(data=valid_data, newsletter_list=self.weekly)
+        form = UnsubscribeForm(data=valid_data, slug=self.weekly)
 
         self.assertTrue(form.is_valid())
 
@@ -278,7 +285,7 @@ class UnsubscribeFormTest(TestCase):
         self.assertEqual(old_subscriber.get().is_unsubscribed, True)
         self.assertEqual(old_subscriber2.get().is_unsubscribed, True)
 
-        form2 = UnsubscribeForm(data=valid_data, newsletter_list=self.weekly)
+        form2 = UnsubscribeForm(data=valid_data, slug=self.weekly)
 
         is_valid = form2.is_valid()
 

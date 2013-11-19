@@ -39,14 +39,13 @@ class UnsubscribeForm(forms.Form):
     from_all = forms.BooleanField(required=False)
 
     def __init__(self, *args, **kwargs):
-        self.newsletter_list = kwargs.pop('newsletter_list', None)
+        self.newsletter_list = kwargs.pop('slug', None)
 
         backend_klass = get_backend()
 
         self.backend = backend_klass()
 
         super(UnsubscribeForm, self).__init__(*args, **kwargs)
-
 
     def clean_email(self):
         email = self.cleaned_data['email']
@@ -63,3 +62,22 @@ class UnsubscribeForm(forms.Form):
             self.backend.unregister(self.cleaned_data['email'])
         else:
             self.backend.unregister(self.cleaned_data['email'], self.newsletter_list)
+
+
+class UnsubscribeAllForm(forms.Form):
+    email = forms.EmailField(max_length=250, required=True)
+
+    def __init__(self, *args, **kwargs):
+        backend_klass = get_backend()
+
+        self.backend = backend_klass()
+
+        super(UnsubscribeAllForm, self).__init__(*args, **kwargs)
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+
+        return email
+
+    def save(self):
+        self.backend.unregister(self.cleaned_data['email'])
