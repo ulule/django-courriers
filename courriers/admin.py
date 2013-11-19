@@ -50,7 +50,7 @@ class NewsletterListAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'languages', 'created_at',)
 
 
-admin.site.register(NewsletterList, NewsletterListAdmin)
+admin.site.register(Newsletter, Newsletter)
 admin.site.register(NewsletterItem, NewsletterItemAdmin)
 admin.site.register(NewsletterSubscriber, NewsletterSubscriberAdmin)
 admin.site.register(NewsletterList, NewsletterListAdmin)
