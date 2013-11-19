@@ -36,12 +36,13 @@ class NewsletterAdmin(admin.ModelAdmin):
         self.message_user(request, _('The newsletter %s has been sent.') % newsletter)
         return HttpResponseRedirect(reverse('admin:courriers_newsletter_change', args=(newsletter.id,)))
 
+
 class NewsletterItemAdmin(admin.ModelAdmin):
     list_display = ('description', 'content_type', 'newsletter',)
 
 
 class NewsletterSubscriberAdmin(admin.ModelAdmin):
-    list_display = ('email', 'user', 'languages', 'is_unsubscribed',)
+    list_display = ('email', 'user', 'lang', 'is_unsubscribed',)
     list_filter = ('is_unsubscribed',)
 
 
