@@ -101,9 +101,10 @@ class NewsletterListUnsubscribeView(FormMixin, DetailView):
 
     def get_initial(self):
         initial = super(NewsletterListUnsubscribeView, self).get_initial()
+        email = self.request.GET.get('email', None)
 
-        if self.request.GET.get('email'):
-            initial['email'] = self.request.GET.get('email')
+        if email:
+            initial['email'] = email
 
         return initial.copy()
 
@@ -143,10 +144,9 @@ class NewslettersUnsubscribeView(FormView):
 
     def get_initial(self):
         initial = super(NewslettersUnsubscribeView, self).get_initial()
+        email = self.request.GET.get('email', None)
 
-        if self.request.GET.get('email'):
-            initial['email'] = self.request.GET.get('email')
-        else:
-            raise Http404
+        if email:
+            initial['email'] = email
 
         return initial.copy()

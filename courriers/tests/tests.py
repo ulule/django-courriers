@@ -164,9 +164,6 @@ class NewslettersViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_newsletters_unsubscribe(self):
-        response = self.client.post(reverse('newsletters_unsubscribe'))
-        self.assertEqual(response.status_code, 404)
-
         response = self.client.post(reverse('newsletters_unsubscribe') + '?email=adele@ulule.com')
         self.assertEqual(response.status_code, 200)
 
