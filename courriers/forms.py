@@ -39,7 +39,7 @@ class UnsubscribeForm(forms.Form):
     from_all = forms.BooleanField(required=False)
 
     def __init__(self, *args, **kwargs):
-        self.newsletter_list = kwargs.pop('slug', None)
+        self.newsletter_list = kwargs.pop('newsletter_list', None)
 
         backend_klass = get_backend()
 

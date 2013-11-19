@@ -109,7 +109,7 @@ class NewsletterListUnsubscribeView(FormMixin, DetailView):
 
     def get_form_kwargs(self):
         return dict(super(NewsletterListUnsubscribeView, self).get_form_kwargs(), **{
-            'slug': self.object
+            'newsletter_list': self.object
         })
 
     def get_context_data(self, **kwargs):

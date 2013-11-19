@@ -254,7 +254,7 @@ class UnsubscribeFormTest(TestCase):
         # Unsubscribe from monthly
         valid_data = {'email': 'adele@ulule.com', 'from_all': False}
 
-        form = UnsubscribeForm(data=valid_data, initial={'email': 'adele@ulule.com'}, **{'slug': self.monthly})
+        form = UnsubscribeForm(data=valid_data, initial={'email': 'adele@ulule.com'}, **{'newsletter_list': self.monthly})
 
         self.assertTrue(form.is_valid())
 
@@ -271,7 +271,7 @@ class UnsubscribeFormTest(TestCase):
         # Unsubscribe from all
         valid_data = {'email': 'adele@ulule.com', 'from_all': True}
 
-        form = UnsubscribeForm(data=valid_data, slug=self.weekly)
+        form = UnsubscribeForm(data=valid_data, newsletter_list=self.weekly)
 
         self.assertTrue(form.is_valid())
 
@@ -285,7 +285,7 @@ class UnsubscribeFormTest(TestCase):
         self.assertEqual(old_subscriber.get().is_unsubscribed, True)
         self.assertEqual(old_subscriber2.get().is_unsubscribed, True)
 
-        form2 = UnsubscribeForm(data=valid_data, slug=self.weekly)
+        form2 = UnsubscribeForm(data=valid_data, newsletter_list=self.weekly)
 
         is_valid = form2.is_valid()
 
