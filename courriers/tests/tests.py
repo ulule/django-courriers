@@ -45,10 +45,6 @@ class BaseBackendTests(TestCase):
         self.newsletters = [n1, n2, n3]
 
     def test_registration(self):
-
-        self.backend.unregister('adele@ulule.com', self.monthly, 'FR')
-        self.backend.unregister('adele@ulule.com', self.weekly, 'FR')
-
         # Subscribe to all
         self.backend.register('adele@ulule.com', self.monthly, 'FR')
         self.backend.register('adele@ulule.com', self.weekly, 'FR')
@@ -247,6 +243,8 @@ class UnsubscribeFormTest(TestCase):
         self.daily = NewsletterList.objects.create(name="Daily", slug="daily")
 
     def test_unsubscription(self):
+        self.backend.unregister('adele@ulule.com', self.monthly, 'FR')
+
         self.backend.register('adele@ulule.com', self.monthly, 'FR')
         self.backend.register('adele@ulule.com', self.weekly, 'FR')
         self.backend.register('adele@ulule.com', self.daily, 'FR')
@@ -295,6 +293,10 @@ class UnsubscribeFormTest(TestCase):
 if hasattr(settings, 'COURRIERS_MAILCHIMP_API_KEY'):
     @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')
     class SubscribeMailchimpFormTest(SubscribeFormTest):
+        pass
+
+    @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')
+    class UnsubscribeMailchimpFormTest(UnsubscribeFormTest):
         pass
 
     @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')
