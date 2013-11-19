@@ -9,7 +9,7 @@ from .views import (NewsletterListDetailView,
 
 urlpatterns = patterns(
     '',
-    url(r'^(?P<slug>(\w+))$',
+    url(r'^(?P<slug>(\w+))/$',
         NewsletterListDetailView.as_view(),
         name="newsletter_list"),
 

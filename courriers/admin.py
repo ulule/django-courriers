@@ -11,7 +11,7 @@ from .models import Newsletter, NewsletterItem, NewsletterSubscriber, Newsletter
 class NewsletterAdmin(admin.ModelAdmin):
     change_form_template = 'admin/courriers/newsletter/change_form.html'
 
-    list_display = ('name', 'headline', 'languages', 'published_at', 'status', 'newsletter_list',)
+    list_display = ('name', 'headline', 'published_at', 'status', 'newsletter_list',)
     list_filter = ('published_at', 'status',)
 
     def get_urls(self):
@@ -38,7 +38,7 @@ class NewsletterAdmin(admin.ModelAdmin):
 
 
 class NewsletterItemAdmin(admin.ModelAdmin):
-    list_display = ('description', 'content_type', 'newsletter',)
+    list_display = ('content_type', 'description', 'newsletter',)
 
 
 class NewsletterSubscriberAdmin(admin.ModelAdmin):
@@ -47,7 +47,7 @@ class NewsletterSubscriberAdmin(admin.ModelAdmin):
 
 
 class NewsletterListAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'languages', 'created_at',)
+    list_display = ('name', 'slug', 'created_at',)
 
 
 admin.site.register(Newsletter, NewsletterAdmin)

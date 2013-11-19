@@ -2,8 +2,8 @@
 from django.views.generic import View, ListView, DetailView, FormView
 from django.views.generic.edit import FormMixin
 from django.views.generic.detail import SingleObjectMixin
-from django.core.urlresolvers import reverse_lazy, reverse
-from django.http import HttpResponseRedirect, Http404
+from django.core.urlresolvers import reverse_lazy
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 
