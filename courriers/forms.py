@@ -7,11 +7,10 @@ from .models import NewsletterSubscriber
 
 
 class SubscriptionForm(forms.Form):
-    widgets = {
-        'placeholder': 'Your email',
+    receiver = forms.EmailField(max_length=250, required=True, widget=forms.TextInput(attrs={
+        'placeholder': _(u"Your email"),
         'size': '30'
-    }
-    receiver = forms.EmailField(max_length=250, required=True, widget=forms.TextInput(attrs=widgets))
+    }))
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
