@@ -2,7 +2,7 @@
 from django.views.generic import View, ListView, DetailView, FormView, TemplateView
 from django.views.generic.edit import FormMixin
 from django.views.generic.detail import SingleObjectMixin
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
@@ -140,6 +140,9 @@ class NewsletterListUnsubscribeView(FormMixin, DetailView):
 
         return super(NewsletterListUnsubscribeView, self).form_valid(form)
 
+    def get_success_url(self):
+        return reverse('unsubscribe_list_thanks', kwargs={'slug': self.object.slug})
+
 
 class NewslettersUnsubscribeView(FormView):
     template_name = 'courriers/newsletters_unsubscribe.html'
@@ -160,8 +163,19 @@ class NewslettersUnsubscribeView(FormView):
         return super(NewslettersUnsubscribeView, self).form_valid(form)
 
 
-class UnsubscribeThanksView(TemplateView):
+class UnsubscribeListThanksView(TemplateView):
+    template_name = "courriers/unsubscribe_list_thanks.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(UnsubscribeListThanksView, self).get_context_data(**kwargs)
+        newsletter_list_slug = kwargs.pop('slug')
+        newsletter_list = get_object_or_404(NewsletterList, slug=newsletter_list_slug)
+        context['newsletter_list_name'] = newsletter_list.name
+        return context
+
+
+class UnsubscribeAllThanksView(TemplateView):
     template_name = "courriers/unsubscribe_thanks.html"
 
     def get_context_data(self, **kwargs):
-        return super(UnsubscribeThanksView, self).get_context_data(**kwargs)
+        return super(UnsubscribeAllThanksView, self).get_context_data(**kwargs)

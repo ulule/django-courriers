@@ -5,7 +5,8 @@ from .views import (NewsletterListDetailView,
                     NewsletterRawDetailView,
                     NewsletterListUnsubscribeView,
                     NewslettersUnsubscribeView,
-                    UnsubscribeThanksView)
+                    UnsubscribeListThanksView,
+                    UnsubscribeAllThanksView)
 
 
 urlpatterns = patterns(
@@ -30,7 +31,11 @@ urlpatterns = patterns(
         NewslettersUnsubscribeView.as_view(),
         name="newsletters_unsubscribe"),
 
-    url(r'^unsubscribe/thanks/$',
-        UnsubscribeThanksView.as_view(),
-        name="unsubscribe_thanks"),
+    url(r'^unsubscribe/(?P<slug>(\w+))/thanks/$',
+        UnsubscribeListThanksView.as_view(),
+        name="unsubscribe_list_thanks"),
+
+    url(r'^unsubscribe/all/thanks/$',
+        UnsubscribeAllThanksView.as_view(),
+        name="unsubscribe_all_thanks"),
 )
