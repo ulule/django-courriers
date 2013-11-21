@@ -15,7 +15,7 @@ urlpatterns = patterns(
         NewsletterListView.as_view(),
         name="newsletter_list"),
 
-    url(r'^(?P<pk>(\d+))/detail/$',
+    url(r'^(?P<pk>(\d+))/detail(?:/(?P<action>(\w+)))?/$',
         NewsletterDetailView.as_view(),
         name="newsletter_detail"),
 

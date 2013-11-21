@@ -46,6 +46,9 @@ class NewsletterDisplayView(DetailView):
         context['form'] = SubscriptionForm(user=self.request.user,
                                            newsletter_list=self.model.newsletter_list)
 
+        if self.kwargs.get('action'):
+            context['action'] = self.kwargs.get('action')
+
         return context
 
 

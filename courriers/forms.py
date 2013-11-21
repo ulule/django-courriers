@@ -38,7 +38,10 @@ class SubscriptionForm(forms.Form):
 
 
 class UnsubscribeForm(forms.Form):
-    email = forms.EmailField(max_length=250, required=True)
+    email = forms.EmailField(max_length=250, required=True, widget=forms.TextInput(attrs={
+        'placeholder': _(u"Your email"),
+        'size': '30'
+    }))
     from_all = forms.BooleanField(required=False)
 
     def __init__(self, *args, **kwargs):
