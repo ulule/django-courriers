@@ -21,6 +21,8 @@ class MailchimpBackend(SimpleBackend):
     mailchimp_class = Mailchimp
 
     def __init__(self):
+        if not MAILCHIMP_API_KEY:
+            raise Exception(_('Please specify your MAILCHIMP API key in Django settings'))
         self.mc = self.mailchimp_class(MAILCHIMP_API_KEY, True)
 
     def get_list_ids(self):
@@ -75,9 +77,9 @@ class MailchimpBackend(SimpleBackend):
     def send_campaign(self, newsletter, list_id):
 
         if not DEFAULT_FROM_EMAIL:
-            raise Exception(_("You have to specify a DEFAULT_FROM_EMAIL in settings."))
+            raise Exception(_("You have to specify a DEFAULT_FROM_EMAIL in Django settings."))
         if not DEFAULT_FROM_NAME:
-            raise Exception(_("You have to specify a DEFAULT_FROM_NAME in settings."))
+            raise Exception(_("You have to specify a DEFAULT_FROM_NAME in Django settings."))
 
         options = {
             'list_id': list_id,
