@@ -11,7 +11,7 @@ from .views import (NewsletterListDetailView,
 
 urlpatterns = patterns(
     '',
-    url(r'^(?P<slug>(\w+))/$',
+    url(r'^(?P<slug>(\w+))/(?:/(?P<lang>(\w+)))?/$',
         NewsletterListDetailView.as_view(),
         name="newsletter_list"),
 
