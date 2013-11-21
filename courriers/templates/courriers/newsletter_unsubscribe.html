@@ -3,16 +3,16 @@
 
     {% if form.subject.errors %}
         <ol>
-            {% for error in form.receiver.errors %}
+            {% for error in form.email.errors %}
                 <li><strong>{{ error|escape }}</strong></li>
             {% endfor %}
         </ol>
     {% endif %}
 
     <div class="fieldWrapper">
-        {{ form.receiver.errors }}
+        {{ form.email.errors }}
         <label for="id_receiver">Your e-mail :</label>
-        {{ form.receiver }}
+        {{ form.email }}
     </div>
     <p><input type="submit" value="Submit"/></p>
 </form>

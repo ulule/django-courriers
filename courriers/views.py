@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.views.generic import View, ListView, DetailView, FormView
+from django.views.generic import View, ListView, DetailView, FormView, TemplateView
 from django.views.generic.edit import FormMixin
 from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse_lazy
@@ -15,6 +15,7 @@ class NewsletterListDetailView(ListView):
     model = Newsletter
     context_object_name = 'newsletters'
     template_name = 'courriers/newsletter_list.html'
+    paginate_by = 3
 
     @cached_property
     def newsletter_list(self):
@@ -22,6 +23,11 @@ class NewsletterListDetailView(ListView):
 
     def get_queryset(self):
         return self.newsletter_list.newsletters.status_online().order_by('published_at')
+
+    def get_context_data(self, **kwargs):
+        context = super(NewsletterListDetailView, self).get_context_data(**kwargs)
+        context['slug'] = self.newsletter_list.slug
+        return context
 
 
 class NewsletterDisplayView(DetailView):
@@ -138,9 +144,7 @@ class NewsletterListUnsubscribeView(FormMixin, DetailView):
 class NewslettersUnsubscribeView(FormView):
     template_name = 'courriers/newsletters_unsubscribe.html'
     form_class = UnsubscribeAllForm
-    model = NewsletterList
-    context_object_name = 'newsletters'
-    success_url = reverse_lazy('newsletter_list')
+    success_url = reverse_lazy('unsubscribe_thanks')
 
     def get_initial(self):
         initial = super(NewslettersUnsubscribeView, self).get_initial()
@@ -150,3 +154,14 @@ class NewslettersUnsubscribeView(FormView):
             initial['email'] = email
 
         return initial.copy()
+
+    def form_valid(self, form):
+        form.save()
+        return super(NewslettersUnsubscribeView, self).form_valid(form)
+
+
+class UnsubscribeThanksView(TemplateView):
+    template_name = "courriers/unsubscribe_thanks.html"
+
+    def get_context_data(self, **kwargs):
+        return super(UnsubscribeThanksView, self).get_context_data(**kwargs)

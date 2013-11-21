@@ -79,7 +79,6 @@ class UnsubscribeAllForm(forms.Form):
 
     def clean_email(self):
         email = self.cleaned_data['email']
-
         return email
 
     def save(self):
