@@ -11,7 +11,7 @@ from .models import Newsletter, NewsletterList
 from .forms import SubscriptionForm, UnsubscribeForm, UnsubscribeAllForm
 
 
-class NewsletterListDetailView(ListView):
+class NewsletterListView(ListView):
     model = Newsletter
     context_object_name = 'newsletters'
     template_name = 'courriers/newsletter_list.html'
@@ -30,7 +30,7 @@ class NewsletterListDetailView(ListView):
         return self.newsletter_list.newsletters.status_online().order_by('published_at')
 
     def get_context_data(self, **kwargs):
-        context = super(NewsletterListDetailView, self).get_context_data(**kwargs)
+        context = super(NewsletterListView, self).get_context_data(**kwargs)
         context['slug'] = self.newsletter_list.slug
         return context
 

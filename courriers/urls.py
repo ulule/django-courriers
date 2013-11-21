@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 
-from .views import (NewsletterListDetailView,
+from .views import (NewsletterListView,
                     NewsletterDetailView,
                     NewsletterRawDetailView,
                     NewsletterListUnsubscribeView,
@@ -12,7 +12,7 @@ from .views import (NewsletterListDetailView,
 urlpatterns = patterns(
     '',
     url(r'^(?P<slug>(\w+))/(?:/(?P<lang>(\w+)))?/$',
-        NewsletterListDetailView.as_view(),
+        NewsletterListView.as_view(),
         name="newsletter_list"),
 
     url(r'^(?P<pk>(\d+))/detail/$',
