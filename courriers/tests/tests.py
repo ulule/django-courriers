@@ -122,7 +122,11 @@ class SimpleBackendTests(BaseBackendTests):
 class NewslettersViewsTests(TestCase):
     def setUp(self):
         self.monthly = NewsletterList.objects.create(name="Monthly", slug="monthly")
-        self.n1 = Newsletter.objects.create(name='Newsletter1', newsletter_list=self.monthly, published_at=datetime.now())
+        self.n1 = Newsletter.objects.create(name='Newsletter1',
+                                            newsletter_list=self.monthly,
+                                            published_at=datetime.now())
+
+        self.user = User.objects.create_user('adele', 'adele@ulule.com', '$ecret')
 
     def test_newsletter_list(self):
         response = self.client.get(self.monthly.get_absolute_url())
@@ -130,43 +134,69 @@ class NewslettersViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'courriers/newsletter_list.html')
 
-    def test_newsletter_detail(self):
+    def test_newsletter_detail_view(self):
         response = self.client.get(self.n1.get_absolute_url())
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'courriers/newsletter_detail.html')
 
         self.assertTrue(isinstance(response.context['form'], SubscriptionForm))
 
-    def test_newsletter_detail_post(self):
+    def test_newsletter_detail_complete(self):
         valid_data = {'newsletter_list': self.monthly}
+
         response = self.client.post(self.n1.get_absolute_url(), data=valid_data)
+
         self.assertEqual(response.status_code, 200)
 
-    def test_newsletter_list_unsubscribe(self):
-        url = reverse('newsletter_list_unsubscribe', kwargs={'slug': 'monthly'}) + '?email=adele@ulule.com'
+    def test_newsletter_list_unsubscribe_view(self):
+        url = reverse('newsletter_list_unsubscribe',
+                      kwargs={'slug': 'monthly'}) + '?email=adele@ulule.com'
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'courriers/newsletter_list_unsubscribe.html')
+
+        self.assertTrue(isinstance(response.context['form'], UnsubscribeForm))
+
+    def test_newsletter_list_unsubscribe_complete(self):
+        url = reverse('newsletter_list_unsubscribe',
+                      kwargs={'slug': 'monthly'}) + '?email=adele@ulule.com'
 
         # GET
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-        # POST
-        # With email param
-        valid_data = {'slug': 'monthly'}
-        response = self.client.post(url, data=valid_data)
+        response = self.client.post(url, data={
+            'email': 'adele@ulule.com'
+        })
+        self.assertIn('email', response.context['form'].errors)
         self.assertEqual(response.context['form'].initial['email'], 'adele@ulule.com')
         self.assertEqual(response.status_code, 200)
 
         # Without email param
-        valid_data = {'slug': 'monthly',
-                      'email': 'adele@ulule.com'}
-        response = self.client.post(reverse('newsletter_list_unsubscribe', kwargs={'slug': 'monthly'}), data=valid_data)
-        self.assertEqual(response.status_code, 200)
+        valid_data = {'email': 'adele@ulule.com'}
+
+        NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='adele@ulule.com')
+
+        response = self.client.post(reverse('newsletter_list_unsubscribe',
+                                            kwargs={'slug': 'monthly'}),
+                                    data=valid_data)
+
+        self.assertRedirects(
+            response,
+            expected_url=reverse('newsletter_list_unsubscribe_done', args=[self.monthly.slug]),
+            status_code=302,
+            target_status_code=200
+        )
+
+        subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com')
+
+        self.assertFalse(subscriber.subscribed)
 
     def test_newsletter_list_all_unsubscribe(self):
         response = self.client.post(reverse('newsletter_list_unsubscribe') + '?email=adele@ulule.com')
         self.assertEqual(response.status_code, 200)
 
-        # Test that the initial data of the form is set.
         self.assertEqual(response.context['form'].initial['email'], 'adele@ulule.com')
 
     def test_newsletterraw_detail(self):

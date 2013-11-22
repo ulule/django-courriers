@@ -173,6 +173,10 @@ class NewsletterSubscriber(models.Model):
     def __str__(self):
         return '%s for %s' % (self.email, self.newsletter_list)
 
+    @property
+    def subscribed(self):
+        return self.is_unsubscribed is False
+
     def subscribe(self, commit=True):
         self.is_unsubscribed = False
 

@@ -175,10 +175,10 @@ class NewsletterListUnsubscribeView(FormMixin, TemplateView):
 
     def get_success_url(self):
         if self.object:
-            return reverse('unsubscribe_list_done',
+            return reverse('newsletter_list_unsubscribe_done',
                            kwargs={'slug': self.object.slug})
 
-        return reverse('unsubscribe_list_done')
+        return reverse('newsletter_list_unsubscribe_done')
 
 
 class NewsletterListUnsubscribeDoneView(TemplateView):
