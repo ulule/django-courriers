@@ -15,7 +15,7 @@ class NewsletterListView(ListView):
     model = Newsletter
     context_object_name = 'newsletters'
     template_name = 'courriers/newsletter_list.html'
-    paginate_by = 3
+    paginate_by = 9
 
     @cached_property
     def newsletter_list(self):
