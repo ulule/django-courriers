@@ -80,9 +80,5 @@ class UnsubscribeAllForm(forms.Form):
 
         super(UnsubscribeAllForm, self).__init__(*args, **kwargs)
 
-    def clean_email(self):
-        email = self.cleaned_data['email']
-        return email
-
     def save(self):
         self.backend.unregister(self.cleaned_data['email'])

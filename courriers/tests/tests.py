@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone as datetime
 from django.core import mail
 
-from courriers.forms import SubscriptionForm, UnsubscribeForm
+from courriers.forms import SubscriptionForm, UnsubscribeForm, UnsubscribeAllForm
 from courriers.models import Newsletter, NewsletterList, NewsletterSubscriber
 
 from django.conf import settings
@@ -193,11 +193,37 @@ class NewslettersViewsTests(TestCase):
 
         self.assertFalse(subscriber.subscribed)
 
-    def test_newsletter_list_all_unsubscribe(self):
-        response = self.client.post(reverse('newsletter_list_unsubscribe') + '?email=adele@ulule.com')
+    def test_newsletter_list_all_unsubscribe_view(self):
+        url = reverse('newsletter_list_unsubscribe') + '?email=adele@ulule.com'
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'courriers/newsletter_list_unsubscribe.html')
+
+        self.assertTrue(isinstance(response.context['form'], UnsubscribeAllForm))
+
+    def test_newsletter_list_all_unsubscribe_complete(self):
+        url = reverse('newsletter_list_unsubscribe') + '?email=adele@ulule.com'
+
+        NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='adele@ulule.com')
+
+        # GET
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(response.context['form'].initial['email'], 'adele@ulule.com')
+        response = self.client.post(url, data={
+            'email': 'adele@ulule.com'
+        })
+
+        self.assertRedirects(
+            response,
+            expected_url=reverse('newsletter_list_unsubscribe_done'),
+            status_code=302,
+            target_status_code=200
+        )
+
+        subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com')
+        self.assertFalse(subscriber.subscribed)
 
     def test_newsletterraw_detail(self):
         response = self.client.get(reverse('newsletter_raw_detail', kwargs={'pk': 1}))
