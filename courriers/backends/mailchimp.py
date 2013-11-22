@@ -89,15 +89,15 @@ class MailchimpBackend(SimpleBackend):
             'from_name': DEFAULT_FROM_NAME
         }
 
-        content = render_to_string('courriers/newsletter_raw_detail.html', {
+        html = render_to_string('courriers/newsletter_raw_detail.html', {
             'object': newsletter,
         })
 
         for pre_processor in PRE_PROCESSORS:
-            content = load_class(pre_processor)(content)
+            html = load_class(pre_processor)(html)
 
         content = {
-            'html': content
+            'html': html
         }
 
         campaign = self.mc.campaigns.create('regular', options, content, segment_opts=None, type_opts=None)
