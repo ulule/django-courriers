@@ -27,15 +27,15 @@ urlpatterns = patterns(
         NewslettersUnsubscribeView.as_view(),
         name="newsletters_unsubscribe"),
 
-    url(r'^unsubscribe/(?P<slug>(\w+))/thanks/$',
+    url(r'^unsubscribe/(?P<slug>(\w+))/done/$',
         UnsubscribeListThanksView.as_view(),
         name="unsubscribe_list_thanks"),
 
-    url(r'^unsubscribe/thanks/$',
+    url(r'^unsubscribe/done/$',
         UnsubscribeAllThanksView.as_view(),
         name="unsubscribe_all_thanks"),
 
-     url(r'^(?P<slug>(\w+))/(?:(?P<lang>(\w+))/)?(?:(?P<page>(\d+))/)?$',
+    url(r'^(?P<slug>(\w+))/(?:(?P<lang>(\w+))/)?(?:(?P<page>(\d+))/)?$',
         NewsletterListView.as_view(),
         name="newsletter_list"),
 )
