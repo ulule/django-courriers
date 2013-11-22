@@ -6,7 +6,8 @@ from django.core import mail
 from django.core.mail import EmailMultiAlternatives
 
 from ..models import NewsletterSubscriber
-from ..settings import DEFAULT_FROM_EMAIL
+from ..settings import DEFAULT_FROM_EMAIL, PRE_PROCESSORS
+from ..utils import load_class
 
 
 class SimpleBackend(BaseBackend):
@@ -66,10 +67,19 @@ class SimpleBackend(BaseBackend):
 
         emails = []
         for subscriber in subscribers:
-            email = EmailMultiAlternatives(newsletter.name, render_to_string('courriers/newsletter_raw_detail.txt', {
+            html = render_to_string('courriers/newsletter_raw_detail.txt', {
                 'object': newsletter,
                 'subscriber': subscriber
-            }), DEFAULT_FROM_EMAIL, [subscriber.email, ], connection=connection)
+            })
+
+            for pre_processor in PRE_PROCESSORS:
+                html = load_class(pre_processor)(html)
+
+            email = EmailMultiAlternatives(newsletter.name,
+                                           html,
+                                           DEFAULT_FROM_EMAIL,
+                                           [subscriber.email, ],
+                                           connection=connection)
 
             email.attach_alternative(render_to_string('courriers/newsletter_raw_detail.html', {
                 'object': newsletter,

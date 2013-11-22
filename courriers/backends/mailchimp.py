@@ -8,8 +8,9 @@ from django.utils.translation import ugettext as _
 
 from .simple import SimpleBackend
 from ..models import NewsletterSubscriber
-from ..settings import (MAILCHIMP_API_KEY,
+from ..settings import (MAILCHIMP_API_KEY, PRE_PROCESSORS,
                         DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME)
+from ..utils import load_class
 
 from mailchimp import Mailchimp, ListNotSubscribedError
 
@@ -88,10 +89,15 @@ class MailchimpBackend(SimpleBackend):
             'from_name': DEFAULT_FROM_NAME
         }
 
+        content = render_to_string('courriers/newsletter_raw_detail.html', {
+            'object': newsletter,
+        })
+
+        for pre_processor in PRE_PROCESSORS:
+            content = load_class(pre_processor)(content)
+
         content = {
-            'html': render_to_string('courriers/newsletter_raw_detail.html', {
-                'object': newsletter,
-            })
+            'html': content
         }
 
         campaign = self.mc.campaigns.create('regular', options, content, segment_opts=None, type_opts=None)
