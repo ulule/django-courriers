@@ -1,0 +1,4 @@
+include README.rst
+include MANIFEST.in
+include Makefile
+recursive-include courriers/templates *.html *.txt
