@@ -35,7 +35,7 @@ urlpatterns = patterns(
         UnsubscribeListThanksView.as_view(),
         name="unsubscribe_list_thanks"),
 
-    url(r'^unsubscribe/all/thanks/$',
+    url(r'^unsubscribe/thanks/$',
         UnsubscribeAllThanksView.as_view(),
         name="unsubscribe_all_thanks"),
 )

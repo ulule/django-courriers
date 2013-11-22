@@ -155,7 +155,7 @@ class NewsletterListUnsubscribeView(FormMixin, DetailView):
 class NewslettersUnsubscribeView(FormView):
     template_name = 'courriers/newsletters_unsubscribe.html'
     form_class = UnsubscribeAllForm
-    success_url = reverse_lazy('unsubscribe_thanks')
+    success_url = reverse_lazy('unsubscribe_all_thanks')
 
     def get_initial(self):
         initial = super(NewslettersUnsubscribeView, self).get_initial()
@@ -183,7 +183,7 @@ class UnsubscribeListThanksView(TemplateView):
 
 
 class UnsubscribeAllThanksView(TemplateView):
-    template_name = "courriers/unsubscribe_thanks.html"
+    template_name = "courriers/unsubscribe_all_thanks.html"
 
     def get_context_data(self, **kwargs):
         return super(UnsubscribeAllThanksView, self).get_context_data(**kwargs)
