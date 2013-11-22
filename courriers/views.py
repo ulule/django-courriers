@@ -23,12 +23,14 @@ class NewsletterListView(ListView):
         return get_object_or_404(NewsletterList, slug=self.kwargs.get('slug'))
 
     def get_queryset(self):
-        if self.kwargs.get('lang'):
-            return self.newsletter_list.newsletters \
-                                       .status_online() \
-                                       .filter(languages__contains=self.kwargs.get('lang')) \
-                                       .order_by('published_at')
-        return self.newsletter_list.newsletters.status_online().order_by('published_at')
+        qs = self.newsletter_list.newsletters.status_online().order_by('published_at')
+
+        lang = self.kwargs.get('lang', None)
+
+        if lang:
+            qs = qs.filter(languages__contains=lang)
+
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super(NewsletterListView, self).get_context_data(**kwargs)
