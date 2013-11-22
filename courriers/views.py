@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 
+from .settings import PAGINATE_BY
 from .models import Newsletter, NewsletterList
 from .forms import SubscriptionForm, UnsubscribeForm, UnsubscribeAllForm
 
@@ -15,7 +16,7 @@ class NewsletterListView(ListView):
     model = Newsletter
     context_object_name = 'newsletters'
     template_name = 'courriers/newsletter_list.html'
-    paginate_by = 9
+    paginate_by = PAGINATE_BY
 
     @cached_property
     def newsletter_list(self):
