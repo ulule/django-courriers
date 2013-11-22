@@ -1,2 +1,6 @@
 {% load i18n %}
-<p>{% trans "Thank you. You're now unsubscribed from newsletters of list" %} "{{ newsletter_list_name }}"</p>
+{% if newsletter_list %}
+<p>{% trans "Thank you. You're now unsubscribed from this newsletter" %}</p>
+{% else %}
+<p>{% trans "Thank you. You're now unsubscribed from all our newsletters" %}</p>
+{% endif %}
