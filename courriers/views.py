@@ -31,7 +31,7 @@ class NewsletterListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(NewsletterListView, self).get_context_data(**kwargs)
-        context['slug'] = self.newsletter_list.slug
+        context['newsletter_list'] = self.newsletter_list
         return context
 
 

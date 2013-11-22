@@ -11,10 +11,6 @@ from .views import (NewsletterListView,
 
 urlpatterns = patterns(
     '',
-    url(r'^(?P<slug>(\w+))/(?:/(?P<lang>(\w+)))?/$',
-        NewsletterListView.as_view(),
-        name="newsletter_list"),
-
     url(r'^(?P<pk>(\d+))/detail(?:/(?P<action>(\w+)))?/$',
         NewsletterDetailView.as_view(),
         name="newsletter_detail"),
@@ -38,4 +34,8 @@ urlpatterns = patterns(
     url(r'^unsubscribe/thanks/$',
         UnsubscribeAllThanksView.as_view(),
         name="unsubscribe_all_thanks"),
+
+     url(r'^(?P<slug>(\w+))/(?:(?P<lang>(\w+))/)?(?:(?P<page>(\d+))/)?$',
+        NewsletterListView.as_view(),
+        name="newsletter_list"),
 )
