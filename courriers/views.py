@@ -171,19 +171,19 @@ class NewslettersUnsubscribeView(FormView):
         return super(NewslettersUnsubscribeView, self).form_valid(form)
 
 
-class UnsubscribeListThanksView(TemplateView):
+class UnsubscribeListDoneView(TemplateView):
     template_name = "courriers/unsubscribe_list_thanks.html"
 
     def get_context_data(self, **kwargs):
-        context = super(UnsubscribeListThanksView, self).get_context_data(**kwargs)
+        context = super(UnsubscribeListDoneView, self).get_context_data(**kwargs)
         newsletter_list_slug = kwargs.pop('slug')
         newsletter_list = get_object_or_404(NewsletterList, slug=newsletter_list_slug)
         context['newsletter_list_name'] = newsletter_list.name
         return context
 
 
-class UnsubscribeAllThanksView(TemplateView):
+class UnsubscribeAllDoneView(TemplateView):
     template_name = "courriers/unsubscribe_all_thanks.html"
 
     def get_context_data(self, **kwargs):
-        return super(UnsubscribeAllThanksView, self).get_context_data(**kwargs)
+        return super(UnsubscribeAllDoneView, self).get_context_data(**kwargs)
