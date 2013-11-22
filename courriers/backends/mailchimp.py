@@ -11,6 +11,7 @@ from ..models import NewsletterSubscriber
 from ..settings import (MAILCHIMP_API_KEY, PRE_PROCESSORS,
                         DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME)
 from ..utils import load_class
+from ..compat import update_fields
 
 from mailchimp import Mailchimp, ListNotSubscribedError
 
@@ -105,7 +106,7 @@ class MailchimpBackend(SimpleBackend):
         self.mc.campaigns.send(campaign['id'])
 
         newsletter.sent = True
-        newsletter.save(update_fields=['sent'])
+        update_fields(newsletter, fields=('sent', ))
 
     def send_mails(self, newsletter):
         if not newsletter.is_online():

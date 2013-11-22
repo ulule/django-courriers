@@ -2,7 +2,7 @@
 from django.views.generic import View, ListView, DetailView, FormView, TemplateView
 from django.views.generic.edit import FormMixin
 from django.views.generic.detail import SingleObjectMixin
-from django.core.urlresolvers import reverse_lazy, reverse
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
@@ -107,12 +107,16 @@ class NewsletterRawDetailView(DetailView):
         return context
 
 
-class NewsletterListUnsubscribeView(FormMixin, DetailView):
-    template_name = 'courriers/newsletter_unsubscribe.html'
-    form_class = UnsubscribeForm
+class NewsletterListUnsubscribeView(FormMixin, TemplateView):
+    template_name = 'courriers/newsletter_list_unsubscribe.html'
     model = NewsletterList
     context_object_name = 'newsletter_list'
-    success_url = reverse_lazy('newsletter_list')
+
+    def get_form_class(self):
+        if not self.kwargs.get('slug', None):
+            return UnsubscribeAllForm
+
+        return UnsubscribeForm
 
     def get_initial(self):
         initial = super(NewsletterListUnsubscribeView, self).get_initial()
@@ -124,18 +128,38 @@ class NewsletterListUnsubscribeView(FormMixin, DetailView):
         return initial.copy()
 
     def get_form_kwargs(self):
-        return dict(super(NewsletterListUnsubscribeView, self).get_form_kwargs(), **{
-            'newsletter_list': self.object
-        })
+        kwargs = super(NewsletterListUnsubscribeView, self).get_form_kwargs()
+
+        if self.object:
+            return dict(kwargs, **{
+                'newsletter_list': self.object
+            })
+
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super(NewsletterListUnsubscribeView, self).get_context_data(**kwargs)
+
         form_class = self.get_form_class()
         context['form'] = self.get_form(form_class)
+
+        if self.object:
+            context[self.context_object_name] = self.object
+
         return context
 
+    @cached_property
+    def object(self):
+        slug = self.kwargs.get('slug', None)
+
+        if slug:
+            return get_object_or_404(self.model, slug=slug)
+
+        return None
+
     def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        self.get_context_data(**kwargs)
+
         form_class = self.get_form_class()
         form = self.get_form(form_class)
 
@@ -150,41 +174,24 @@ class NewsletterListUnsubscribeView(FormMixin, DetailView):
         return super(NewsletterListUnsubscribeView, self).form_valid(form)
 
     def get_success_url(self):
-        return reverse('unsubscribe_list_thanks', kwargs={'slug': self.object.slug})
+        if self.object:
+            return reverse('unsubscribe_list_done',
+                           kwargs={'slug': self.object.slug})
+
+        return reverse('unsubscribe_list_done')
 
 
-class NewslettersUnsubscribeView(FormView):
-    template_name = 'courriers/newsletters_unsubscribe.html'
-    form_class = UnsubscribeAllForm
-    success_url = reverse_lazy('unsubscribe_all_thanks')
-
-    def get_initial(self):
-        initial = super(NewslettersUnsubscribeView, self).get_initial()
-        email = self.request.GET.get('email', None)
-
-        if email:
-            initial['email'] = email
-
-        return initial.copy()
-
-    def form_valid(self, form):
-        form.save()
-        return super(NewslettersUnsubscribeView, self).form_valid(form)
-
-
-class UnsubscribeListDoneView(TemplateView):
-    template_name = "courriers/unsubscribe_list_thanks.html"
+class NewsletterListUnsubscribeDoneView(TemplateView):
+    template_name = "courriers/newsletter_list_unsubscribe_done.html"
+    model = NewsletterList
+    context_object_name = 'newsletter_list'
 
     def get_context_data(self, **kwargs):
-        context = super(UnsubscribeListDoneView, self).get_context_data(**kwargs)
-        newsletter_list_slug = kwargs.pop('slug')
-        newsletter_list = get_object_or_404(NewsletterList, slug=newsletter_list_slug)
-        context['newsletter_list_name'] = newsletter_list.name
+        context = super(NewsletterListUnsubscribeDoneView, self).get_context_data(**kwargs)
+
+        slug = self.kwargs.get('slug', None)
+
+        if slug:
+            context[self.context_object_name] = get_object_or_404(self.model, slug=slug)
+
         return context
-
-
-class UnsubscribeAllDoneView(TemplateView):
-    template_name = "courriers/unsubscribe_all_thanks.html"
-
-    def get_context_data(self, **kwargs):
-        return super(UnsubscribeAllDoneView, self).get_context_data(**kwargs)

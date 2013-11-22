@@ -8,6 +8,7 @@ from django.core.mail import EmailMultiAlternatives
 from ..models import NewsletterSubscriber
 from ..settings import DEFAULT_FROM_EMAIL, PRE_PROCESSORS
 from ..utils import load_class
+from ..compat import update_fields
 
 
 class SimpleBackend(BaseBackend):
@@ -91,6 +92,6 @@ class SimpleBackend(BaseBackend):
         results = connection.send_messages(emails)
 
         newsletter.sent = True
-        newsletter.save(update_fields=['sent'])
+        update_fields(newsletter, fields=('sent', ))
 
         return results

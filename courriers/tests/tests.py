@@ -49,7 +49,6 @@ class BaseBackendTests(TestCase):
         self.backend.register('adele@ulule.com', self.monthly, 'FR')
         self.backend.register('adele@ulule.com', self.weekly, 'FR')
 
-
         subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
                                                          newsletter_list=self.monthly,
                                                          is_unsubscribed=False)
@@ -163,8 +162,8 @@ class NewslettersViewsTests(TestCase):
         response = self.client.post(reverse('newsletter_list_unsubscribe', kwargs={'slug': 'monthly'}), data=valid_data)
         self.assertEqual(response.status_code, 200)
 
-    def test_newsletters_unsubscribe(self):
-        response = self.client.post(reverse('newsletters_unsubscribe') + '?email=adele@ulule.com')
+    def test_newsletter_list_all_unsubscribe(self):
+        response = self.client.post(reverse('newsletter_list_unsubscribe') + '?email=adele@ulule.com')
         self.assertEqual(response.status_code, 200)
 
         # Test that the initial data of the form is set.
