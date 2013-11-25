@@ -415,3 +415,11 @@ class SeparatedValuesFieldTests(TestCase):
 
         form = NewsletterListForm()
         self.assertFalse(form.fields['languages'].required)
+
+        valid_data = {'name': 'Weekly', 'slug': 'weekly', 'languages': [u'']}
+        form = NewsletterListForm(data=valid_data)
+        self.assertTrue(form.is_valid())
+
+        valid_data = {'name': 'Daily', 'slug': 'daily', 'languages': [u'en', u'fr']}
+        form = NewsletterListForm(data=valid_data)
+        self.assertTrue(form.is_valid())

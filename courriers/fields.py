@@ -30,7 +30,7 @@ class SeparatedValuesField(models.CharField):
                     choices.append(option_key)
 
             for val in value:
-                if not val in choices:
+                if val and not val in choices:
                     raise exceptions.ValidationError(self.error_messages['invalid_choice'] % val)
 
         if value is None and not self.null:
@@ -78,7 +78,7 @@ class SeparatedValuesField(models.CharField):
             defaults['choices'] = self.get_choices(include_blank=include_blank)
 
             for k in list(kwargs):
-                if k not in ('coerce', 'empty_value', 'choices', 'required',
+                if k not in ('choices', 'required',
                              'widget', 'label', 'initial', 'help_text',
                              'error_messages', 'show_hidden_initial'):
                     del kwargs[k]
