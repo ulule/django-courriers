@@ -2,6 +2,7 @@ from django.conf.urls import patterns, url
 
 from .views import (NewsletterListView,
                     NewsletterDetailView,
+                    NewsletterFormView,
                     NewsletterRawDetailView,
                     NewsletterListUnsubscribeView,
                     NewsletterListSubscribeDoneView,
@@ -14,6 +15,10 @@ urlpatterns = patterns(
         NewsletterDetailView.as_view(),
         name="newsletter_detail"),
 
+    url(r'^(?P<pk>(\d+))/detail/subscribe/$',
+        NewsletterFormView.as_view(),
+        name="newsletter_detail_subscribe"),
+
     url(r'^(?P<pk>(\d+))/raw/$',
         NewsletterRawDetailView.as_view(),
         name="newsletter_raw_detail"),
@@ -22,7 +27,7 @@ urlpatterns = patterns(
         NewsletterListUnsubscribeView.as_view(),
         name="newsletter_list_unsubscribe"),
 
-    url(r'^subscribe/(?:(?P<slug>(\w+))/)?done/$',
+    url(r'^subscribe/done/$',
         NewsletterListSubscribeDoneView.as_view(),
         name="newsletter_list_subscribe_done"),
 

@@ -38,13 +38,13 @@ class NewsletterListView(ListView):
         return context
 
 
-class NewsletterDisplayView(DetailView):
+class NewsletterDetailView(DetailView):
     model = Newsletter
     context_object_name = 'newsletter'
     template_name = 'courriers/newsletter_detail.html'
 
     def get_context_data(self, **kwargs):
-        context = super(NewsletterDisplayView, self).get_context_data(**kwargs)
+        context = super(NewsletterDetailView, self).get_context_data(**kwargs)
 
         context['form'] = SubscriptionForm(user=self.request.user,
                                            newsletter_list=self.model.newsletter_list)
@@ -53,7 +53,7 @@ class NewsletterDisplayView(DetailView):
 
 
 class NewsletterFormView(SingleObjectMixin, FormView):
-    template_name = 'courriers/newsletter_detail.html'
+    template_name = 'courriers/newsletter_list_subscribe_form.html'
     form_class = SubscriptionForm
     model = Newsletter
     context_object_name = 'newsletter'
@@ -80,24 +80,8 @@ class NewsletterFormView(SingleObjectMixin, FormView):
 
         return HttpResponseRedirect(self.get_success_url())
 
-    def form_invalid(self, form):
-        if self.request.is_ajax():
-            return render_to_response("courriers/newsletter_list_subscribe_form.html", {'form': form})
-
-        return super(NewsletterFormView, self).form_invalid(form)
-
     def get_success_url(self):
         return reverse('newsletter_list_subscribe_done')
-
-
-class NewsletterDetailView(View):
-    def get(self, request, *args, **kwargs):
-        view = NewsletterDisplayView.as_view()
-        return view(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        view = NewsletterFormView.as_view()
-        return view(request, *args, **kwargs)
 
 
 class NewsletterRawDetailView(DetailView):
