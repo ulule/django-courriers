@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.views.generic import ListView, DetailView, FormView, TemplateView
+from django.views.generic import View, ListView, DetailView, FormView, TemplateView
 from django.views.generic.edit import FormMixin
 from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse
@@ -38,13 +38,13 @@ class NewsletterListView(ListView):
         return context
 
 
-class NewsletterDetailView(DetailView):
+class NewsletterDisplayView(DetailView):
     model = Newsletter
     context_object_name = 'newsletter'
     template_name = 'courriers/newsletter_detail.html'
 
     def get_context_data(self, **kwargs):
-        context = super(NewsletterDetailView, self).get_context_data(**kwargs)
+        context = super(NewsletterDisplayView, self).get_context_data(**kwargs)
 
         context['form'] = SubscriptionForm(user=self.request.user,
                                            newsletter_list=self.model.newsletter_list)
@@ -82,6 +82,16 @@ class NewsletterFormView(SingleObjectMixin, FormView):
 
     def get_success_url(self):
         return reverse('newsletter_list_subscribe_done')
+
+
+class NewsletterDetailView(View):
+    def get(self, request, *args, **kwargs):
+        view = NewsletterDisplayView.as_view()
+        return view(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        view = NewsletterFormView.as_view()
+        return view(request, *args, **kwargs)
 
 
 class NewsletterRawDetailView(DetailView):
