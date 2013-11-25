@@ -2,6 +2,7 @@ from django.forms.fields import MultipleChoiceField
 from django.core import validators
 from django.db import models
 from django.core import exceptions
+from django.utils.text import capfirst
 
 
 class SeparatedValuesField(models.CharField):
@@ -60,8 +61,29 @@ class SeparatedValuesField(models.CharField):
 
         return self.get_db_prep_value(value)
 
-    def formfield(self, **kwargs):
-        return MultipleChoiceField(choices=self.choices)
+    def formfield(self, form_class=MultipleChoiceField, **kwargs):
+        defaults = {'required': not self.blank,
+                    'label': capfirst(self.verbose_name),
+                    'help_text': self.help_text}
+        if self.has_default():
+            if callable(self.default):
+                defaults['initial'] = self.default
+                defaults['show_hidden_initial'] = True
+            else:
+                defaults['initial'] = self.get_default()
+
+        if self.choices:
+            include_blank = (self.blank or
+                             not (self.has_default() or 'initial' in kwargs))
+            defaults['choices'] = self.get_choices(include_blank=include_blank)
+
+            for k in list(kwargs):
+                if k not in ('coerce', 'empty_value', 'choices', 'required',
+                             'widget', 'label', 'initial', 'help_text',
+                             'error_messages', 'show_hidden_initial'):
+                    del kwargs[k]
+        defaults.update(kwargs)
+        return form_class(**defaults)
 
 try:
     from south.modelsinspector import add_introspection_rules
