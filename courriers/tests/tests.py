@@ -141,6 +141,9 @@ class NewslettersViewsTests(TestCase):
 
         self.assertTrue(isinstance(response.context['form'], SubscriptionForm))
 
+        response = self.client.get(self.n1.get_absolute_url(), {'form': response.context['form']}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 200)
+
     def test_newsletter_detail_complete(self):
         valid_data = {'newsletter_list': self.monthly}
 

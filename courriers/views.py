@@ -4,7 +4,7 @@ from django.views.generic.edit import FormMixin
 from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render_to_response
 from django.utils.functional import cached_property
 
 from .settings import PAGINATE_BY
@@ -49,9 +49,6 @@ class NewsletterDisplayView(DetailView):
         context['form'] = SubscriptionForm(user=self.request.user,
                                            newsletter_list=self.model.newsletter_list)
 
-        if self.kwargs.get('action'):
-            context['action'] = self.kwargs.get('action')
-
         return context
 
 
@@ -83,8 +80,14 @@ class NewsletterFormView(SingleObjectMixin, FormView):
 
         return HttpResponseRedirect(self.get_success_url())
 
+    def form_invalid(self, form):
+        if self.request.is_ajax():
+            return render_to_response("courriers/newsletter_list_subscribe_form.html", {'form': form})
+
+        return super(NewsletterFormView, self).form_invalid(form)
+
     def get_success_url(self):
-        return self.object.get_absolute_url()
+        return reverse('newsletter_list_subscribe_done')
 
 
 class NewsletterDetailView(View):
@@ -197,3 +200,9 @@ class NewsletterListUnsubscribeDoneView(TemplateView):
             context[self.context_object_name] = get_object_or_404(self.model, slug=slug)
 
         return context
+
+
+class NewsletterListSubscribeDoneView(TemplateView):
+    template_name = "courriers/newsletter_list_subscribe_done.html"
+    model = NewsletterList
+    context_object_name = 'newsletter_list'
