@@ -146,8 +146,9 @@ class NewslettersViewsTests(TestCase):
 
     def test_newsletter_detail_complete(self):
         valid_data = {'newsletter_list': self.monthly}
+        url = reverse('newsletter_detail_subscribe', kwargs={'pk': self.n1.pk}) + '?email=adele@ulule.com'
 
-        response = self.client.post(self.n1.get_absolute_url(), data=valid_data)
+        response = self.client.post(url, data=valid_data)
 
         self.assertEqual(response.status_code, 200)
 
