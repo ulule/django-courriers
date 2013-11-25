@@ -82,7 +82,7 @@ What you need to do for mailchimp
 
 Which this backend you have to provide additional settings ::
 
-    COURRIERS_MAILCHIMP_API_KEY = 'You API key'
+    COURRIERS_MAILCHIMP_API_KEY = 'Your API key'
     COURRIERS_DEFAULT_FROM_NAME = 'Your name'
 
 
