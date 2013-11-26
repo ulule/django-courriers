@@ -8,11 +8,16 @@ from django.core.urlresolvers import reverse
 from .models import Newsletter, NewsletterItem, NewsletterSubscriber, NewsletterList
 
 
+class NewsletterItemInline(admin.TabularInline):
+    model = NewsletterItem
+
+
 class NewsletterAdmin(admin.ModelAdmin):
     change_form_template = 'admin/courriers/newsletter/change_form.html'
 
     list_display = ('name', 'headline', 'published_at', 'status', 'newsletter_list',)
     list_filter = ('published_at', 'status',)
+    inlines = [NewsletterItemInline]
 
     def get_urls(self):
         urls = super(NewsletterAdmin, self).get_urls()
@@ -38,7 +43,7 @@ class NewsletterAdmin(admin.ModelAdmin):
 
 
 class NewsletterItemAdmin(admin.ModelAdmin):
-    list_display = ('content_type', 'description', 'newsletter',)
+    list_display = ('content_type', 'name', 'description', 'newsletter',)
 
 
 class NewsletterSubscriberAdmin(admin.ModelAdmin):

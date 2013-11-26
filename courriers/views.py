@@ -23,7 +23,7 @@ class NewsletterListView(ListView):
         return get_object_or_404(NewsletterList, slug=self.kwargs.get('slug'))
 
     def get_queryset(self):
-        qs = self.newsletter_list.newsletters.status_online().order_by('published_at')
+        qs = self.newsletter_list.newsletters.status_online().order_by('-published_at')
 
         lang = self.kwargs.get('lang', None)
 
@@ -101,7 +101,7 @@ class NewsletterRawDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(NewsletterRawDetailView, self).get_context_data(**kwargs)
 
-        context['items'] = self.object.items.all()
+        context['items'] = self.object.items.all().prefetch_related('newsletter')
 
         return context
 
