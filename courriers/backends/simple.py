@@ -79,6 +79,7 @@ class SimpleBackend(BaseBackend):
 
             html = render_to_string('courriers/newsletter_raw_detail.html', {
                 'object': newsletter,
+                'items': newsletter.items.all().prefetch_related('newsletter'),
                 'subscriber': subscriber
             })
 

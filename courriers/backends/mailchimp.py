@@ -92,6 +92,7 @@ class MailchimpBackend(SimpleBackend):
 
         html = render_to_string('courriers/newsletter_raw_detail.html', {
             'object': newsletter,
+            'items': newsletter.items.all().prefetch_related('newsletter')
         })
 
         for pre_processor in PRE_PROCESSORS:
