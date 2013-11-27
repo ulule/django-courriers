@@ -146,14 +146,18 @@ class NewslettersViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_newsletter_detail_complete(self):
-        valid_data = {'newsletter_list': self.monthly}
+        subscriber = NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='adele@ulule.com', lang='FR')
 
-        response = self.client.post(self.n1.get_absolute_url(), data=valid_data)
+        response = self.client.post(self.n1.get_absolute_url(), data={'receiver': subscriber.email})
         self.assertEqual(response.status_code, 200)
+
+        subscriber = NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='florent@ulule.com', lang='FR')
 
         url = reverse('newsletter_detail_form', kwargs={'pk': self.n1.pk})
-        response = self.client.post(url, data=valid_data)
+        response = self.client.post(url, data={'receiver': subscriber.email})
         self.assertEqual(response.status_code, 200)
+
+        subscriber.unsubscribe()
 
     def test_newsletter_list_unsubscribe_view(self):
         url = reverse('newsletter_list_unsubscribe',
