@@ -1,3 +1,4 @@
+{% load url from future %}
 <form action="{% url "newsletter_detail_form" newsletter.pk %}" method="post" class="ff subscribe">{% csrf_token %}
     {{ form.non_field_errors }}
 
