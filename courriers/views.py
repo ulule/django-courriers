@@ -6,13 +6,29 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
+from django.views.generic.base import TemplateResponseMixin
 
 from .settings import PAGINATE_BY
 from .models import Newsletter, NewsletterList
 from .forms import SubscriptionForm, UnsubscribeForm, UnsubscribeAllForm
+from .utils import ajaxify_template_var
 
 
-class NewsletterListView(ListView):
+class AJAXResponseMixin(TemplateResponseMixin):
+    ajax_template_name = None
+
+    def get_template_names(self):
+        names = super(AJAXResponseMixin, self).get_template_names()
+
+        if self.request.is_ajax():
+            if self.ajax_template_name:
+                names = [self.ajax_template_name] + names
+            else:
+                names = ajaxify_template_var(names) + names
+        return names
+
+
+class NewsletterListView(AJAXResponseMixin, ListView):
     model = Newsletter
     context_object_name = 'newsletters'
     template_name = 'courriers/newsletter_list.html'
@@ -38,7 +54,7 @@ class NewsletterListView(ListView):
         return context
 
 
-class NewsletterDisplayView(DetailView):
+class NewsletterDisplayView(AJAXResponseMixin, DetailView):
     model = Newsletter
     context_object_name = 'newsletter'
     template_name = 'courriers/newsletter_detail.html'
@@ -52,7 +68,7 @@ class NewsletterDisplayView(DetailView):
         return context
 
 
-class NewsletterFormView(SingleObjectMixin, FormView):
+class NewsletterFormView(AJAXResponseMixin, SingleObjectMixin, FormView):
     template_name = 'courriers/newsletter_list_subscribe_form.html'
     form_class = SubscriptionForm
     model = Newsletter
@@ -94,7 +110,7 @@ class NewsletterDetailView(View):
         return view(request, *args, **kwargs)
 
 
-class NewsletterRawDetailView(DetailView):
+class NewsletterRawDetailView(AJAXResponseMixin, DetailView):
     model = Newsletter
     template_name = 'courriers/newsletter_raw_detail.html'
 
@@ -106,7 +122,7 @@ class NewsletterRawDetailView(DetailView):
         return context
 
 
-class NewsletterListUnsubscribeView(FormMixin, TemplateView):
+class NewsletterListUnsubscribeView(AJAXResponseMixin, FormMixin, TemplateView):
     template_name = 'courriers/newsletter_list_unsubscribe.html'
     model = NewsletterList
     context_object_name = 'newsletter_list'
@@ -180,7 +196,7 @@ class NewsletterListUnsubscribeView(FormMixin, TemplateView):
         return reverse('newsletter_list_unsubscribe_done')
 
 
-class NewsletterListUnsubscribeDoneView(TemplateView):
+class NewsletterListUnsubscribeDoneView(AJAXResponseMixin, TemplateView):
     template_name = "courriers/newsletter_list_unsubscribe_done.html"
     model = NewsletterList
     context_object_name = 'newsletter_list'
@@ -196,7 +212,7 @@ class NewsletterListUnsubscribeDoneView(TemplateView):
         return context
 
 
-class NewsletterListSubscribeDoneView(TemplateView):
+class NewsletterListSubscribeDoneView(AJAXResponseMixin, TemplateView):
     template_name = "courriers/newsletter_list_subscribe_done.html"
     model = NewsletterList
     context_object_name = 'newsletter_list'
