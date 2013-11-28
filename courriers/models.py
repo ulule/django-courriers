@@ -29,7 +29,10 @@ class NewsletterList(models.Model):
     slug = models.SlugField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    languages = SeparatedValuesField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
+    languages = SeparatedValuesField(max_length=50,
+                                     blank=True,
+                                     null=True,
+                                     choices=ALLOWED_LANGUAGES)
 
     def __str__(self):
         return self.name
@@ -91,7 +94,7 @@ class Newsletter(models.Model):
                                          db_index=True)
     headline = models.CharField(max_length=255, blank=True, null=True)
     cover = models.ImageField(upload_to=get_file_path, blank=True, null=True)
-    languages = SeparatedValuesField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
+    languages = SeparatedValuesField(max_length=50, blank=True, null=True, choices=ALLOWED_LANGUAGES)
     newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletters')
     sent = models.BooleanField(default=False, db_index=True)
 
