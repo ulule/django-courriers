@@ -1,6 +1,10 @@
 django-courriers
 ================
 
+.. image:: https://secure.travis-ci.org/ulule/django-courriers.png?branch=master
+    :alt: Build Status
+    :target: http://travis-ci.org/ulule/django-courriers
+
 A generic application to manage your newsletters
 
 Compatibility
