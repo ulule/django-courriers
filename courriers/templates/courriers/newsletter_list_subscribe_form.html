@@ -1,5 +1,5 @@
 {% load url from future %}
-<form action="{% url "newsletter_detail_form" newsletter.pk %}" method="post" class="ff subscribe">{% csrf_token %}
+<form action="{% url 'newsletter_subscribe_form' 'monthly' %}" method="post" class="ff subscribe">{% csrf_token %}
     {{ form.non_field_errors }}
 
     {% if form.subject.errors %}

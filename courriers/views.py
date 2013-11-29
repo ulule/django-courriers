@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.views.generic import View, ListView, DetailView, FormView, TemplateView
 from django.views.generic.edit import FormMixin
-from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -54,38 +53,38 @@ class NewsletterListView(AJAXResponseMixin, ListView):
         return context
 
 
-class NewsletterDisplayView(AJAXResponseMixin, DetailView):
+class NewsletterDetailView(AJAXResponseMixin, DetailView):
     model = Newsletter
     context_object_name = 'newsletter'
     template_name = 'courriers/newsletter_detail.html'
 
     def get_context_data(self, **kwargs):
-        context = super(NewsletterDisplayView, self).get_context_data(**kwargs)
+        context = super(NewsletterDetailView, self).get_context_data(**kwargs)
 
         context['form'] = SubscriptionForm(user=self.request.user,
                                            newsletter_list=self.model.newsletter_list)
 
+        context['newsletter_list'] = self.object.newsletter_list
+
         return context
 
 
-class NewsletterFormView(AJAXResponseMixin, SingleObjectMixin, FormView):
+class NewsletterListFormView(AJAXResponseMixin, FormView):
     template_name = 'courriers/newsletter_list_subscribe_form.html'
     form_class = SubscriptionForm
-    model = Newsletter
-    context_object_name = 'newsletter'
+    model = NewsletterList
 
     def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        return super(NewsletterFormView, self).post(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super(NewsletterFormView, self).get_context_data(**kwargs)
-        context.update(SingleObjectMixin.get_context_data(self, **kwargs))
-        return context
+        return super(NewsletterListFormView, self).post(request, *args, **kwargs)
 
     def get_form_kwargs(self):
-        return dict(super(NewsletterFormView, self).get_form_kwargs(), **{
-            'newsletter_list': self.object.newsletter_list
+        newsletter_list = None
+        slug = self.kwargs.pop('slug', None)
+        if slug:
+            newsletter_list = self.model.objects.get(slug=slug)
+
+        return dict(super(NewsletterListFormView, self).get_form_kwargs(), **{
+            'newsletter_list': newsletter_list
         })
 
     def form_valid(self, form):
@@ -98,16 +97,6 @@ class NewsletterFormView(AJAXResponseMixin, SingleObjectMixin, FormView):
 
     def get_success_url(self):
         return reverse('newsletter_list_subscribe_done')
-
-
-class NewsletterDetailView(View):
-    def get(self, request, *args, **kwargs):
-        view = NewsletterDisplayView.as_view()
-        return view(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        view = NewsletterFormView.as_view()
-        return view(request, *args, **kwargs)
 
 
 class NewsletterRawDetailView(AJAXResponseMixin, DetailView):
