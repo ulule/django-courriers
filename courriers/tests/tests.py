@@ -365,8 +365,7 @@ class UnsubscribeFormTest(TestCase):
         self.assertEqual(is_valid, False)
 
     def test_unsubscription_logged_in(self):
-        user = User.objects.create(username='thoas', password='secret')
-        self.client.login(username='thoas', password='secret')
+        user = User.objects.create_user('thoas', 'florent@ulule.com', 'secret')
 
         self.backend.register('florent@ulule.com', self.monthly, 'fr', user=user)
         new_subscriber = NewsletterSubscriber.objects.filter(email='florent@ulule.com', user=user)
