@@ -148,14 +148,7 @@ class NewslettersViewsTests(TestCase):
     def test_newsletter_detail_complete(self):
         subscriber = NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='adele@ulule.com', lang='fr')
 
-        response = self.client.post(self.n1.get_absolute_url(), data={'receiver': subscriber.email})
-        self.assertEqual(response.status_code, 200)
-
-        subscriber.unsubscribe()
-
-        subscriber = NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='florent@ulule.com', lang='fr')
-
-        url = reverse('newsletter_detail_form', kwargs={'pk': self.n1.pk})
+        url = reverse('newsletter_list_subscribe', kwargs={'slug': self.monthly.slug})
         response = self.client.post(url, data={'receiver': subscriber.email})
         self.assertEqual(response.status_code, 200)
 

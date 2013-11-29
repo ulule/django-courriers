@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.views.generic import View, ListView, DetailView, FormView, TemplateView
-from django.views.generic.edit import FormMixin
+from django.views.generic import ListView, DetailView, FormView, TemplateView
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -69,88 +68,9 @@ class NewsletterDetailView(AJAXResponseMixin, DetailView):
         return context
 
 
-class NewsletterListFormView(AJAXResponseMixin, FormView):
-    template_name = 'courriers/newsletter_list_subscribe_form.html'
-    form_class = SubscriptionForm
-    model = NewsletterList
-
-    def post(self, request, *args, **kwargs):
-        return super(NewsletterListFormView, self).post(request, *args, **kwargs)
-
-    def get_form_kwargs(self):
-        newsletter_list = None
-        slug = self.kwargs.pop('slug', None)
-        if slug:
-            newsletter_list = self.model.objects.get(slug=slug)
-
-        return dict(super(NewsletterListFormView, self).get_form_kwargs(), **{
-            'newsletter_list': newsletter_list
-        })
-
-    def form_valid(self, form):
-        if self.request.user.is_authenticated():
-            form.save(self.request.user)
-        else:
-            form.save()
-
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return reverse('newsletter_list_subscribe_done')
-
-
-class NewsletterRawDetailView(AJAXResponseMixin, DetailView):
-    model = Newsletter
-    template_name = 'courriers/newsletter_raw_detail.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(NewsletterRawDetailView, self).get_context_data(**kwargs)
-
-        context['items'] = self.object.items.all().prefetch_related('newsletter')
-
-        return context
-
-
-class NewsletterListUnsubscribeView(AJAXResponseMixin, FormMixin, TemplateView):
-    template_name = 'courriers/newsletter_list_unsubscribe.html'
+class BaseNewsletterListFormView(AJAXResponseMixin, FormView):
     model = NewsletterList
     context_object_name = 'newsletter_list'
-
-    def get_form_class(self):
-        if not self.kwargs.get('slug', None):
-            return UnsubscribeAllForm
-
-        return UnsubscribeForm
-
-    def get_initial(self):
-        initial = super(NewsletterListUnsubscribeView, self).get_initial()
-        email = self.request.GET.get('email', None)
-
-        if email:
-            initial['email'] = email
-
-        return initial.copy()
-
-    def get_form_kwargs(self):
-        kwargs = super(NewsletterListUnsubscribeView, self).get_form_kwargs()
-
-        if self.object:
-            return dict(kwargs, **{
-                'newsletter_list': self.object
-            })
-
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super(NewsletterListUnsubscribeView, self).get_context_data(**kwargs)
-
-        form_class = self.get_form_class()
-        context['form'] = self.get_form(form_class)
-
-        if self.object:
-            context[self.context_object_name] = self.object
-
-        return context
 
     @cached_property
     def object(self):
@@ -172,10 +92,68 @@ class NewsletterListUnsubscribeView(AJAXResponseMixin, FormMixin, TemplateView):
 
         return self.form_invalid(form)
 
-    def form_valid(self, form):
-        form.save()
+    def get_form_kwargs(self):
+        kwargs = super(BaseNewsletterListFormView, self).get_form_kwargs()
 
-        return super(NewsletterListUnsubscribeView, self).form_valid(form)
+        if self.object:
+            kwargs['newsletter_list'] = self.object
+
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super(BaseNewsletterListFormView, self).get_context_data(**kwargs)
+
+        if self.object:
+            context[self.context_object_name] = self.object
+
+        return context
+
+    def form_valid(self, form):
+        if self.request.user.is_authenticated():
+            form.save(self.request.user)
+        else:
+            form.save()
+
+        return HttpResponseRedirect(self.get_success_url())
+
+
+class NewsletterListSubscribeView(BaseNewsletterListFormView):
+    template_name = 'courriers/newsletter_list_subscribe_form.html'
+    form_class = SubscriptionForm
+
+    def get_success_url(self):
+        return reverse('newsletter_list_subscribe_done')
+
+
+class NewsletterRawDetailView(AJAXResponseMixin, DetailView):
+    model = Newsletter
+    template_name = 'courriers/newsletter_raw_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(NewsletterRawDetailView, self).get_context_data(**kwargs)
+
+        context['items'] = self.object.items.all().prefetch_related('newsletter')
+
+        return context
+
+
+class NewsletterListUnsubscribeView(BaseNewsletterListFormView):
+    template_name = 'courriers/newsletter_list_unsubscribe.html'
+
+    def get_form_class(self):
+        if not self.kwargs.get('slug', None):
+            return UnsubscribeAllForm
+
+        return UnsubscribeForm
+
+    def get_initial(self):
+        initial = super(NewsletterListUnsubscribeView, self).get_initial()
+        email = self.request.GET.get('email', None)
+
+        if email:
+            initial['email'] = email
+
+        return initial.copy()
 
     def get_success_url(self):
         if self.object:
