@@ -61,7 +61,7 @@ class UnsubscribeForm(forms.Form):
 
         return email
 
-    def save(self):
+    def save(self, user=None):
         from_all = self.cleaned_data['from_all']
 
         if from_all:
@@ -80,5 +80,5 @@ class UnsubscribeAllForm(forms.Form):
 
         super(UnsubscribeAllForm, self).__init__(*args, **kwargs)
 
-    def save(self):
+    def save(self, user=None):
         self.backend.unregister(self.cleaned_data['email'])

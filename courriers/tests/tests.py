@@ -364,6 +364,24 @@ class UnsubscribeFormTest(TestCase):
 
         self.assertEqual(is_valid, False)
 
+    def test_unsubscription_logged_in(self):
+        user = User.objects.create(username='thoas', password='secret')
+        self.client.login(username='thoas', password='secret')
+
+        self.backend.register('florent@ulule.com', self.monthly, 'fr', user=user)
+        new_subscriber = NewsletterSubscriber.objects.filter(email='florent@ulule.com', user=user)
+        self.assertEqual(new_subscriber.count(), 1)
+
+        valid_data = {'email': 'florent@ulule.com', 'from_all': False}
+
+        form = UnsubscribeForm(data=valid_data, initial={'email': 'florent@ulule.com'}, **{'newsletter_list': self.monthly})
+
+        self.assertTrue(form.is_valid())
+
+        form.save(user)  # Equivalent for saving with user logged in
+
+        self.backend.unregister('florent@ulule.com')
+
 
 if hasattr(settings, 'COURRIERS_MAILCHIMP_API_KEY'):
     @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')
