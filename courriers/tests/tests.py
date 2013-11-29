@@ -140,16 +140,25 @@ class NewslettersViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'courriers/newsletter_detail.html')
 
-        self.assertTrue(isinstance(response.context['form'], SubscriptionForm))
-
-        response = self.client.get(self.n1.get_absolute_url(), {'form': response.context['form']}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+    def test_newsletter_list_subscribe_view(self):
+        response = self.client.get(reverse('newsletter_list_subscribe',
+                                   kwargs={'slug': self.monthly.slug}))
         self.assertEqual(response.status_code, 200)
 
-    def test_newsletter_detail_complete(self):
+        response = self.client.get(reverse('newsletter_list_subscribe',
+                                   kwargs={'slug': self.monthly.slug}),
+                                   HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTrue(isinstance(response.context['form'], SubscriptionForm))
+
+    def test_newsletter_list_subscribe_complete(self):
         subscriber = NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='adele@ulule.com', lang='fr')
 
-        url = reverse('newsletter_list_subscribe', kwargs={'slug': self.monthly.slug})
-        response = self.client.post(url, data={'receiver': subscriber.email})
+        response = self.client.post(reverse('newsletter_list_subscribe',
+                                    kwargs={'slug': self.monthly.slug}),
+                                    HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+                                    data={'receiver': subscriber.email})
         self.assertEqual(response.status_code, 200)
 
         subscriber.unsubscribe()
@@ -237,7 +246,7 @@ class NewslettersViewsTests(TestCase):
         subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com')
         self.assertFalse(subscriber.subscribed)
 
-    def test_newsletterraw_detail(self):
+    def test_newsletter_raw_detail_view(self):
         response = self.client.get(reverse('newsletter_raw_detail', kwargs={'pk': 1}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'courriers/newsletter_raw_detail.html')

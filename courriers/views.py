@@ -60,9 +60,6 @@ class NewsletterDetailView(AJAXResponseMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(NewsletterDetailView, self).get_context_data(**kwargs)
 
-        context['form'] = SubscriptionForm(user=self.request.user,
-                                           newsletter_list=self.model.newsletter_list)
-
         context['newsletter_list'] = self.object.newsletter_list
 
         return context
