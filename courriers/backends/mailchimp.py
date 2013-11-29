@@ -124,11 +124,5 @@ class MailchimpBackend(SimpleBackend):
         else:
             ids.append(list_ids[newsletter.newsletter_list.slug])
 
-            if newsletter.newsletter_list.languages:
-                for lang in newsletter.newsletter_list.languages:
-                    slug = u'%s_%s' % (newsletter.newsletter_list.slug, lang)
-                    if slug in list_ids:
-                        ids.append(list_ids[slug])
-
         for list_id in ids:
             self.send_campaign(newsletter, list_id)
