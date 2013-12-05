@@ -3,7 +3,7 @@ pep8:
 
 test:
 	coverage run --branch --source=courriers manage.py test courriers
-	coverage report --omit=courriers/test*
+	coverage report --omit=courriers/test* --omit=courriers/migrations/*
 
 release:
 	python setup.py sdist register upload -s

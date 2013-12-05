@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.utils import timezone as datetime
 from django.core import mail
-from django import forms
 
 from courriers.forms import SubscriptionForm, UnsubscribeForm, UnsubscribeAllForm
 from courriers.models import Newsletter, NewsletterList, NewsletterSubscriber
@@ -424,33 +423,3 @@ class NewsletterModelsTest(TestCase):
         self.assertEqual(n2.get_previous(), n1)
         self.assertEqual(n2.get_next(), n3)
         self.assertEqual(n1.get_previous(), None)
-
-
-class SeparatedValuesFieldTests(TestCase):
-    def test_basics(self):
-        newsletter_list = NewsletterList(name='monthly', slug='monthly')
-        self.assertEqual(newsletter_list.languages, None)
-
-        langs = ['en', 'fr']
-
-        newsletter_list.languages = langs
-        newsletter_list.save()
-
-        self.assertEqual(newsletter_list.languages, langs)
-
-        class NewsletterListForm(forms.ModelForm):
-            class Meta:
-                model = NewsletterList
-
-                excludes = ('created_at', )
-
-        form = NewsletterListForm()
-        self.assertFalse(form.fields['languages'].required)
-
-        valid_data = {'name': 'Weekly', 'slug': 'weekly', 'languages': [u'']}
-        form = NewsletterListForm(data=valid_data)
-        self.assertTrue(form.is_valid())
-
-        valid_data = {'name': 'Daily', 'slug': 'daily', 'languages': [u'en', u'fr']}
-        form = NewsletterListForm(data=valid_data)
-        self.assertTrue(form.is_valid())

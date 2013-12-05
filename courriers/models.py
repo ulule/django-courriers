@@ -13,7 +13,8 @@ from django.utils.encoding import python_2_unicode_compatible
 from .compat import User, update_fields
 from .core import QuerySet, Manager
 from .settings import ALLOWED_LANGUAGES
-from .fields import SeparatedValuesField
+
+from separatedvaluesfield.models import SeparatedValuesField
 
 
 def get_file_path(instance, filename):
