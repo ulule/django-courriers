@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.views.generic import ListView, DetailView, FormView, TemplateView
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 from django.views.generic.base import TemplateResponseMixin
@@ -56,6 +56,12 @@ class NewsletterDetailView(AJAXResponseMixin, DetailView):
     model = Newsletter
     context_object_name = 'newsletter'
     template_name = 'courriers/newsletter_detail.html'
+
+    def get(self, request, *args, **kwargs):
+        response = super(NewsletterDetailView, self).get(request, *args, **kwargs)
+        if self.object.is_online():
+            return response
+        raise Http404
 
     def get_context_data(self, **kwargs):
         context = super(NewsletterDetailView, self).get_context_data(**kwargs)

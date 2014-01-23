@@ -124,7 +124,8 @@ class NewslettersViewsTests(TestCase):
         self.monthly = NewsletterList.objects.create(name="Monthly", slug="monthly")
         self.n1 = Newsletter.objects.create(name='Newsletter1',
                                             newsletter_list=self.monthly,
-                                            published_at=datetime.now())
+                                            published_at=datetime.now(),
+                                            status=Newsletter.STATUS_DRAFT)
 
         self.user = User.objects.create_user('adele', 'adele@ulule.com', '$ecret')
 
@@ -136,7 +137,14 @@ class NewslettersViewsTests(TestCase):
 
     def test_newsletter_detail_view(self):
         response = self.client.get(self.n1.get_absolute_url())
+        self.assertEqual(response.status_code, 404)
+
+        self.n1.status = Newsletter.STATUS_ONLINE
+        self.n1.save()
+
+        response = self.client.get(self.n1.get_absolute_url())
         self.assertEqual(response.status_code, 200)
+
         self.assertTemplateUsed(response, 'courriers/newsletter_detail.html')
 
     def test_newsletter_list_subscribe_view(self):
