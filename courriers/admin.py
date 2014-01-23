@@ -42,10 +42,6 @@ class NewsletterAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(reverse('admin:courriers_newsletter_change', args=(newsletter.id,)))
 
 
-class NewsletterItemAdmin(admin.ModelAdmin):
-    list_display = ('content_type', 'name', 'description', 'newsletter',)
-
-
 class NewsletterSubscriberAdmin(admin.ModelAdmin):
     list_display = ('email', 'user', 'lang', 'is_unsubscribed',)
     list_filter = ('is_unsubscribed',)
@@ -56,6 +52,5 @@ class NewsletterListAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Newsletter, NewsletterAdmin)
-admin.site.register(NewsletterItem, NewsletterItemAdmin)
 admin.site.register(NewsletterSubscriber, NewsletterSubscriberAdmin)
 admin.site.register(NewsletterList, NewsletterListAdmin)
