@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-01-24 15:05+0100\n"
+"POT-Creation-Date: 2014-01-24 16:04+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,15 +23,15 @@ msgstr ""
 msgid "The newsletter \"%s\" has been sent."
 msgstr "La newsletter \"%s\" a été envoyée."
 
-#: forms.py:11 forms.py:42
+#: forms.py:10 forms.py:44
 msgid "Your email"
 msgstr "Votre email"
 
-#: forms.py:32
+#: forms.py:31
 msgid "You already subscribe to this newsletter."
 msgstr "Vous êtes déjà inscrit à cette newsletter."
 
-#: forms.py:60
+#: forms.py:62
 msgid "You are not subscribed to this newsletter."
 msgstr "Vous n'êtes pas inscrit à cette newsletter."
 
@@ -54,11 +54,14 @@ msgstr "La liste %s n'existe pas"
 
 #: backends/mailchimp.py:82
 msgid "You have to specify a DEFAULT_FROM_EMAIL in Django settings."
-msgstr "Vous devez spécifier le paramètre DEFAULT_FROM_EMAIL dans les settings Django."
+msgstr ""
+"Vous devez spécifier le paramètre DEFAULT_FROM_EMAIL dans les settings "
+"Django."
 
 #: backends/mailchimp.py:84
 msgid "You have to specify a DEFAULT_FROM_NAME in Django settings."
-msgstr "Vous devez spécifier le paramètre DEFAULT_FROM_NAME dans les settings Django."
+msgstr ""
+"Vous devez spécifier le paramètre DEFAULT_FROM_NAME dans les settings Django."
 
 #: backends/mailchimp.py:114
 msgid "This newsletter is not online. You can't send it."
@@ -75,6 +78,20 @@ msgstr "Voir sur le site"
 #: templates/courriers/newsletter_list_subscribe_done.html:2
 msgid "Thank you. You successfully subscribe to this newsletter !"
 msgstr "Merci. Vous êtes maintenant inscrit à cette newsletter !"
+
+#: templates/courriers/newsletter_list_subscribe_form.html:16
+#,
+msgid "Subscribe to the newsletter"
+msgstr "S'inscrire à cette newsletter."
+
+#: templates/courriers/newsletter_list_subscribe_form.html:19
+msgid "Close"
+msgstr ""
+
+#: templates/courriers/newsletter_list_unsubscribe.html:15
+#,
+msgid "Your e-mail"
+msgstr "Votre email"
 
 #: templates/courriers/newsletter_list_unsubscribe_done.html:3
 msgid "Thank you. You're now unsubscribed from this newsletter."

@@ -1,4 +1,5 @@
 {% load url from future %}
+{% load i18n %}
 <form action="" method="post" class="ff subscribe">{% csrf_token %}
     {{ form.non_field_errors }}
 
@@ -12,8 +13,8 @@
 
     {{ form.receiver.errors }}
     {{ form.receiver }}
-    <input type="submit" value="Subscribe to the newsletter" class="ff-btn btn-primary">
+    <input type="submit" value="{% trans "Subscribe to the newsletter" %}" class="ff-btn btn-primary">
 </form>
 <div class="close">
-    <a href=""><i class="sprite-flash-close">Close</i></a>
+    <a href=""><i class="sprite-flash-close">{% trans "Close" %}</i></a>
 </div>

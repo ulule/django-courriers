@@ -1,6 +1,5 @@
 from django import forms
-from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import get_language
+from django.utils.translation import ugettext_lazy as _, get_language
 
 from .backends import get_backend
 from .models import NewsletterSubscriber
@@ -34,7 +33,10 @@ class SubscriptionForm(forms.Form):
         return receiver
 
     def save(self, user=None):
-        self.backend.register(self.cleaned_data['receiver'], self.newsletter_list, get_language(), user or self.user)
+        self.backend.register(self.cleaned_data['receiver'],
+                              self.newsletter_list,
+                              get_language(),
+                              user or self.user)
 
 
 class UnsubscribeForm(forms.Form):

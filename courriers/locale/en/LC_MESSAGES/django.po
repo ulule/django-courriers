@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-01-24 15:05+0100\n"
+"POT-Creation-Date: 2014-01-24 16:04+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,15 +22,15 @@ msgstr ""
 msgid "The newsletter \"%s\" has been sent."
 msgstr ""
 
-#: forms.py:11 forms.py:42
+#: forms.py:10 forms.py:44
 msgid "Your email"
 msgstr ""
 
-#: forms.py:32
+#: forms.py:31
 msgid "You already subscribe to this newsletter."
 msgstr ""
 
-#: forms.py:60
+#: forms.py:62
 msgid "You are not subscribed to this newsletter."
 msgstr ""
 
@@ -73,6 +73,18 @@ msgstr ""
 
 #: templates/courriers/newsletter_list_subscribe_done.html:2
 msgid "Thank you. You successfully subscribe to this newsletter !"
+msgstr ""
+
+#: templates/courriers/newsletter_list_subscribe_form.html:16
+msgid "Subscribe to the newsletter"
+msgstr ""
+
+#: templates/courriers/newsletter_list_subscribe_form.html:19
+msgid "Close"
+msgstr ""
+
+#: templates/courriers/newsletter_list_unsubscribe.html:15
+msgid "Your e-mail"
 msgstr ""
 
 #: templates/courriers/newsletter_list_unsubscribe_done.html:3

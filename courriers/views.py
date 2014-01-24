@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from django.views.generic import ListView, DetailView, FormView, TemplateView
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 from django.views.generic.base import TemplateResponseMixin
+from django.utils.translation import get_language
+from django.db.models import Q
 
 from .settings import PAGINATE_BY
 from .models import Newsletter, NewsletterList
@@ -43,6 +45,8 @@ class NewsletterListView(AJAXResponseMixin, ListView):
 
         if lang:
             qs = qs.filter(languages__contains=lang)
+        else:
+            qs = qs.filter(Q(languages__contains=get_language()) | Q(languages__isnull=True))
 
         return qs
 
