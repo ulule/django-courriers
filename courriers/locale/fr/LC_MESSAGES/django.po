@@ -1,0 +1,85 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-01-24 15:05+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: admin.py:41
+#, python-format
+msgid "The newsletter \"%s\" has been sent."
+msgstr "La newsletter \"%s\" a été envoyée."
+
+#: forms.py:11 forms.py:42
+msgid "Your email"
+msgstr "Votre email"
+
+#: forms.py:32
+msgid "You already subscribe to this newsletter."
+msgstr "Vous êtes déjà inscrit à cette newsletter."
+
+#: forms.py:60
+msgid "You are not subscribed to this newsletter."
+msgstr "Vous n'êtes pas inscrit à cette newsletter."
+
+#: models.py:86
+msgid "Online"
+msgstr "En ligne"
+
+#: models.py:87
+msgid "Draft"
+msgstr "Brouillon"
+
+#: backends/mailchimp.py:27
+msgid "Please specify your MAILCHIMP API key in Django settings"
+msgstr "Merci de spécifier votre API key MAILCHIMP dans les settings Django"
+
+#: backends/mailchimp.py:44
+#, python-format
+msgid "List %s does not exist"
+msgstr "La liste %s n'existe pas"
+
+#: backends/mailchimp.py:82
+msgid "You have to specify a DEFAULT_FROM_EMAIL in Django settings."
+msgstr "Vous devez spécifier le paramètre DEFAULT_FROM_EMAIL dans les settings Django."
+
+#: backends/mailchimp.py:84
+msgid "You have to specify a DEFAULT_FROM_NAME in Django settings."
+msgstr "Vous devez spécifier le paramètre DEFAULT_FROM_NAME dans les settings Django."
+
+#: backends/mailchimp.py:114
+msgid "This newsletter is not online. You can't send it."
+msgstr "Cette newsletter n'est pas publiée. Vous ne pouvez pas l'envoyer."
+
+#: templates/admin/courriers/newsletter/change_form.html:8
+msgid "History"
+msgstr "Historique"
+
+#: templates/admin/courriers/newsletter/change_form.html:12
+msgid "View on site"
+msgstr "Voir sur le site"
+
+#: templates/courriers/newsletter_list_subscribe_done.html:2
+msgid "Thank you. You successfully subscribe to this newsletter !"
+msgstr "Merci. Vous êtes maintenant inscrit à cette newsletter !"
+
+#: templates/courriers/newsletter_list_unsubscribe_done.html:3
+msgid "Thank you. You're now unsubscribed from this newsletter."
+msgstr "Merci. Vous êtes maintenant désinscrit de cette newsletter."
+
+#: templates/courriers/newsletter_list_unsubscribe_done.html:5
+msgid "Thank you. You're now unsubscribed from all our newsletters."
+msgstr "Merci. Vous êtes maintenant désinscrit de toutes les newsletters."
