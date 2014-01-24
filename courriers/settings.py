@@ -14,3 +14,5 @@ ALLOWED_LANGUAGES = getattr(settings, 'COURRIERS_ALLOWED_LANGUAGES', settings.LA
 PRE_PROCESSORS = getattr(settings, 'COURRIERS_PRE_PROCESSORS', ())
 
 PAGINATE_BY = getattr(settings, 'COURRIERS_PAGINATE_BY', 9)
+
+FAIL_SILENTLY = getattr(settings, 'COURRIERS_FAIL_SILENTLY', False)

@@ -9,7 +9,7 @@ from django.utils.functional import cached_property
 
 from .simple import SimpleBackend
 from ..models import NewsletterSubscriber
-from ..settings import (MAILCHIMP_API_KEY, PRE_PROCESSORS,
+from ..settings import (MAILCHIMP_API_KEY, PRE_PROCESSORS, FAIL_SILENTLY,
                         DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME)
 from ..utils import load_class
 from ..compat import update_fields
@@ -77,12 +77,18 @@ class MailchimpBackend(SimpleBackend):
         except ListAlreadySubscribedError as e:
             logger.error(e)
 
+            if not FAIL_SILENTLY:
+                raise e
+
     def mc_unsubscribe(self, list_id, email):
         try:
             self.mc.lists.unsubscribe(list_id, {'email': email}, delete_member=False,
                                       send_goodbye=False, send_notify=False)
         except EmailNotExistsError as e:
             logger.error(e)
+
+            if not FAIL_SILENTLY:
+                raise e
 
     def send_campaign(self, newsletter, list_id):
 
