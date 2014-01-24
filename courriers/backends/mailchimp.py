@@ -14,7 +14,7 @@ from ..settings import (MAILCHIMP_API_KEY, PRE_PROCESSORS,
 from ..utils import load_class
 from ..compat import update_fields
 
-from mailchimp import Mailchimp, ListNotSubscribedError
+from mailchimp import Mailchimp, ListNotSubscribedError, ListAlreadySubscribedError, EmailNotExistsError
 
 logger = logging.getLogger('courriers')
 
@@ -70,13 +70,19 @@ class MailchimpBackend(SimpleBackend):
                 self.unregister(email, subscriber.newsletter_list, user=user)
 
     def mc_subscribe(self, list_id, email):
-        self.mc.lists.subscribe(list_id, {'email': email}, merge_vars=None,
-                                email_type='html', double_optin=False, update_existing=False,
-                                replace_interests=True, send_welcome=False)
+        try:
+            self.mc.lists.subscribe(list_id, {'email': email}, merge_vars=None,
+                                    email_type='html', double_optin=False, update_existing=False,
+                                    replace_interests=True, send_welcome=False)
+        except ListAlreadySubscribedError as e:
+            logger.error(e)
 
     def mc_unsubscribe(self, list_id, email):
-        self.mc.lists.unsubscribe(list_id, {'email': email}, delete_member=False,
-                                  send_goodbye=False, send_notify=False)
+        try:
+            self.mc.lists.unsubscribe(list_id, {'email': email}, delete_member=False,
+                                      send_goodbye=False, send_notify=False)
+        except EmailNotExistsError as e:
+            logger.error(e)
 
     def send_campaign(self, newsletter, list_id):
 
