@@ -136,7 +136,10 @@ class NewsletterRawDetailView(AJAXResponseMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(NewsletterRawDetailView, self).get_context_data(**kwargs)
 
-        context['items'] = self.object.items.all().prefetch_related('newsletter')
+        context['items'] = self.object.items.all()
+
+        for item in context['items']:
+            item.newsletter = self.object
 
         return context
 

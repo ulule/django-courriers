@@ -129,6 +129,10 @@ class NewsletterItem(models.Model):
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to=get_file_path, blank=True, null=True)
     url = models.URLField(blank=True, null=True)
+    position = models.PositiveIntegerField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['position']
 
     def __str__(self):
         return self.name
