@@ -5,6 +5,7 @@ import logging
 
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
+from django.utils.functional import cached_property
 
 from .simple import SimpleBackend
 from ..models import NewsletterSubscriber
@@ -27,13 +28,14 @@ class MailchimpBackend(SimpleBackend):
             raise Exception(_('Please specify your MAILCHIMP API key in Django settings'))
         self.mc = self.mailchimp_class(MAILCHIMP_API_KEY, True)
 
-    def get_list_ids(self):
+    @cached_property
+    def list_ids(self):
         return dict((l['name'], l['id']) for l in self.mc.lists.list()['data'])
 
     def register(self, email, newsletter_list, lang=None, user=None):
         super(MailchimpBackend, self).register(email, newsletter_list, lang=lang, user=user)
 
-        list_ids = self.get_list_ids()
+        list_ids = self.list_ids
 
         self.mc_subscribe(list_ids[newsletter_list.slug], email)
 
@@ -49,7 +51,7 @@ class MailchimpBackend(SimpleBackend):
         if newsletter_list:
             super(MailchimpBackend, self).unregister(email, newsletter_list, user=user)
 
-            list_ids = self.get_list_ids()
+            list_ids = self.list_ids
 
             ids = [list_ids[newsletter_list.slug]]
 
@@ -113,7 +115,7 @@ class MailchimpBackend(SimpleBackend):
         if not newsletter.is_online():
             raise Exception(_("This newsletter is not online. You can't send it."))
 
-        list_ids = self.get_list_ids()
+        list_ids = self.list_ids
         ids = []
 
         if newsletter.languages:
