@@ -407,6 +407,24 @@ if hasattr(settings, 'COURRIERS_MAILCHIMP_API_KEY'):
                 self.backend.send_mails(newsletter)
 
 
+if hasattr(settings, 'COURRIERS_MAILJET_API_KEY') and hasattr(settings, 'COURRIERS_MAILJET_API_SECRET_KEY'):
+    @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailjet.MailjetBackend')
+    class SubscribeMailjetFormTest(SubscribeFormTest):
+        pass
+
+    @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailjet.MailjetBackend')
+    class UnsubscribeMailjetFormTest(UnsubscribeFormTest):
+        pass
+
+    @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailjet.MailjetBackend')
+    class MailjetBackendTests(BaseBackendTests):
+        def test_registration(self):
+            super(MailjetBackendTests, self).test_registration()
+
+            for newsletter in self.newsletters:
+                self.backend.send_mails(newsletter)
+
+
 class NewsletterModelsTest(TestCase):
     def test_navigation(self):
         monthly = NewsletterList.objects.create(name="Monthly", slug="monthly")
