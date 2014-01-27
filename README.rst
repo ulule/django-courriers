@@ -37,7 +37,7 @@ You have the choice between three backends to manage and send your emails:
 - ``SimpleBackend``, a simple backend to send emails with Django and
   your current smtp configuration
 - ``MailchimpBackend``, a `Mailchimp`_ backend which uses `mailchimp library`_
-- ``MailJetBackend``, a `Mailjet`_ backend, which will be available soon
+- ``MailJetBackend``, a `Mailjet`_ backend which uses `mailjet library`_
 
 
 Installation
@@ -73,6 +73,11 @@ courriers.backends.mailchimp.MailchimpBackend
 
 A backend to manage your newsletters with Mailchimp.
 
+courriers.backends.mailjet.MailjetBackend
+..............................................
+
+A backend to manage your newsletters with Mailjet.
+
 
 What you need to do for mailchimp
 .................................
@@ -82,7 +87,7 @@ What you need to do for mailchimp
 - Add it to your settings with others options as described below
 - Install the `mailchimp library`_
 - Create a list or more if you have users
-  from different countries (see multilingual section below)
+  from different countries
 
 Which this backend you have to provide additional settings ::
 
@@ -90,12 +95,24 @@ Which this backend you have to provide additional settings ::
     COURRIERS_DEFAULT_FROM_NAME = 'Your name'
 
 
-Where the suffix language code is one of Django language code.
+What you need to do for mailjet
+.................................
 
-See `available languages codes`_.
+- Create an account on Mailjet
+- Get your API key and API Secret key
+- Add it to your settings with others options as described below
+- Install the `mailjet library`_
+- Create a list or more if you have users
+  from different countries
+
+Which this backend you have to provide additional settings ::
+
+    COURRIERS_MAILJET_API_KEY = 'Your API key'
+    COURRIERS_MAILJET_API_SECRET_KEY = 'Your API Secret key'
+    COURRIERS_DEFAULT_FROM_NAME = 'Your name'
 
 .. _GitHub: https://github.com/ulule/django-courriers
-.. _Available languages codes: https://github.com/django/django/tree/master/django/conf/locale
 .. _Mailchimp: http://mailchimp.com/
 .. _Mailjet: https://eu.mailjet.com/
 .. _mailchimp library: https://pypi.python.org/pypi/mailchimp
+.. _mailjet library: https://pypi.python.org/pypi/mailjet/
