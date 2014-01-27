@@ -6,9 +6,9 @@ import logging
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from django.utils.functional import cached_property
+from django.core.exceptions import ImproperlyConfigured
 
 from .simple import SimpleBackend
-from ..models import NewsletterSubscriber
 from ..settings import (MAILCHIMP_API_KEY, PRE_PROCESSORS, FAIL_SILENTLY,
                         DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME)
 from ..utils import load_class
@@ -20,12 +20,11 @@ logger = logging.getLogger('courriers')
 
 
 class MailchimpBackend(SimpleBackend):
-    model = NewsletterSubscriber
     mailchimp_class = Mailchimp
 
     def __init__(self):
         if not MAILCHIMP_API_KEY:
-            raise Exception(_('Please specify your MAILCHIMP API key in Django settings'))
+            raise ImproperlyConfigured(_('Please specify your MAILCHIMP API key in Django settings'))
         self.mc = self.mailchimp_class(MAILCHIMP_API_KEY, True)
 
     @cached_property
@@ -93,9 +92,9 @@ class MailchimpBackend(SimpleBackend):
     def send_campaign(self, newsletter, list_id):
 
         if not DEFAULT_FROM_EMAIL:
-            raise Exception(_("You have to specify a DEFAULT_FROM_EMAIL in Django settings."))
+            raise ImproperlyConfigured(_("You have to specify a DEFAULT_FROM_EMAIL in Django settings."))
         if not DEFAULT_FROM_NAME:
-            raise Exception(_("You have to specify a DEFAULT_FROM_NAME in Django settings."))
+            raise ImproperlyConfigured(_("You have to specify a DEFAULT_FROM_NAME in Django settings."))
 
         options = {
             'list_id': list_id,
@@ -106,7 +105,7 @@ class MailchimpBackend(SimpleBackend):
 
         html = render_to_string('courriers/newsletter_raw_detail.html', {
             'object': newsletter,
-            'items': newsletter.items.all().prefetch_related('newsletter')
+            'items': newsletter.items.select_related('newsletter')
         })
 
         for pre_processor in PRE_PROCESSORS:

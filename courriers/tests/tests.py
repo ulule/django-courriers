@@ -36,16 +36,20 @@ class BaseBackendTests(TestCase):
                                        newsletter_list=self.monthly,
                                        languages=['fr'])
 
-        n3 = Newsletter.objects.create(name="3000 projets finances [en-us]",
+        n3 = Newsletter.objects.create(name="3000 projets finances [enus]",
                                        published_at=datetime.now() - datetime.timedelta(hours=2),
                                        status=Newsletter.STATUS_ONLINE,
                                        newsletter_list=self.weekly,
-                                       languages=['en-us'])
+                                       languages=['enus'])
 
         self.newsletters = [n1, n2, n3]
 
     def test_registration(self):
         # Subscribe to all
+
+        self.backend.unregister('adele@ulule.com', self.monthly, 'fr')
+        self.backend.unregister('adele@ulule.com', self.weekly, 'fr')
+
         self.backend.register('adele@ulule.com', self.monthly, 'fr')
         self.backend.register('adele@ulule.com', self.weekly, 'fr')
 
@@ -101,22 +105,22 @@ class SimpleBackendTests(BaseBackendTests):
     def test_registration(self):
         super(SimpleBackendTests, self).test_registration()
 
-        self.backend.register('adele@ulule.com', self.newsletters[0])
+        self.backend.register('adele@ulule.com', self.newsletters[0].newsletter_list)
 
         self.backend.send_mails(self.newsletters[0])
         self.assertEqual(len(mail.outbox), NewsletterSubscriber.objects.subscribed().filter(newsletter_list=self.newsletters[0].newsletter_list).count())
         out = len(mail.outbox)
 
-        self.backend.register('adele@ulule.com', self.newsletters[0], 'fr')
+        self.backend.register('adele@ulule.com', self.newsletters[0].newsletter_list, 'fr')
 
         self.backend.send_mails(self.newsletters[1])
         self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().filter(newsletter_list=self.newsletters[1].newsletter_list).has_lang('fr').count())
         out = len(mail.outbox)
 
-        self.backend.register('adele@ulule.com', self.newsletters[0], 'en-us')
+        self.backend.register('adele@ulule.com', self.newsletters[0].newsletter_list, 'enus')
 
         self.backend.send_mails(self.newsletters[2])
-        self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().filter(newsletter_list=self.newsletters[2].newsletter_list).has_lang('en-us').count())
+        self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().filter(newsletter_list=self.newsletters[2].newsletter_list).has_lang('enus').count())
 
 
 class NewslettersViewsTests(TestCase):
