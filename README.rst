@@ -26,10 +26,10 @@ What it does?
 
 django-courriers has three models:
 
-- ``NewsletterList`` which represents a newsletter list.
-- ``Newsletter`` which represents a newsletter.
-- ``NewsletterItem`` an item of a newsletter. It could be a content-type you want.
-- ``NewsletterSubscriber`` which represents a user who is subscribed to a newsletter.
+- ``NewsletterList`` which represents a newsletter list
+- ``Newsletter`` which represents a newsletter
+- ``NewsletterItem`` an item of a newsletter. It could be a content-type
+- ``NewsletterSubscriber`` which represents a user who is subscribed to a newsletter
 
 
 You have the choice between three backends to manage and send your emails:
@@ -89,7 +89,7 @@ What you need to do for mailchimp
 - Create a list or more if you have users
   from different countries
 
-Which this backend you have to provide additional settings ::
+With this backend you have to provide additional settings ::
 
     COURRIERS_MAILCHIMP_API_KEY = 'Your API key'
     COURRIERS_DEFAULT_FROM_NAME = 'Your name'
@@ -105,7 +105,7 @@ What you need to do for mailjet
 - Create a list or more if you have users
   from different countries
 
-Which this backend you have to provide additional settings ::
+With this backend you have to provide additional settings ::
 
     COURRIERS_MAILJET_API_KEY = 'Your API key'
     COURRIERS_MAILJET_API_SECRET_KEY = 'Your API Secret key'
