@@ -68,15 +68,23 @@ class MailjetBackend(SimpleBackend):
         super(MailjetBackend, self).register(email, newsletter_list, lang=lang, user=user)
 
         list_ids = self.list_ids
-        self.mj_subscribe(list_ids[newsletter_list.slug], email)
+
+        keys = [self._format_slug(newsletter_list.slug), ]
 
         if lang:
-            key = self._format_slug(newsletter_list.slug, lang)
+            keys.append(self._format_slug(newsletter_list.slug, lang))
 
+        for key in keys:
             if not key in list_ids:
-                raise Exception(_('List %s does not exist') % key)
 
-            self.mj_subscribe(list_ids[key], email)
+                message = 'List %s does not exist' % key
+
+                if not FAIL_SILENTLY:
+                    raise Exception(message)
+
+                logger.error(message)
+            else:
+                self.mj_subscribe(list_ids[key], email)
 
     def unregister(self, email, newsletter_list=None, user=None):
         if newsletter_list:
@@ -84,15 +92,22 @@ class MailjetBackend(SimpleBackend):
 
             list_ids = self.list_ids
 
-            ids = [list_ids[newsletter_list.slug]]
+            keys = [self._format_slug(newsletter_list.slug), ]
 
             if newsletter_list.languages:
                 for lang in newsletter_list.languages:
-                    slug = self._format_slug(newsletter_list.slug, lang)
-                    ids.append(list_ids[slug])
+                    keys.append(self._format_slug(newsletter_list.slug, lang))
 
-            for lid in ids:
-                self.mj_unsubscribe(lid, email)
+            for key in keys:
+                if not key in list_ids:
+                    message = 'List %s does not exist' % key
+
+                    if not FAIL_SILENTLY:
+                        raise Exception(message)
+
+                    logger.error(message)
+                else:
+                    self.mj_unsubscribe(list_ids[key], email)
         else:
             for subscriber in self.all(email, user=user):
                 self.unregister(email, subscriber.newsletter_list, user=user)
