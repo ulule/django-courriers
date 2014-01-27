@@ -35,7 +35,7 @@ class SubscriptionForm(forms.Form):
     def save(self, user=None):
         self.backend.register(self.cleaned_data['receiver'],
                               self.newsletter_list,
-                              get_language().replace("-", ""),
+                              get_language(),
                               user or self.user)
 
 

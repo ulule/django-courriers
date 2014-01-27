@@ -5,4 +5,4 @@
     {{ item.description }}
 {% endfor %}
 
-<a href="[[UNSUB_LINK_EN]]"></a>
+[[UNSUB_LINK_EN]]

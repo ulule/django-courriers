@@ -6,7 +6,6 @@ import logging
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from django.utils.functional import cached_property
-from django.template.defaultfilters import strip_tags
 from django.core.exceptions import ImproperlyConfigured
 
 from .simple import SimpleBackend
@@ -33,7 +32,7 @@ class MailjetBackend(SimpleBackend):
 
     @cached_property
     def list_ids(self):
-        return dict((l['name'], l['id']) for l in self.mailjet_api.lists.all()['lists'])
+        return dict((l['label'], l['id']) for l in self.mailjet_api.lists.all()['lists'])
 
     def create_list(self, label, name):
         try:
@@ -69,18 +68,15 @@ class MailjetBackend(SimpleBackend):
         super(MailjetBackend, self).register(email, newsletter_list, lang=lang, user=user)
 
         list_ids = self.list_ids
-
-        if not self.exists(email, newsletter_list):
-            self.mj_subscribe(list_ids[newsletter_list.slug], email)
+        self.mj_subscribe(list_ids[newsletter_list.slug], email)
 
         if lang:
-            key = "%s%s" % (newsletter_list.slug, lang.upper())
+            key = self._format_slug(newsletter_list.slug, lang)
 
             if not key in list_ids:
                 raise Exception(_('List %s does not exist') % key)
 
-            if not self.exists(email, newsletter_list):
-                self.mj_subscribe(list_ids[key], email)
+            self.mj_subscribe(list_ids[key], email)
 
     def unregister(self, email, newsletter_list=None, user=None):
         if newsletter_list:
@@ -92,12 +88,11 @@ class MailjetBackend(SimpleBackend):
 
             if newsletter_list.languages:
                 for lang in newsletter_list.languages:
-                    slug = u'%s%s' % (newsletter_list.slug, lang.upper())
+                    slug = self._format_slug(newsletter_list.slug, lang)
                     ids.append(list_ids[slug])
 
             for lid in ids:
-                if self.exists(email, newsletter_list):
-                    self.mj_unsubscribe(lid, email)
+                self.mj_unsubscribe(lid, email)
         else:
             for subscriber in self.all(email, user=user):
                 self.unregister(email, subscriber.newsletter_list, user=user)
@@ -166,7 +161,10 @@ class MailjetBackend(SimpleBackend):
                 'method': 'POST',
                 'id': campaign['campaign']['id'],
                 'html': html,
-                'text': strip_tags(html)
+                'text': render_to_string('courriers/newsletter_raw_detail.txt', {
+                    'object': newsletter,
+                    'items': newsletter.items.select_related('newsletter')
+                })
             }
 
             try:
@@ -185,6 +183,9 @@ class MailjetBackend(SimpleBackend):
                 newsletter.sent = True
                 update_fields(newsletter, fields=('sent', ))
 
+    def _format_slug(self, *args):
+        return u''.join([unicode(arg).replace('-', '') for arg in args])
+
     def send_mails(self, newsletter):
         if not newsletter.is_online():
             raise Exception(_("This newsletter is not online. You can't send it."))
@@ -194,7 +195,7 @@ class MailjetBackend(SimpleBackend):
 
         if newsletter.languages:
             for lang in newsletter.languages:
-                slug = u'%s%s' % (newsletter.newsletter_list.slug, lang.upper())
+                slug = self._format_slug(newsletter.newsletter_list.slug, lang)
                 if slug in list_ids:
                     ids.append(list_ids[slug])
         else:
