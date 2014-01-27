@@ -38,3 +38,34 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 if django.VERSION <= (1, 6):
     TEST_RUNNER = 'discover_runner.DiscoverRunner'
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+    },
+    'handlers': {
+        'stream': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['stream'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+
+        'courriers': {
+            'handlers': ['stream'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
