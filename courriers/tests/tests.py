@@ -157,14 +157,19 @@ class NewslettersViewsTests(TestCase):
 
         self.assertTrue(isinstance(response.context['form'], SubscriptionForm))
 
-    def test_newsletter_list_subscribe_complete(self):
-        subscriber = NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='adele@ulule.com', lang='fr')
+    def test_newsletter_list_subscribe_errors(self):
+        subscriber = NewsletterSubscriber.objects.create(newsletter_list=self.monthly,
+                                                         email='adele@ulule.com',
+                                                         lang=settings.LANGUAGE_CODE)
 
         response = self.client.post(reverse('newsletter_list_subscribe',
                                     kwargs={'slug': self.monthly.slug}),
                                     HTTP_X_REQUESTED_WITH='XMLHttpRequest',
                                     data={'receiver': subscriber.email})
         self.assertEqual(response.status_code, 200)
+
+        self.assertFalse(response.context['form'].is_valid())
+        self.assertTrue('receiver' in response.context['form'].errors)
 
         subscriber.unsubscribe()
 

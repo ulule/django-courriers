@@ -14,6 +14,7 @@ class SubscriptionForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         self.newsletter_list = kwargs.pop('newsletter_list', None)
+        self.lang = kwargs.pop('lang', get_language())
 
         backend_klass = get_backend()
 
@@ -24,11 +25,14 @@ class SubscriptionForm(forms.Form):
     def clean_receiver(self):
         receiver = self.cleaned_data['receiver']
 
-        if self.backend.exists(receiver, self.newsletter_list, user=self.user):
-            subscriber = NewsletterSubscriber.objects.get(email=receiver,
-                                                          newsletter_list_id=self.newsletter_list.id)
+        if self.backend.exists(receiver, self.newsletter_list, user=self.user, lang=self.lang):
+            qs = NewsletterSubscriber.objects.filter(email=receiver,
+                                                     newsletter_list_id=self.newsletter_list.id)
 
-            if not subscriber.is_unsubscribed:
+            if self.lang:
+                qs = qs.filter(lang=self.lang)
+
+            if not qs.get().is_unsubscribed:
                 raise forms.ValidationError(_(u"You already subscribe to this newsletter."))
 
         return receiver
@@ -36,8 +40,8 @@ class SubscriptionForm(forms.Form):
     def save(self, user=None):
         self.backend.register(self.cleaned_data['receiver'],
                               self.newsletter_list,
-                              get_language(),
-                              user or self.user)
+                              lang=self.lang,
+                              user=user or self.user)
 
 
 class UnsubscribeForm(forms.Form):

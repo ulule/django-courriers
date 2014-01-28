@@ -19,42 +19,48 @@ class SimpleBackend(BaseBackend):
                                          newsletter_list=newsletter_list, lang=lang)
 
     def register(self, email, newsletter_list, lang=None, user=None):
-        if not self.exists(email, newsletter_list):
+        if not self.exists(email, newsletter_list, lang=lang):
             subscriber = self.subscribe(email, newsletter_list, lang, user)
         else:
-            subscriber = self.model.objects.get(email=email, newsletter_list=newsletter_list)
+            subscriber = self.all(email=email, newsletter_list=newsletter_list, lang=lang).get()
 
             if subscriber.is_unsubscribed:
                 subscriber.subscribe()
 
-    def unregister(self, email, newsletter_list=None, user=None):
+    def unregister(self, email, newsletter_list=None, user=None, lang=None):
+        qs = self.model.objects.filter(email=email)
+
+        if lang:
+            qs = qs.filter(lang=lang)
+
         if not newsletter_list:
-            for subscriber in self.model.objects.filter(email=email):
+            for subscriber in qs:
                 subscriber.unsubscribe(commit=True)
         else:
             if self.exists(email, newsletter_list):
-                self.model.objects.get(email=email, newsletter_list=newsletter_list).unsubscribe()
+                qs.filter(newsletter_list=newsletter_list).get().unsubscribe()
 
-    def exists(self, email, newsletter_list=None, user=None):
-        qs = self.all(email, user=user)
+    def exists(self, email, newsletter_list=None, user=None, lang=None):
+        return self.all(email, user=user, lang=lang, newsletter_list=newsletter_list).exists()
 
-        if newsletter_list:
-            qs = qs.filter(newsletter_list=newsletter_list)
-
-        return qs.exists()
-
-    def all(self, email, user=None):
+    def all(self, email, user=None, lang=None, newsletter_list=None):
         qs = self.model.objects.filter(email=email).select_related('newsletter_list')
 
         if user:
             qs = qs.filter(user=user)
 
+        if lang:
+            qs = qs.filter(lang=lang)
+
+        if newsletter_list:
+            qs = qs.filter(newsletter_list=newsletter_list)
+
         return qs
 
-    def subscribed(self, email, newsletter_list, user=None):
-        return self.model.objects.filter(email=email,
-                                         newsletter_list=newsletter_list,
-                                         is_unsubscribed=False).exists()
+    def subscribed(self, email, newsletter_list, user=None, lang=None):
+        return (self.all(email, user=user, lang=lang, newsletter_list=newsletter_list)
+                .filter(is_unsubscribed=False)
+                .exists())
 
     def send_mails(self, newsletter, fail_silently=False):
         qs = self.model.objects.filter(newsletter_list=newsletter.newsletter_list).subscribed()

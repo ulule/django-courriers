@@ -64,9 +64,9 @@ class CampaignBackend(SimpleBackend):
                     if not FAIL_SILENTLY:
                         raise e
 
-    def unregister(self, email, newsletter_list=None, user=None):
+    def unregister(self, email, newsletter_list=None, user=None, lang=None):
         if newsletter_list:
-            super(CampaignBackend, self).unregister(email, newsletter_list, user=user)
+            super(CampaignBackend, self).unregister(email, newsletter_list, user=user, lang=lang)
 
             list_ids = self.list_ids
 
