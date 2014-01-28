@@ -4,6 +4,7 @@ from .base import BaseBackend
 from django.template.loader import render_to_string
 from django.core import mail
 from django.core.mail import EmailMultiAlternatives
+from django.utils import translation
 
 from ..models import NewsletterSubscriber
 from ..settings import DEFAULT_FROM_EMAIL, PRE_PROCESSORS
@@ -74,7 +75,12 @@ class SimpleBackend(BaseBackend):
         connection = mail.get_connection(fail_silently=fail_silently)
 
         emails = []
+
+        old_language = translation.get_language()
+
         for subscriber in subscribers:
+            translation.activate(subscriber.lang)
+
             email = EmailMultiAlternatives(newsletter.name,
                                            render_to_string('courriers/newsletter_raw_detail.txt', {
                                                'object': newsletter,
@@ -96,6 +102,8 @@ class SimpleBackend(BaseBackend):
             email.attach_alternative(html, 'text/html')
 
             emails.append(email)
+
+        translation.activate(old_language)
 
         results = connection.send_messages(emails)
 

@@ -4,6 +4,7 @@ from courriers.settings import FAIL_SILENTLY, DEFAULT_FROM_EMAIL, DEFAULT_FROM_N
 from courriers.compat import update_fields
 
 from django.core.exceptions import ImproperlyConfigured
+from django.utils import translation
 
 from .simple import SimpleBackend
 
@@ -102,6 +103,15 @@ class CampaignBackend(SimpleBackend):
         if not DEFAULT_FROM_NAME:
             raise ImproperlyConfigured("You have to specify a DEFAULT_FROM_NAME in Django settings.")
 
+        old_language = translation.get_language()
+
+        language = settings.LANGUAGE_CODE
+
+        if len(newsletter.languages) == 1:
+            language = newsletter.languages[0]
+
+        translation.activate(language)
+
         try:
             self._send_campaign(newsletter, list_id)
         except Exception as e:
@@ -112,3 +122,5 @@ class CampaignBackend(SimpleBackend):
         else:
             newsletter.sent = True
             update_fields(newsletter, fields=('sent', ))
+
+        translation.activate(old_language)
