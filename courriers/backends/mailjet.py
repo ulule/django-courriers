@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
@@ -86,4 +86,4 @@ class MailjetBackend(CampaignBackend):
         })
 
     def _format_slug(self, *args):
-        return u''.join([unicode(arg).replace('-', '') for arg in args])
+        return u''.join([(u'%s' % arg).replace('-', '') for arg in args])

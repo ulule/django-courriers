@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
@@ -64,4 +64,4 @@ class MailchimpBackend(CampaignBackend):
         self.mc.campaigns.send(campaign['id'])
 
     def _format_slug(self, *args):
-        return u'_'.join([unicode(arg) for arg in args])
+        return u'_'.join([u'%s' % arg for arg in args])
