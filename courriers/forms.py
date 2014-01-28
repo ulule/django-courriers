@@ -69,7 +69,7 @@ class UnsubscribeForm(forms.Form):
         return email
 
     def save(self, user=None):
-        from_all = self.cleaned_data['from_all']
+        from_all = self.cleaned_data.get('from_all', False)
 
         if from_all or not self.newsletter_list:
             self.backend.unregister(self.cleaned_data['email'])
