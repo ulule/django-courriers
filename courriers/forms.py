@@ -25,7 +25,8 @@ class SubscriptionForm(forms.Form):
         receiver = self.cleaned_data['receiver']
 
         if self.backend.exists(receiver, self.newsletter_list, user=self.user):
-            subscriber = NewsletterSubscriber.objects.get(email=receiver, newsletter_list_id=self.newsletter_list.id)
+            subscriber = NewsletterSubscriber.objects.get(email=receiver,
+                                                          newsletter_list_id=self.newsletter_list.id)
 
             if not subscriber.is_unsubscribed:
                 raise forms.ValidationError(_(u"You already subscribe to this newsletter."))

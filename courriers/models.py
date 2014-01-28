@@ -3,6 +3,7 @@ import os
 
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 from django.contrib.contenttypes import generic
 from django.template.defaultfilters import slugify, truncatechars
 from django.utils.translation import ugettext_lazy as _
@@ -24,6 +25,19 @@ def get_file_path(instance, filename):
     return os.path.join('courriers', 'uploads', filename)
 
 
+class NewsletterListQuerySet(QuerySet):
+    def has_lang(self, lang):
+        return self.filter(Q(languages__contains=lang) | Q(languages__isnull=True))
+
+
+class NewsletterListManager(Manager):
+    def get_query_set(self):
+        return NewsletterListQuerySet(self.model)
+
+    def has_lang(self, lang):
+        return self.get_query_set().has_lang(lang)
+
+
 @python_2_unicode_compatible
 class NewsletterList(models.Model):
     name = models.CharField(max_length=255)
@@ -35,6 +49,8 @@ class NewsletterList(models.Model):
                                      null=True,
                                      choices=ALLOWED_LANGUAGES)
 
+    objects = NewsletterListManager()
+
     def __str__(self):
         return self.name
 
@@ -45,6 +61,9 @@ class NewsletterList(models.Model):
 
 
 class NewsletterQuerySet(QuerySet):
+    def has_lang(self, lang):
+        return self.filter(Q(languages__contains=lang) | Q(languages__isnull=True))
+
     def status_online(self):
         return (self.filter(status=Newsletter.STATUS_ONLINE,
                             published_at__lt=datetime.now())
@@ -66,6 +85,9 @@ class NewsletterQuerySet(QuerySet):
 class NewsletterManager(Manager):
     def get_query_set(self):
         return NewsletterQuerySet(self.model)
+
+    def has_lang(self, lang):
+        return self.get_query_set().has_lang(lang)
 
     def status_online(self):
         return self.get_query_set().status_online()

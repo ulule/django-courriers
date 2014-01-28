@@ -6,7 +6,6 @@ from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 from django.views.generic.base import TemplateResponseMixin
 from django.utils.translation import get_language
-from django.db.models import Q
 
 from .settings import PAGINATE_BY
 from .models import Newsletter, NewsletterList
@@ -34,21 +33,21 @@ class NewsletterListView(AJAXResponseMixin, ListView):
     template_name = 'courriers/newsletter_list.html'
     paginate_by = PAGINATE_BY
 
+    def dispatch(self, *args, **kwargs):
+        self.lang = self.kwargs.get('lang', None) or get_language()
+
+        return super(NewsletterListView, self).dispatch(*args, **kwargs)
+
     @cached_property
     def newsletter_list(self):
-        return get_object_or_404(NewsletterList, slug=self.kwargs.get('slug'))
+        return get_object_or_404(NewsletterList.objects.has_lang(self.lang),
+                                 slug=self.kwargs.get('slug'))
 
     def get_queryset(self):
-        qs = self.newsletter_list.newsletters.status_online().order_by('-published_at')
-
-        lang = self.kwargs.get('lang', None)
-
-        if lang:
-            qs = qs.filter(languages__contains=lang)
-        else:
-            qs = qs.filter(Q(languages__contains=get_language()) | Q(languages__isnull=True))
-
-        return qs
+        return (self.newsletter_list.newsletters
+                .status_online()
+                .has_lang(self.lang)
+                .order_by('-published_at'))
 
     def get_context_data(self, **kwargs):
         context = super(NewsletterListView, self).get_context_data(**kwargs)
@@ -62,7 +61,7 @@ class NewsletterDetailView(AJAXResponseMixin, DetailView):
     template_name = 'courriers/newsletter_detail.html'
 
     def get_queryset(self):
-        return self.model.objects.status_online()
+        return self.model.objects.status_online().has_lang(get_language())
 
     def get_context_data(self, **kwargs):
         context = super(NewsletterDetailView, self).get_context_data(**kwargs)
