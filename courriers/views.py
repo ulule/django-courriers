@@ -34,7 +34,7 @@ class NewsletterListView(AJAXResponseMixin, ListView):
     paginate_by = PAGINATE_BY
 
     def dispatch(self, *args, **kwargs):
-        self.lang = self.kwargs.get('lang', None) or get_language()
+        self.lang = kwargs.get('lang', None) or get_language()
 
         return super(NewsletterListView, self).dispatch(*args, **kwargs)
 
