@@ -59,7 +59,7 @@ class SimpleBackend(BaseBackend):
 
         return qs
 
-    def subscribed(self, email, newsletter_list, user=None, lang=None):
+    def subscribed(self, email, newsletter_list=None, user=None, lang=None):
         return (self.all(email, user=user, lang=lang, newsletter_list=newsletter_list)
                 .filter(is_unsubscribed=False)
                 .exists())

@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone as datetime
 from django.core import mail
 
-from courriers.forms import SubscriptionForm, UnsubscribeForm, UnsubscribeAllForm
+from courriers.forms import SubscriptionForm, UnsubscribeForm
 from courriers.models import Newsletter, NewsletterList, NewsletterSubscriber
 
 from django.conf import settings
@@ -228,7 +228,7 @@ class NewslettersViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'courriers/newsletter_list_unsubscribe.html')
 
-        self.assertTrue(isinstance(response.context['form'], UnsubscribeAllForm))
+        self.assertTrue(isinstance(response.context['form'], UnsubscribeForm))
 
         response = self.client.get(url, {'form': response.context['form']}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)

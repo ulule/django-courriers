@@ -63,12 +63,12 @@ class MailjetBackend(CampaignBackend):
             'footer': 'default'
         }
 
-        campaign = self.mailjet_api.message.createcampaign(**options)
-
         html = render_to_string('courriers/newsletter_raw_detail.html', {
             'object': newsletter,
             'items': newsletter.items.select_related('newsletter')
         })
+
+        campaign = self.mailjet_api.message.createcampaign(**options)
 
         for pre_processor in PRE_PROCESSORS:
             html = load_class(pre_processor)(html)

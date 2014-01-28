@@ -9,7 +9,7 @@ from django.utils.translation import get_language
 
 from .settings import PAGINATE_BY
 from .models import Newsletter, NewsletterList
-from .forms import SubscriptionForm, UnsubscribeForm, UnsubscribeAllForm
+from .forms import SubscriptionForm, UnsubscribeForm
 from .utils import ajaxify_template_var
 
 
@@ -147,9 +147,6 @@ class NewsletterListUnsubscribeView(BaseNewsletterListFormView):
     template_name = 'courriers/newsletter_list_unsubscribe.html'
 
     def get_form_class(self):
-        if not self.kwargs.get('slug', None):
-            return UnsubscribeAllForm
-
         return UnsubscribeForm
 
     def get_initial(self):

@@ -63,7 +63,7 @@ class UnsubscribeForm(forms.Form):
     def clean_email(self):
         email = self.cleaned_data['email']
 
-        if not self.backend.subscribed(email, self.newsletter_list):
+        if not self.backend.subscribed(email, newsletter_list=self.newsletter_list):
             raise forms.ValidationError(_(u"You are not subscribed to this newsletter."))
 
         return email
@@ -71,21 +71,7 @@ class UnsubscribeForm(forms.Form):
     def save(self, user=None):
         from_all = self.cleaned_data['from_all']
 
-        if from_all:
+        if from_all or not self.newsletter_list:
             self.backend.unregister(self.cleaned_data['email'])
         else:
-            self.backend.unregister(self.cleaned_data['email'], self.newsletter_list)
-
-
-class UnsubscribeAllForm(forms.Form):
-    email = forms.EmailField(max_length=250, required=True)
-
-    def __init__(self, *args, **kwargs):
-        backend_klass = get_backend()
-
-        self.backend = backend_klass()
-
-        super(UnsubscribeAllForm, self).__init__(*args, **kwargs)
-
-    def save(self, user=None):
-        self.backend.unregister(self.cleaned_data['email'])
+            self.backend.unregister(self.cleaned_data['email'], newsletter_list=self.newsletter_list)
