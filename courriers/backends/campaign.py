@@ -3,6 +3,7 @@ import logging
 from courriers.settings import FAIL_SILENTLY, DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME
 from courriers.compat import update_fields
 
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import translation
 
