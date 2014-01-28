@@ -38,7 +38,8 @@ class SimpleBackend(BaseBackend):
                 subscriber.unsubscribe(commit=True)
         else:
             if self.exists(email, newsletter_list):
-                qs.filter(newsletter_list=newsletter_list).get().unsubscribe()
+                for subscriber in qs.filter(newsletter_list=newsletter_list):
+                    subscriber.unsubscribe(commit=True)
 
     def exists(self, email, newsletter_list=None, user=None, lang=None):
         return self.all(email, user=user, lang=lang, newsletter_list=newsletter_list).exists()
