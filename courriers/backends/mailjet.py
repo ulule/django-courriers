@@ -8,6 +8,11 @@ from django.utils.translation import ugettext as _
 from django.utils.functional import cached_property
 from django.core.exceptions import ImproperlyConfigured
 
+try:
+    from django.utils.encoding import smart_unicode
+except ImportError:
+    from django.utils.encoding import smart_text as smart_unicode
+
 from .campaign import CampaignBackend
 from ..settings import (MAILJET_API_KEY, MAILJET_API_SECRET_KEY,
                         DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME,
@@ -50,7 +55,7 @@ class MailjetBackend(CampaignBackend):
     def _send_campaign(self, newsletter, list_id):
         options = {
             'method': 'POST',
-            'subject': newsletter.name,
+            'subject': smart_unicode(newsletter.name).encode('utf-8'),
             'list_id': list_id,
             'lang': 'en',
             'from': DEFAULT_FROM_EMAIL,
@@ -71,11 +76,11 @@ class MailjetBackend(CampaignBackend):
         extra = {
             'method': 'POST',
             'id': campaign['campaign']['id'],
-            'html': html,
-            'text': render_to_string('courriers/newsletter_raw_detail.txt', {
+            'html': smart_unicode(html).encode('utf-8'),
+            'text': smart_unicode(render_to_string('courriers/newsletter_raw_detail.txt', {
                 'object': newsletter,
                 'items': newsletter.items.select_related('newsletter')
-            })
+            })).encode('utf-8')
         }
 
         self.mailjet_api.message.sethtmlcampaign(**extra)

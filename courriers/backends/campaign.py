@@ -59,7 +59,7 @@ class CampaignBackend(SimpleBackend):
                 try:
                     self._subscribe(list_ids[key], email)
                 except Exception as e:
-                    logger.error(e)
+                    logger.exception(e)
 
                     if not FAIL_SILENTLY:
                         raise e
@@ -88,7 +88,7 @@ class CampaignBackend(SimpleBackend):
                     try:
                         self._unsubscribe(list_ids[key], email)
                     except Exception as e:
-                        logger.error(e)
+                        logger.exception(e)
 
                         if not FAIL_SILENTLY:
                             raise e
@@ -105,7 +105,7 @@ class CampaignBackend(SimpleBackend):
         try:
             self._send_campaign(newsletter, list_id)
         except Exception as e:
-            logger.error(e)
+            logger.exception(e)
 
             if not FAIL_SILENTLY:
                 raise e

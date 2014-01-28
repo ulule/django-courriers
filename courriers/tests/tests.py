@@ -27,24 +27,24 @@ class BaseBackendTests(TestCase):
         self.monthly = NewsletterList.objects.create(name="TestMonthly", slug="testmonthly", languages=['fr'])
         self.weekly = NewsletterList.objects.create(name="TestWeekly", slug="testweekly", languages=['fr'])
 
-        n1 = Newsletter.objects.create(name="3000 projets finances %s" % current,
+        n1 = Newsletter.objects.create(name="3000 projets financés %s" % current,
                                        published_at=datetime.now() - datetime.timedelta(hours=2),
                                        status=Newsletter.STATUS_ONLINE,
                                        newsletter_list=self.monthly)
 
-        n2 = Newsletter.objects.create(name="3000 projets finances %s [monthly][fr]" % current,
+        n2 = Newsletter.objects.create(name="3000 projets financés %s [monthly][fr]" % current,
                                        published_at=datetime.now() - datetime.timedelta(hours=2),
                                        status=Newsletter.STATUS_ONLINE,
                                        newsletter_list=self.monthly,
                                        languages=['fr'])
 
-        n3 = Newsletter.objects.create(name="3000 projets finances %s [monthly][en-us]" % current,
+        n3 = Newsletter.objects.create(name="3000 projets financés %s [monthly][en-us]" % current,
                                        published_at=datetime.now() - datetime.timedelta(hours=2),
                                        status=Newsletter.STATUS_ONLINE,
                                        newsletter_list=self.weekly,
                                        languages=['en-us'])
 
-        n4 = Newsletter.objects.create(name="3000 projets finances %s [weekly][fr]" % current,
+        n4 = Newsletter.objects.create(name="3000 projets financés %s [weekly][fr]" % current,
                                        published_at=datetime.now() - datetime.timedelta(hours=2),
                                        status=Newsletter.STATUS_ONLINE,
                                        newsletter_list=self.weekly,
