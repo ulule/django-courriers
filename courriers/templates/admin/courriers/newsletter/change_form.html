@@ -2,7 +2,7 @@
 {% load i18n admin_urls %}
 {% block object-tools-items %}
     <li>
-        <a href="{% url 'admin:send_newsletter' original.pk %}" class="historylink">Send this newsletter</a>
+        <a href="{% url 'admin:send_newsletter' original.pk %}" class="historylink" onclick="return confirm('Do you really want to send this newsletter?');">Send this newsletter</a>
     </li>
     <li>
         <a href="{% url opts|admin_urlname:'history' original.pk|admin_urlquote %}" class="historylink">{% trans "History" %}</a>
