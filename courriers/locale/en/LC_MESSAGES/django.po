@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-01-24 16:04+0100\n"
+"POT-Creation-Date: 2014-02-18 10:40+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,45 +22,40 @@ msgstr ""
 msgid "The newsletter \"%s\" has been sent."
 msgstr ""
 
-#: forms.py:10 forms.py:44
+#: forms.py:10 forms.py:49
 msgid "Your email"
 msgstr ""
 
-#: forms.py:31
+#: forms.py:36
 msgid "You already subscribe to this newsletter."
 msgstr ""
 
-#: forms.py:62
+#: forms.py:67
 msgid "You are not subscribed to this newsletter."
 msgstr ""
 
-#: models.py:86
+#: models.py:108
 msgid "Online"
 msgstr ""
 
-#: models.py:87
+#: models.py:109
 msgid "Draft"
 msgstr ""
 
-#: backends/mailchimp.py:27
+#: backends/mailchimp.py:26
 msgid "Please specify your MAILCHIMP API key in Django settings"
 msgstr ""
 
-#: backends/mailchimp.py:44
-#, python-format
-msgid "List %s does not exist"
+#: backends/mailjet.py:30
+msgid "Please specify your MAILJET API key in Django settings"
 msgstr ""
 
-#: backends/mailchimp.py:82
-msgid "You have to specify a DEFAULT_FROM_EMAIL in Django settings."
+#: backends/mailjet.py:33
+msgid "Please specify your MAILJET API SECRET key in Django settings"
 msgstr ""
 
-#: backends/mailchimp.py:84
-msgid "You have to specify a DEFAULT_FROM_NAME in Django settings."
-msgstr ""
-
-#: backends/mailchimp.py:114
-msgid "This newsletter is not online. You can't send it."
+#: templates/admin/courriers/newsletter/change_form.html:5
+msgid "'Do you really want to send this newsletter?'"
 msgstr ""
 
 #: templates/admin/courriers/newsletter/change_form.html:8
@@ -83,7 +78,7 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: templates/courriers/newsletter_list_unsubscribe.html:15
+#: templates/courriers/newsletter_list_unsubscribe.html:16
 msgid "Your e-mail"
 msgstr ""
 

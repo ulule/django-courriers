@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-01-24 16:04+0100\n"
+"POT-Creation-Date: 2014-02-18 10:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,49 +23,44 @@ msgstr ""
 msgid "The newsletter \"%s\" has been sent."
 msgstr "La newsletter \"%s\" a été envoyée."
 
-#: forms.py:10 forms.py:44
+#: forms.py:10 forms.py:49
 msgid "Your email"
 msgstr "Votre email"
 
-#: forms.py:31
+#: forms.py:36
 msgid "You already subscribe to this newsletter."
 msgstr "Vous êtes déjà inscrit à cette newsletter."
 
-#: forms.py:62
+#: forms.py:67
 msgid "You are not subscribed to this newsletter."
 msgstr "Vous n'êtes pas inscrit à cette newsletter."
 
-#: models.py:86
+#: models.py:108
 msgid "Online"
 msgstr "En ligne"
 
-#: models.py:87
+#: models.py:109
 msgid "Draft"
 msgstr "Brouillon"
 
-#: backends/mailchimp.py:27
+#: backends/mailchimp.py:26
 msgid "Please specify your MAILCHIMP API key in Django settings"
 msgstr "Merci de spécifier votre API key MAILCHIMP dans les settings Django"
 
-#: backends/mailchimp.py:44
-#, python-format
-msgid "List %s does not exist"
-msgstr "La liste %s n'existe pas"
+#: backends/mailjet.py:30
+#, fuzzy
+msgid "Please specify your MAILJET API key in Django settings"
+msgstr "Merci de spécifier votre API key MAILCHIMP dans les settings Django"
 
-#: backends/mailchimp.py:82
-msgid "You have to specify a DEFAULT_FROM_EMAIL in Django settings."
-msgstr ""
-"Vous devez spécifier le paramètre DEFAULT_FROM_EMAIL dans les settings "
-"Django."
+#: backends/mailjet.py:33
+#, fuzzy
+msgid "Please specify your MAILJET API SECRET key in Django settings"
+msgstr "Merci de spécifier votre API key MAILCHIMP dans les settings Django"
 
-#: backends/mailchimp.py:84
-msgid "You have to specify a DEFAULT_FROM_NAME in Django settings."
-msgstr ""
-"Vous devez spécifier le paramètre DEFAULT_FROM_NAME dans les settings Django."
-
-#: backends/mailchimp.py:114
-msgid "This newsletter is not online. You can't send it."
-msgstr "Cette newsletter n'est pas publiée. Vous ne pouvez pas l'envoyer."
+#: templates/admin/courriers/newsletter/change_form.html:5
+#, fuzzy
+msgid "'Do you really want to send this newsletter?'"
+msgstr "Vous n'êtes pas inscrit à cette newsletter."
 
 #: templates/admin/courriers/newsletter/change_form.html:8
 msgid "History"
@@ -80,7 +75,6 @@ msgid "Thank you. You successfully subscribe to this newsletter !"
 msgstr "Merci. Vous êtes maintenant inscrit à cette newsletter !"
 
 #: templates/courriers/newsletter_list_subscribe_form.html:16
-#,
 msgid "Subscribe to the newsletter"
 msgstr "S'inscrire à cette newsletter."
 
@@ -88,8 +82,7 @@ msgstr "S'inscrire à cette newsletter."
 msgid "Close"
 msgstr ""
 
-#: templates/courriers/newsletter_list_unsubscribe.html:15
-#,
+#: templates/courriers/newsletter_list_unsubscribe.html:16
 msgid "Your e-mail"
 msgstr "Votre email"
 
@@ -100,3 +93,19 @@ msgstr "Merci. Vous êtes maintenant désinscrit de cette newsletter."
 #: templates/courriers/newsletter_list_unsubscribe_done.html:5
 msgid "Thank you. You're now unsubscribed from all our newsletters."
 msgstr "Merci. Vous êtes maintenant désinscrit de toutes les newsletters."
+
+#~ msgid "List %s does not exist"
+#~ msgstr "La liste %s n'existe pas"
+
+#~ msgid "You have to specify a DEFAULT_FROM_EMAIL in Django settings."
+#~ msgstr ""
+#~ "Vous devez spécifier le paramètre DEFAULT_FROM_EMAIL dans les settings "
+#~ "Django."
+
+#~ msgid "You have to specify a DEFAULT_FROM_NAME in Django settings."
+#~ msgstr ""
+#~ "Vous devez spécifier le paramètre DEFAULT_FROM_NAME dans les settings "
+#~ "Django."
+
+#~ msgid "This newsletter is not online. You can't send it."
+#~ msgstr "Cette newsletter n'est pas publiée. Vous ne pouvez pas l'envoyer."
