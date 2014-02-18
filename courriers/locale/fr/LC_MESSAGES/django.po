@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-02-18 10:41+0100\n"
+"POT-Creation-Date: 2014-02-18 10:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,7 +59,7 @@ msgstr "Merci de spécifier votre API key MAILCHIMP dans les settings Django"
 
 #: templates/admin/courriers/newsletter/change_form.html:5
 #, fuzzy
-msgid "'Do you really want to send this newsletter?'"
+msgid "Do you really want to send this newsletter?"
 msgstr "Vous n'êtes pas inscrit à cette newsletter."
 
 #: templates/admin/courriers/newsletter/change_form.html:8

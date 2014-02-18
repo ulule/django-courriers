@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-02-18 10:40+0100\n"
+"POT-Creation-Date: 2014-02-18 10:44+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,7 +55,7 @@ msgid "Please specify your MAILJET API SECRET key in Django settings"
 msgstr ""
 
 #: templates/admin/courriers/newsletter/change_form.html:5
-msgid "'Do you really want to send this newsletter?'"
+msgid "Do you really want to send this newsletter?"
 msgstr ""
 
 #: templates/admin/courriers/newsletter/change_form.html:8
