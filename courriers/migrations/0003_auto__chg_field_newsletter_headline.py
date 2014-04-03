@@ -10,7 +10,7 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
 
         # Changing field 'Newsletter.headline'
-        db.alter_column(u'courriers_newsletter', 'headline', self.gf('django.db.models.fields.CharField')(max_length=500, null=True))
+        db.alter_column(u'courriers_newsletter', 'headline', self.gf('django.db.models.fields.TextField')(null=True))
 
     def backwards(self, orm):
 
@@ -57,7 +57,7 @@ class Migration(SchemaMigration):
         u'courriers.newsletter': {
             'Meta': {'object_name': 'Newsletter'},
             'cover': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'headline': ('django.db.models.fields.CharField', [], {'max_length': '500', 'null': 'True', 'blank': 'True'}),
+            'headline': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'languages': ('separatedvaluesfield.models.SeparatedValuesField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
