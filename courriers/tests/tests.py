@@ -349,6 +349,7 @@ class UnsubscribeFormTest(TestCase):
                                                            newsletter_list=self.weekly)
 
         self.assertEqual(old_subscriber.is_unsubscribed, True)
+        self.assertEqual(old_subscriber.unsubscribed_at.strftime('%Y-%m-%d %H:%i:%s'), datetime.now().strftime('%Y-%m-%d %H:%i:%s'))
         self.assertEqual(old_subscriber2.is_unsubscribed, False)
 
         # Unsubscribe from all
@@ -367,6 +368,7 @@ class UnsubscribeFormTest(TestCase):
 
         self.assertEqual(old_subscriber.get().is_unsubscribed, True)
         self.assertEqual(old_subscriber2.get().is_unsubscribed, True)
+        self.assertEqual(old_subscriber2.get().unsubscribed_at.strftime('%Y-%m-%d %H:%i:%s'), datetime.now().strftime('%Y-%m-%d %H:%i:%s'))
 
         form2 = UnsubscribeForm(data=valid_data, newsletter_list=self.weekly)
 

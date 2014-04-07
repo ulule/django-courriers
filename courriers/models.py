@@ -198,6 +198,7 @@ class NewsletterSubscriber(models.Model):
     subscribed_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, null=True)
     is_unsubscribed = models.BooleanField(default=False, db_index=True)
+    unsubscribed_at = models.DateTimeField(null=True)
     email = models.EmailField(max_length=250)
     lang = models.CharField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
     newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletter_subscribers')
@@ -219,6 +220,7 @@ class NewsletterSubscriber(models.Model):
 
     def unsubscribe(self, commit=True):
         self.is_unsubscribed = True
+        self.unsubscribed_at = datetime.now()
 
         if commit:
-            update_fields(self, fields=('is_unsubscribed', ))
+            update_fields(self, fields=('is_unsubscribed', 'unsubscribed_at', ))
