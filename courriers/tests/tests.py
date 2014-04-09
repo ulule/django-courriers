@@ -315,10 +315,17 @@ class SubscribeFormTest(TestCase):
         self.backend.unregister('florent@ulule.com')
 
 
+class NewDatetime(datetime.datetime):
+    @classmethod
+    def now(cls):
+        return cls(2014, 4, 9, 9, 56, 2, 342715)
+
+
 @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.simple.SimpleBackend')
 class UnsubscribeFormTest(TestCase):
     def setUp(self):
         from courriers.backends import get_backend
+        datetime.datetime = NewDatetime
 
         self.backend_klass = get_backend()
         self.backend = self.backend_klass()
@@ -349,7 +356,7 @@ class UnsubscribeFormTest(TestCase):
                                                            newsletter_list=self.weekly)
 
         self.assertEqual(old_subscriber.is_unsubscribed, True)
-        self.assertEqual(old_subscriber.unsubscribed_at.strftime('%Y-%m-%d %H:%i:%s'), datetime.now().strftime('%Y-%m-%d %H:%i:%s'))
+        self.assertEqual(old_subscriber.unsubscribed_at, datetime.now())
         self.assertEqual(old_subscriber2.is_unsubscribed, False)
 
         # Unsubscribe from all
@@ -368,7 +375,7 @@ class UnsubscribeFormTest(TestCase):
 
         self.assertEqual(old_subscriber.get().is_unsubscribed, True)
         self.assertEqual(old_subscriber2.get().is_unsubscribed, True)
-        self.assertEqual(old_subscriber2.get().unsubscribed_at.strftime('%Y-%m-%d %H:%i:%s'), datetime.now().strftime('%Y-%m-%d %H:%i:%s'))
+        self.assertEqual(old_subscriber2.get().unsubscribed_at, datetime.now())
 
         form2 = UnsubscribeForm(data=valid_data, newsletter_list=self.weekly)
 
