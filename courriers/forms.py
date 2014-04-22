@@ -3,6 +3,7 @@ from django.utils.translation import ugettext_lazy as _, get_language
 
 from .backends import get_backend
 from .models import NewsletterSubscriber
+from .tasks import subscribe, unsubscribe
 
 
 class SubscriptionForm(forms.Form):
@@ -38,10 +39,10 @@ class SubscriptionForm(forms.Form):
         return receiver
 
     def save(self, user=None):
-        self.backend.register(self.cleaned_data['receiver'],
+        subscribe.apply(args=(self.cleaned_data['receiver'],
                               self.newsletter_list,
-                              lang=self.lang,
-                              user=user or self.user)
+                              self.lang,
+                              user or self.user))
 
 
 class UnsubscribeForm(forms.Form):
@@ -72,6 +73,9 @@ class UnsubscribeForm(forms.Form):
         from_all = self.cleaned_data.get('from_all', False)
 
         if from_all or not self.newsletter_list:
-            self.backend.unregister(self.cleaned_data['email'])
+            unsubscribe.apply(kwargs={'email': self.cleaned_data['email'],
+                                      'user': user})
         else:
-            self.backend.unregister(self.cleaned_data['email'], newsletter_list=self.newsletter_list)
+            unsubscribe.apply(kwargs={'email': self.cleaned_data['email'],
+                                      'newsletter_list': self.newsletter_list,
+                                      'user': user})
