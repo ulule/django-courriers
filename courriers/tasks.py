@@ -13,7 +13,7 @@ def subscribe(email, newsletter_list, lang=None, user=None):
                          lang=lang,
                          user=user)
     except Exception as e:
-        raise subscribe.retry(args=[email, newsletter_list, lang, user], exc=e, countdown=5)
+        raise subscribe.retry(args=[email, newsletter_list, lang, user], exc=e, countdown=30)
 
 
 @task
@@ -28,4 +28,4 @@ def unsubscribe(email, newsletter_list=None, lang=None, user=None):
                            lang=lang,
                            user=user)
     except Exception as e:
-        raise unsubscribe.retry(args=[email, newsletter_list, lang, user], exc=e, countdown=5)
+        raise unsubscribe.retry(args=[email, newsletter_list, lang, user], exc=e, countdown=30)
