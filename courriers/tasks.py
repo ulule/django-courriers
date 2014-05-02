@@ -1,7 +1,9 @@
-from celery.task import task
+from celery import Celery
+app = Celery()
+app.conf.CELERY_ALWAYS_EAGER = True
 
 
-@task
+@app.task
 def subscribe(email, newsletter_list, lang=None, user=None):
     from courriers.backends import get_backend
 
@@ -16,7 +18,7 @@ def subscribe(email, newsletter_list, lang=None, user=None):
         raise subscribe.retry(args=[email, newsletter_list, lang, user], exc=e, countdown=30)
 
 
-@task
+@app.task
 def unsubscribe(email, newsletter_list=None, lang=None, user=None):
     from courriers.backends import get_backend
 
