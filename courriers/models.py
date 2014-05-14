@@ -116,6 +116,7 @@ class Newsletter(models.Model):
                                          default=STATUS_DRAFT,
                                          db_index=True)
     headline = models.TextField(blank=True, null=True)
+    conclusion = models.TextField(blank=True, null=True)
     cover = models.ImageField(upload_to=get_file_path, blank=True, null=True)
     languages = SeparatedValuesField(max_length=50, blank=True, null=True, choices=ALLOWED_LANGUAGES)
     newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletters')
