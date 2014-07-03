@@ -31,9 +31,7 @@ class Command(BaseCommand):
 
         mailjet_contacts = backend.mailjet_api.contact.list()
 
-        mailjet_users = []
-        for contact in mailjet_contacts['result']:
-            mailjet_users.append(contact['email'])
+        mailjet_users = [contact['email'] for contact in mailjet_contacts['result']]
 
         diff = list(set(unsubscribed_users) - set(mailjet_users))
 
