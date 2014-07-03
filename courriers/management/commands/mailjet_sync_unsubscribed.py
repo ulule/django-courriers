@@ -29,11 +29,11 @@ class Command(BaseCommand):
                                                           .values_list('email', flat=True)
                                                           .order_by('-unsubscribed_at'))
 
-        mailjet_contacts = backend.mailjet_api.contact.list()
+        mailjet_contacts = backend.mailjet_api.contact.list(unsub=1)
 
         mailjet_users = [contact['email'] for contact in mailjet_contacts['result']]
 
-        diff = list(set(unsubscribed_users) - set(mailjet_users))
+        diff = list(set(mailjet_users) - set(unsubscribed_users))
 
         print "%d contacts to unsubscribe" % len(diff)
 
