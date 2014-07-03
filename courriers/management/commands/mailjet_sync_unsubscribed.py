@@ -24,20 +24,22 @@ class Command(BaseCommand):
 
         backend = backend_klass()
 
-        unsubscribed_users = NewsletterSubscriber.objects.using(self.connection).filter(is_unsubscribed=True)
+        unsubscribed_users = (NewsletterSubscriber.objects.using(self.connection)
+                                                          .filter(is_unsubscribed=True)
+                                                          .values_list('email', flat=True)
+                                                          .order_by('-unsubscribed_at'))
 
-        count_diff = 0
+        mailjet_contacts = backend.mailjet_api.contact.list()
 
-        for u in unsubscribed_users:
-            print "Contact: %s" % u.email
+        mailjet_users = []
+        for contact in mailjet_contacts['result']:
+            mailjet_users.append(contact['email'])
 
-            response = backend.mailjet_api.contact.infos(contact=u.email)
-            if 'lists' in response:
-                for l in response['lists']:
-                    if not l['unsub']:
-                        count_diff += 1
-                        backend.unregister(u.email)
-                        print "Unsubscribe user: %s" % u.email
-                        break
+        diff = list(set(unsubscribed_users) - set(mailjet_users))
 
-        print "%s users were unsubscribed from your website but not from Mailjet" % count_diff
+        print "%d contacts to unsubscribe" % len(diff)
+
+        for email in diff:
+            backend.unregister(email)
+
+            print "Unsubscribe user: %s" % email
