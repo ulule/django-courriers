@@ -197,9 +197,9 @@ class NewsletterSubscriberManager(models.Manager):
 @python_2_unicode_compatible
 class NewsletterSubscriber(models.Model):
     subscribed_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, null=True)
+    user = models.ForeignKey(User, blank=True, null=True)
     is_unsubscribed = models.BooleanField(default=False, db_index=True)
-    unsubscribed_at = models.DateTimeField(null=True)
+    unsubscribed_at = models.DateTimeField(blank=True, null=True)
     email = models.EmailField(max_length=250)
     lang = models.CharField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
     newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletter_subscribers')
