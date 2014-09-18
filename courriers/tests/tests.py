@@ -94,6 +94,15 @@ class BaseBackendTests(TestCase):
                                                            is_unsubscribed=False)
         self.assertEqual(unsubscriber.count(), 1)
 
+        # Subscribe with capital letters
+        self.backend.register('Florent@ulule.com', self.monthly, 'fr')
+
+        self.backend.unregister('florent@ulule.com')
+
+        subscriber = NewsletterSubscriber.objects.filter(email='Florent@ulule.com',
+                                                         is_unsubscribed=True)
+        self.assertEqual(subscriber.count(), 1)
+
 
 class SimpleBackendTests(BaseBackendTests):
     def test_registration(self):
@@ -218,6 +227,26 @@ class NewslettersViewsTests(TestCase):
         )
 
         subscriber = NewsletterSubscriber.objects.get(email='adele@ulule.com')
+
+        self.assertFalse(subscriber.subscribed)
+
+        # With capital letters
+        valid_data = {'email': 'Florent@ulule.com'}
+
+        NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='florent@ulule.com')
+
+        response = self.client.post(reverse('newsletter_list_unsubscribe',
+                                            kwargs={'slug': 'testmonthly'}),
+                                    data=valid_data)
+
+        self.assertRedirects(
+            response,
+            expected_url=reverse('newsletter_list_unsubscribe_done', args=[self.monthly.slug]),
+            status_code=302,
+            target_status_code=200
+        )
+
+        subscriber = NewsletterSubscriber.objects.get(email='florent@ulule.com')
 
         self.assertFalse(subscriber.subscribed)
 
