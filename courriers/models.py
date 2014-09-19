@@ -11,7 +11,7 @@ from django.utils import timezone as datetime
 from django.core.urlresolvers import reverse
 from django.utils.encoding import python_2_unicode_compatible
 
-from .compat import User, update_fields
+from .compat import update_fields, AUTH_USER_MODEL
 from .core import QuerySet, Manager
 from .settings import ALLOWED_LANGUAGES
 
@@ -116,6 +116,7 @@ class Newsletter(models.Model):
                                          default=STATUS_DRAFT,
                                          db_index=True)
     headline = models.TextField(blank=True, null=True)
+    conclusion = models.TextField(blank=True, null=True)
     cover = models.ImageField(upload_to=get_file_path, blank=True, null=True)
     languages = SeparatedValuesField(max_length=50, blank=True, null=True, choices=ALLOWED_LANGUAGES)
     newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletters')
@@ -196,9 +197,9 @@ class NewsletterSubscriberManager(models.Manager):
 @python_2_unicode_compatible
 class NewsletterSubscriber(models.Model):
     subscribed_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, null=True)
+    user = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True)
     is_unsubscribed = models.BooleanField(default=False, db_index=True)
-    unsubscribed_at = models.DateTimeField(null=True)
+    unsubscribed_at = models.DateTimeField(blank=True, null=True)
     email = models.EmailField(max_length=250)
     lang = models.CharField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
     newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletter_subscribers')

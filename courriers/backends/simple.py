@@ -29,7 +29,7 @@ class SimpleBackend(BaseBackend):
                 subscriber.subscribe()
 
     def unregister(self, email, newsletter_list=None, user=None, lang=None):
-        qs = self.model.objects.filter(email=email)
+        qs = self.model.objects.filter(email__iexact=email)
 
         if lang:
             qs = qs.filter(lang=lang)
@@ -46,7 +46,7 @@ class SimpleBackend(BaseBackend):
         return self.all(email, user=user, lang=lang, newsletter_list=newsletter_list).exists()
 
     def all(self, email, user=None, lang=None, newsletter_list=None):
-        qs = self.model.objects.filter(email=email).select_related('newsletter_list')
+        qs = self.model.objects.filter(email__iexact=email).select_related('newsletter_list')
 
         if user:
             qs = qs.filter(user=user)

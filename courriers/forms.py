@@ -27,7 +27,7 @@ class SubscriptionForm(forms.Form):
         receiver = self.cleaned_data['receiver']
 
         if self.backend.exists(receiver, self.newsletter_list, user=self.user, lang=self.lang):
-            qs = NewsletterSubscriber.objects.filter(email=receiver,
+            qs = NewsletterSubscriber.objects.filter(email__iexact=receiver,
                                                      newsletter_list_id=self.newsletter_list.id)
 
             if self.lang:
