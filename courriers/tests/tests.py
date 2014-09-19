@@ -345,7 +345,9 @@ class SubscribeFormTest(TestCase):
         self.backend.unregister('florent@ulule.com')
 
     def test_subscribe_task(self):
-        subscribe.delay(email='adele@ulule.com', newsletter_list=self.monthly, lang='fr')
+        subscribe.apply_async(kwargs={'email': 'adele@ulule.com',
+                                      'newsletter_list': self.monthly,
+                                      'lang': 'fr'})
 
         new_subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
         self.assertEqual(new_subscriber.count(), 1)
@@ -439,7 +441,8 @@ class UnsubscribeFormTest(TestCase):
     def test_unsubscribe_task(self):
         NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='adele@ulule.com')
 
-        unsubscribe.delay(email='adele@ulule.com', newsletter_list=self.monthly)
+        unsubscribe.apply_async(kwargs={'email': 'adele@ulule.com',
+                                        'newsletter_list': self.monthly})
 
         new_subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
                                                              newsletter_list=self.monthly,
