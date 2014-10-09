@@ -8,6 +8,7 @@ from django.core import mail
 
 from courriers.forms import SubscriptionForm, UnsubscribeForm
 from courriers.models import Newsletter, NewsletterList, NewsletterSubscriber
+from courriers.tasks import subscribe, unsubscribe
 
 from django.conf import settings
 
@@ -343,6 +344,14 @@ class SubscribeFormTest(TestCase):
 
         self.backend.unregister('florent@ulule.com')
 
+    def test_subscribe_task(self):
+        subscribe.apply_async(kwargs={'email': 'adele@ulule.com',
+                                      'newsletter_list': self.monthly,
+                                      'lang': 'fr'})
+
+        new_subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
+        self.assertEqual(new_subscriber.count(), 1)
+
 
 class NewDatetime(datetime.datetime):
     @classmethod
@@ -428,6 +437,17 @@ class UnsubscribeFormTest(TestCase):
         form.save(user)  # Equivalent for saving with user logged in
 
         self.backend.unregister('florent@ulule.com')
+
+    def test_unsubscribe_task(self):
+        NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='adele@ulule.com')
+
+        unsubscribe.apply_async(kwargs={'email': 'adele@ulule.com',
+                                        'newsletter_list': self.monthly})
+
+        new_subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
+                                                             newsletter_list=self.monthly,
+                                                             is_unsubscribed=True)
+        self.assertEqual(new_subscriber.count(), 1)
 
 
 if hasattr(settings, 'COURRIERS_MAILCHIMP_API_KEY'):
