@@ -33,7 +33,7 @@ class Command(BaseCommand):
 
         mailjet_users = [contact['email'] for contact in mailjet_contacts['result']]
 
-        diff = list(set(mailjet_users) - set(unsubscribed_users))
+        diff = list(set(unsubscribed_users) - set(mailjet_users))
 
         print "%d contacts to unsubscribe" % len(diff)
 
