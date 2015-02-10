@@ -65,7 +65,8 @@ class MailjetBackend(CampaignBackend):
 
         html = render_to_string('courriers/newsletter_raw_detail.html', {
             'object': newsletter,
-            'items': newsletter.items.select_related('newsletter')
+            'items': newsletter.items.select_related('newsletter'),
+            'options': options
         })
 
         campaign = self.mailjet_api.message.createcampaign(**options)
@@ -79,7 +80,8 @@ class MailjetBackend(CampaignBackend):
             'html': smart_unicode(html).encode('utf-8'),
             'text': smart_unicode(render_to_string('courriers/newsletter_raw_detail.txt', {
                 'object': newsletter,
-                'items': newsletter.items.select_related('newsletter')
+                'items': newsletter.items.select_related('newsletter'),
+                'options': options
             })).encode('utf-8')
         }
 

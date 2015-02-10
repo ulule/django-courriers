@@ -49,7 +49,8 @@ class MailchimpBackend(CampaignBackend):
 
         html = render_to_string('courriers/newsletter_raw_detail.html', {
             'object': newsletter,
-            'items': newsletter.items.select_related('newsletter')
+            'items': newsletter.items.select_related('newsletter'),
+            'options': options
         })
 
         for pre_processor in PRE_PROCESSORS:
