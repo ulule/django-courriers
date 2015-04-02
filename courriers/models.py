@@ -111,8 +111,7 @@ class Newsletter(models.Model):
 
     name = models.CharField(max_length=255)
     published_at = models.DateTimeField(null=True)
-    status = models.PositiveIntegerField(max_length=1,
-                                         choices=STATUS_CHOICES,
+    status = models.PositiveIntegerField(choices=STATUS_CHOICES,
                                          default=STATUS_DRAFT,
                                          db_index=True)
     headline = models.TextField(blank=True, null=True)
