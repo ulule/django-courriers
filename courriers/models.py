@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import django
 
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
@@ -27,15 +28,18 @@ def get_file_path(instance, filename):
 
 class NewsletterListQuerySet(QuerySet):
     def has_lang(self, lang):
-        return self.filter(Q(languages__contains=lang) | Q(languages__isnull=True))
+        return self.filter(Q(languages__contains=lang) | Q(languages__isnull=True) | Q(languages=''))
 
 
 class NewsletterListManager(Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         return NewsletterListQuerySet(self.model)
 
+    if django.VERSION < (1, 6):
+        get_query_set = get_queryset
+
     def has_lang(self, lang):
-        return self.get_query_set().has_lang(lang)
+        return self.get_queryset().has_lang(lang)
 
 
 @python_2_unicode_compatible
@@ -62,7 +66,7 @@ class NewsletterList(models.Model):
 
 class NewsletterQuerySet(QuerySet):
     def has_lang(self, lang):
-        return self.filter(Q(languages__contains=lang) | Q(languages__isnull=True))
+        return self.filter(Q(languages__contains=lang) | Q(languages__isnull=True) | Q(languages=''))
 
     def status_online(self):
         return (self.filter(status=Newsletter.STATUS_ONLINE,
@@ -83,20 +87,23 @@ class NewsletterQuerySet(QuerySet):
 
 
 class NewsletterManager(Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         return NewsletterQuerySet(self.model)
 
+    if django.VERSION < (1, 6):
+        get_query_set = get_queryset
+
     def has_lang(self, lang):
-        return self.get_query_set().has_lang(lang)
+        return self.get_queryset().has_lang(lang)
 
     def status_online(self):
-        return self.get_query_set().status_online()
+        return self.get_queryset().status_online()
 
     def get_previous(self, current_date):
-        return self.get_query_set().get_previous(current_date)
+        return self.get_queryset().get_previous(current_date)
 
     def get_next(self, current_date):
-        return self.get_query_set().get_next(current_date)
+        return self.get_queryset().get_next(current_date)
 
 
 @python_2_unicode_compatible
@@ -180,17 +187,20 @@ class NewsletterSubscriberQuerySet(QuerySet):
 
 
 class NewsletterSubscriberManager(models.Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         return NewsletterSubscriberQuerySet(self.model)
 
+    if django.VERSION < (1, 6):
+        get_query_set = get_queryset
+
     def subscribed(self):
-        return self.get_query_set().subscribed()
+        return self.get_queryset().subscribed()
 
     def has_lang(self, lang):
-        return self.get_query_set().has_lang(lang)
+        return self.get_queryset().has_lang(lang)
 
     def has_langs(self, langs):
-        return self.get_query_set().has_langs(langs)
+        return self.get_queryset().has_langs(langs)
 
 
 @python_2_unicode_compatible

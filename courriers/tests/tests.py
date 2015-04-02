@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+import mock
+
 from django.test import TestCase
-from django.test.utils import override_settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.utils import timezone as datetime
@@ -10,14 +11,13 @@ from courriers.forms import SubscriptionForm, UnsubscribeForm
 from courriers.models import Newsletter, NewsletterList, NewsletterSubscriber
 from courriers.tasks import subscribe, unsubscribe
 
-from django.conf import settings
+from django.conf import settings as djsettings
+
+from courriers import settings
 
 
 class BaseBackendTests(TestCase):
     def setUp(self):
-        from courriers import settings
-        reload(settings)
-
         from courriers.backends import get_backend
 
         self.backend_klass = get_backend()
@@ -170,7 +170,7 @@ class NewslettersViewsTests(TestCase):
     def test_newsletter_list_subscribe_errors(self):
         subscriber = NewsletterSubscriber.objects.create(newsletter_list=self.monthly,
                                                          email='adele@ulule.com',
-                                                         lang=settings.LANGUAGE_CODE)
+                                                         lang=djsettings.LANGUAGE_CODE)
 
         response = self.client.post(reverse('newsletter_list_subscribe',
                                     kwargs={'slug': self.monthly.slug}),
@@ -359,7 +359,7 @@ class NewDatetime(datetime.datetime):
         return cls(2014, 4, 9, 9, 56, 2, 342715)
 
 
-@override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.simple.SimpleBackend')
+@mock.patch.object(settings, 'BACKEND_CLASS', 'courriers.backends.simple.SimpleBackend')
 class UnsubscribeFormTest(TestCase):
     def setUp(self):
         from courriers.backends import get_backend
@@ -451,15 +451,15 @@ class UnsubscribeFormTest(TestCase):
 
 
 if hasattr(settings, 'COURRIERS_MAILCHIMP_API_KEY'):
-    @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')
+    @mock.patch.object(settings, 'BACKEND_CLASS', 'courriers.backends.mailchimp.MailchimpBackend')
     class SubscribeMailchimpFormTest(SubscribeFormTest):
         pass
 
-    @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')
+    @mock.patch.object(settings, 'BACKEND_CLASS', 'courriers.backends.mailchimp.MailchimpBackend')
     class UnsubscribeMailchimpFormTest(UnsubscribeFormTest):
         pass
 
-    @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailchimp.MailchimpBackend')
+    @mock.patch.object(settings, 'BACKEND_CLASS', 'courriers.backends.mailchimp.MailchimpBackend')
     class MailchimpBackendTests(BaseBackendTests):
         def test_registration(self):
             super(MailchimpBackendTests, self).test_registration()
@@ -469,15 +469,15 @@ if hasattr(settings, 'COURRIERS_MAILCHIMP_API_KEY'):
 
 
 if hasattr(settings, 'COURRIERS_MAILJET_API_KEY') and hasattr(settings, 'COURRIERS_MAILJET_API_SECRET_KEY'):
-    @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailjet.MailjetBackend')
+    @mock.patch.object(settings, 'BACKEND_CLASS', 'courriers.backends.mailjet.MailjetBackend')
     class SubscribeMailjetFormTest(SubscribeFormTest):
         pass
 
-    @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailjet.MailjetBackend')
+    @mock.patch.object(settings, 'BACKEND_CLASS', 'courriers.backends.mailjet.MailjetBackend')
     class UnsubscribeMailjetFormTest(UnsubscribeFormTest):
         pass
 
-    @override_settings(COURRIERS_BACKEND_CLASS='courriers.backends.mailjet.MailjetBackend')
+    @mock.patch.object(settings, 'BACKEND_CLASS', 'courriers.backends.mailjet.MailjetBackend')
     class MailjetBackendTests(BaseBackendTests):
         def test_registration(self):
             super(MailjetBackendTests, self).test_registration()
