@@ -1,6 +1,3 @@
-{% load url from future %}
-
-
 {% if previous_object %}
     <p>Previous : <a href="{% url newsletter_detail previous_object.pk %}">{{ previous_object.name }}</a></p>
 {% endif %}
