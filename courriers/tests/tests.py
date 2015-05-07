@@ -346,7 +346,7 @@ class SubscribeFormTest(TestCase):
 
     def test_subscribe_task(self):
         subscribe.apply_async(kwargs={'email': 'adele@ulule.com',
-                                      'newsletter_list': self.monthly,
+                                      'newsletter_list_id': self.monthly.pk,
                                       'lang': 'fr'})
 
         new_subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com', is_unsubscribed=False)
@@ -442,7 +442,7 @@ class UnsubscribeFormTest(TestCase):
         NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='adele@ulule.com')
 
         unsubscribe.apply_async(kwargs={'email': 'adele@ulule.com',
-                                        'newsletter_list': self.monthly})
+                                        'newsletter_list_id': self.monthly.pk})
 
         new_subscriber = NewsletterSubscriber.objects.filter(email='adele@ulule.com',
                                                              newsletter_list=self.monthly,

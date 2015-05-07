@@ -3,10 +3,24 @@ from celery.task import task
 
 
 @task
-def subscribe(email, newsletter_list, lang=None, user=None):
+def subscribe(email, newsletter_list_id, lang=None, user_id=None):
     from courriers.backends import get_backend
+    from courriers.models import NewsletterList
+    from courriers.compat import get_user_model
+
+    User = get_user_model()
 
     backend = get_backend()()
+
+    newsletter_list = None
+
+    if newsletter_list_id:
+        newsletter_list = NewsletterList.objects.get(pk=newsletter_list_id)
+
+    user = None
+
+    if user_id is not None:
+        user = User.objects.get(pk=user_id)
 
     try:
         backend.register(email=email,
@@ -18,8 +32,22 @@ def subscribe(email, newsletter_list, lang=None, user=None):
 
 
 @task
-def unsubscribe(email, newsletter_list=None, lang=None, user=None):
+def unsubscribe(email, newsletter_list_id=None, lang=None, user_id=None):
     from courriers.backends import get_backend
+    from courriers.models import NewsletterList
+    from courriers.compat import get_user_model
+
+    User = get_user_model()
+
+    newsletter_list = None
+
+    if newsletter_list_id:
+        newsletter_list = NewsletterList.objects.get(pk=newsletter_list_id)
+
+    user = None
+
+    if user_id is not None:
+        user = User.objects.get(pk=user_id)
 
     backend = get_backend()()
 

@@ -23,10 +23,9 @@ class SimpleBackend(BaseBackend):
         if not self.exists(email, newsletter_list, lang=lang):
             subscriber = self.subscribe(email, newsletter_list, lang, user)
         else:
-            subscriber = self.all(email=email, newsletter_list=newsletter_list, lang=lang).get()
-
-            if subscriber.is_unsubscribed:
-                subscriber.subscribe()
+            for subscriber in self.all(email=email, newsletter_list=newsletter_list, lang=lang):
+                if subscriber.is_unsubscribed:
+                    subscriber.subscribe()
 
     def unregister(self, email, newsletter_list=None, user=None, lang=None):
         qs = self.model.objects.filter(email__iexact=email)

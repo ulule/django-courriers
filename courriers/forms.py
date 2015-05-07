@@ -39,10 +39,10 @@ class SubscriptionForm(forms.Form):
         return receiver
 
     def save(self, user=None):
-        subscribe.apply_async(args=(self.cleaned_data['receiver'],
-                                    self.newsletter_list,
-                                    self.lang,
-                                    user or self.user))
+        subscribe.delay(email=self.cleaned_data['receiver'],
+                        lang=self.lang,
+                        newsletter_list_id=getattr(self.newsletter_list, 'pk', None),
+                        user_id=getattr(user or self.user, 'pk', None))
 
 
 class UnsubscribeForm(forms.Form):
@@ -74,8 +74,8 @@ class UnsubscribeForm(forms.Form):
 
         if from_all or not self.newsletter_list:
             unsubscribe.apply_async(kwargs={'email': self.cleaned_data['email'],
-                                            'user': user})
+                                            'user_id': getattr(user, 'pk', None)})
         else:
             unsubscribe.apply_async(kwargs={'email': self.cleaned_data['email'],
-                                            'newsletter_list': self.newsletter_list,
-                                            'user': user})
+                                            'newsletter_list_id': self.newsletter_list.pk,
+                                            'user_id': getattr(user, 'pk', None)})
