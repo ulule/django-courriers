@@ -2,8 +2,8 @@ from __future__ import absolute_import
 from celery.task import task
 
 
-@task
-def subscribe(email, newsletter_list_id, lang=None, user_id=None):
+@task(bind=True)
+def subscribe(self, email, newsletter_list_id, lang=None, user_id=None):
     from courriers.backends import get_backend
     from courriers.models import NewsletterList
     from courriers.compat import get_user_model
@@ -28,11 +28,11 @@ def subscribe(email, newsletter_list_id, lang=None, user_id=None):
                          lang=lang,
                          user=user)
     except Exception as e:
-        raise subscribe.retry(args=[email, newsletter_list, lang, user], exc=e, countdown=30)
+        raise self.retry(exc=e, countdown=60)
 
 
-@task
-def unsubscribe(email, newsletter_list_id=None, lang=None, user_id=None):
+@task(bind=True)
+def unsubscribe(self, email, newsletter_list_id=None, lang=None, user_id=None):
     from courriers.backends import get_backend
     from courriers.models import NewsletterList
     from courriers.compat import get_user_model
@@ -57,4 +57,4 @@ def unsubscribe(email, newsletter_list_id=None, lang=None, user_id=None):
                            lang=lang,
                            user=user)
     except Exception as e:
-        raise unsubscribe.retry(args=[email, newsletter_list, lang, user], exc=e, countdown=30)
+        raise self.retry(exc=e, countdown=60)
