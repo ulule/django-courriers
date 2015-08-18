@@ -1,0 +1,92 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Florian Schweikert <kelvan@ist-total.org>, 2015.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-08-18 18:38+0200\n"
+"PO-Revision-Date: 2015-08-18 18:47+0200\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 1.8.4\n"
+
+#: admin.py:41
+#, python-format
+msgid "The newsletter \"%s\" has been sent."
+msgstr "Die Newsletter \"%s\" wurde versendet."
+
+#: backends/mailchimp.py:26
+msgid "Please specify your MAILCHIMP API key in Django settings"
+msgstr "Bitte den ihren MAILCHIMP API Key in den Django settings angeben"
+
+#: backends/mailjet.py:30
+msgid "Please specify your MAILJET API key in Django settings"
+msgstr "Bitte den ihren MAILJET API Key in den Django settings angeben"
+
+#: backends/mailjet.py:33
+msgid "Please specify your MAILJET API SECRET key in Django settings"
+msgstr "Bitte den ihren MAILJET API SECRET Key in den Django settings angeben"
+
+#: forms.py:11 forms.py:50
+msgid "Your email"
+msgstr "Ihre Emailadresse"
+
+#: forms.py:37
+msgid "You already subscribe to this newsletter."
+msgstr "Sie haben diese Newsletter bereits abonniert."
+
+#: forms.py:68
+msgid "You are not subscribed to this newsletter."
+msgstr "Sie haben diese Newsletter nicht abonniert."
+
+#: models.py:118
+msgid "Online"
+msgstr "Online"
+
+#: models.py:119
+msgid "Draft"
+msgstr "Entwurf"
+
+#: templates/admin/courriers/newsletter/change_form.html:5
+msgid "Do you really want to send this newsletter?"
+msgstr "Wollen sie diese Newsletter wirklich versenden?"
+
+#: templates/admin/courriers/newsletter/change_form.html:8
+msgid "History"
+msgstr "Verlauf"
+
+#: templates/admin/courriers/newsletter/change_form.html:12
+msgid "View on site"
+msgstr "Auf der Webseite anzeigen"
+
+#: templates/courriers/newsletter_list_subscribe_done.html:2
+msgid "Thank you. You successfully subscribe to this newsletter !"
+msgstr "Vielen Dank. Sie haben diese Newsletter erfolgreich abonniert."
+
+#: templates/courriers/newsletter_list_subscribe_form.html:15
+msgid "Subscribe to the newsletter"
+msgstr "Newsletter abonnieren"
+
+#: templates/courriers/newsletter_list_subscribe_form.html:18
+msgid "Close"
+msgstr "Schließen"
+
+#: templates/courriers/newsletter_list_unsubscribe.html:15
+msgid "Your e-mail"
+msgstr "Ihre Emailadresse"
+
+#: templates/courriers/newsletter_list_unsubscribe_done.html:3
+msgid "Thank you. You're now unsubscribed from this newsletter."
+msgstr "Sie sind nun von dieser Newsletter abgemeldet."
+
+#: templates/courriers/newsletter_list_unsubscribe_done.html:5
+msgid "Thank you. You're now unsubscribed from all our newsletters."
+msgstr "Sie sind nun von allen unseren Newslettern abgemeldet."
