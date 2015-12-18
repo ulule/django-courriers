@@ -1,5 +1,3 @@
-import django
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -29,15 +27,12 @@ SECRET_KEY = 'blabla'
 ROOT_URLCONF = 'courriers.urls'
 
 try:
-    from .temp import *
+    from .temp import *  # noqa
 except ImportError:
     pass
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-if django.VERSION <= (1, 6):
-    TEST_RUNNER = 'discover_runner.DiscoverRunner'
 
 
 LOGGING = {
@@ -81,3 +76,19 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
