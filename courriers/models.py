@@ -14,7 +14,6 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.db.models.query import QuerySet
 
 from .compat import AUTH_USER_MODEL
-from .core import QuerySet, Manager
 from .settings import ALLOWED_LANGUAGES
 
 from separatedvaluesfield.models import SeparatedValuesField
@@ -32,7 +31,7 @@ class NewsletterListQuerySet(QuerySet):
         return self.filter(Q(languages__contains=lang) | Q(languages__isnull=True) | Q(languages=''))
 
 
-class NewsletterListManager(Manager):
+class NewsletterListManager(models.Manager):
     def get_queryset(self):
         return NewsletterListQuerySet(self.model)
 
@@ -84,7 +83,7 @@ class NewsletterQuerySet(QuerySet):
                 .first())
 
 
-class NewsletterManager(Manager):
+class NewsletterManager(models.Manager):
     def get_queryset(self):
         return NewsletterQuerySet(self.model)
 
