@@ -5,17 +5,15 @@ import django
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
-try:
-    from django.contrib.contenttypes.fields import GenericForeignKey
-except ImportError:
-    from django.contrib.contenttypes.generic import GenericForeignKey  # noqa
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.template.defaultfilters import slugify, truncatechars
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone as datetime
 from django.core.urlresolvers import reverse
 from django.utils.encoding import python_2_unicode_compatible
+from django.db.models.query import QuerySet
 
-from .compat import update_fields, AUTH_USER_MODEL
+from .compat import AUTH_USER_MODEL
 from .core import QuerySet, Manager
 from .settings import ALLOWED_LANGUAGES
 
@@ -37,9 +35,6 @@ class NewsletterListQuerySet(QuerySet):
 class NewsletterListManager(Manager):
     def get_queryset(self):
         return NewsletterListQuerySet(self.model)
-
-    if django.VERSION < (1, 6):
-        get_query_set = get_queryset
 
     def has_lang(self, lang):
         return self.get_queryset().has_lang(lang)
@@ -92,9 +87,6 @@ class NewsletterQuerySet(QuerySet):
 class NewsletterManager(Manager):
     def get_queryset(self):
         return NewsletterQuerySet(self.model)
-
-    if django.VERSION < (1, 6):
-        get_query_set = get_queryset
 
     def has_lang(self, lang):
         return self.get_queryset().has_lang(lang)
@@ -193,9 +185,6 @@ class NewsletterSubscriberManager(models.Manager):
     def get_queryset(self):
         return NewsletterSubscriberQuerySet(self.model)
 
-    if django.VERSION < (1, 6):
-        get_query_set = get_queryset
-
     def subscribed(self):
         return self.get_queryset().subscribed()
 
@@ -229,11 +218,11 @@ class NewsletterSubscriber(models.Model):
         self.is_unsubscribed = False
 
         if commit:
-            update_fields(self, fields=('is_unsubscribed', ))
+            self.save(update_fields=('is_unsubscribed', ))
 
     def unsubscribe(self, commit=True):
         self.is_unsubscribed = True
         self.unsubscribed_at = datetime.now()
 
         if commit:
-            update_fields(self, fields=('is_unsubscribed', 'unsubscribed_at', ))
+            self.save(update_fields=('is_unsubscribed', 'unsubscribed_at', ))

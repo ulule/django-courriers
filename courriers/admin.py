@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 from django.http import HttpResponseRedirect
@@ -21,12 +21,11 @@ class NewsletterAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         urls = super(NewsletterAdmin, self).get_urls()
-        my_urls = patterns(
-            '',
+        my_urls = [
             url(r'^send/(?P<newsletter_id>(\d+))/$',
                 self.send_newsletter,
                 name="send_newsletter")
-        )
+        ]
         return my_urls + urls
 
     def send_newsletter(self, request, newsletter_id):

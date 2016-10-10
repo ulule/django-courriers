@@ -1,7 +1,6 @@
 import logging
 
 from courriers.settings import FAIL_SILENTLY, DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME
-from courriers.compat import update_fields
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -49,7 +48,7 @@ class CampaignBackend(SimpleBackend):
             keys.append(self._format_slug(newsletter_list.slug, lang))
 
         for key in keys:
-            if not key in list_ids:
+            if key not in list_ids:
 
                 message = 'List %s does not exist' % key
 
@@ -79,7 +78,7 @@ class CampaignBackend(SimpleBackend):
                     keys.append(self._format_slug(newsletter_list.slug, lang))
 
             for key in keys:
-                if not key in list_ids:
+                if key not in list_ids:
                     message = 'List %s does not exist' % key
 
                     if not FAIL_SILENTLY:
@@ -122,6 +121,6 @@ class CampaignBackend(SimpleBackend):
                 raise e
         else:
             newsletter.sent = True
-            update_fields(newsletter, fields=('sent', ))
+            newsletter.save(update_fields=('sent', ))
 
         translation.activate(old_language)

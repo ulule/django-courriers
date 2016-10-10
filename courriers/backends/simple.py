@@ -9,7 +9,6 @@ from django.utils import translation
 from ..models import NewsletterSubscriber
 from ..settings import DEFAULT_FROM_EMAIL, PRE_PROCESSORS
 from ..utils import load_class
-from ..compat import update_fields
 
 
 class SimpleBackend(BaseBackend):
@@ -107,6 +106,6 @@ class SimpleBackend(BaseBackend):
         results = connection.send_messages(emails)
 
         newsletter.sent = True
-        update_fields(newsletter, fields=('sent', ))
+        newsletter.save(update_fields=('sent', ))
 
         return results
