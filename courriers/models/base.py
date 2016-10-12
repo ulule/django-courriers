@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 import django
 
@@ -13,8 +12,8 @@ from django.core.urlresolvers import reverse
 from django.utils.encoding import python_2_unicode_compatible
 from django.db.models.query import QuerySet
 
-from .compat import AUTH_USER_MODEL
-from .settings import ALLOWED_LANGUAGES
+from ..compat import AUTH_USER_MODEL
+from ..settings import ALLOWED_LANGUAGES
 
 from separatedvaluesfield.models import SeparatedValuesField
 
@@ -51,6 +50,9 @@ class NewsletterList(models.Model):
                                      choices=ALLOWED_LANGUAGES)
 
     objects = NewsletterListManager()
+
+    class Meta:
+        abstract = True
 
     def __str__(self):
         return self.name
@@ -124,6 +126,9 @@ class Newsletter(models.Model):
 
     objects = NewsletterManager()
 
+    class Meta:
+        abstract = True
+
     def __str__(self):
         return self.name
 
@@ -156,6 +161,7 @@ class NewsletterItem(models.Model):
 
     class Meta:
         ordering = ['position']
+        abstract = True
 
     def __str__(self):
         return self.name
@@ -205,6 +211,9 @@ class NewsletterSubscriber(models.Model):
     newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletter_subscribers')
 
     objects = NewsletterSubscriberManager()
+
+    class Meta:
+        abstract = True
 
     def __str__(self):
         return '%s for %s' % (self.email, self.newsletter_list)
