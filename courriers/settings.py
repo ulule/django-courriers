@@ -20,3 +20,11 @@ PRE_PROCESSORS = getattr(settings, 'COURRIERS_PRE_PROCESSORS', ())
 PAGINATE_BY = getattr(settings, 'COURRIERS_PAGINATE_BY', 9)
 
 FAIL_SILENTLY = getattr(settings, 'COURRIERS_FAIL_SILENTLY', False)
+
+NEWSLETTERLIST_MODEL = getattr(settings, 'COURRIERS_NEWSLETTERLIST_MODEL', 'courriers.models.newsletterlist.NewsletterList')
+
+NEWSLETTER_MODEL = getattr(settings, 'COURRIERS_NEWSLETTER_MODEL', 'courriers.models.newsletter.Newsletter')
+
+NEWSLETTERITEM_MODEL = getattr(settings, 'COURRIERS_NEWSLETTERITEM_MODEL', 'courriers.models.newsletteritem.NewsletterItem')
+
+NEWSLETTERSUBSCRIBER_MODEL = getattr(settings, 'COURRIERS_NEWSLETTERSUBSCRIBER_MODEL', 'courriers.models.newslettersubscriber.NewsletterSubscriber')
