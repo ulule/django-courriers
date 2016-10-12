@@ -2,6 +2,6 @@
 from . import base
 
 
-class NewsletterLift(base.NewsletterList):
+class NewsletterList(base.NewsletterList):
     class Meta(base.NewsletterList.Meta):
         abstract = False
