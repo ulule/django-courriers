@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 
-import logging
-
 from django.template.loader import render_to_string
-from django.utils.translation import ugettext as _
 from django.utils.functional import cached_property
 from django.core.exceptions import ImproperlyConfigured
 
@@ -15,15 +12,13 @@ from ..utils import load_class
 
 from mailchimp import Mailchimp
 
-logger = logging.getLogger('courriers')
-
 
 class MailchimpBackend(CampaignBackend):
     mailchimp_class = Mailchimp
 
     def __init__(self):
         if not MAILCHIMP_API_KEY:
-            raise ImproperlyConfigured(_('Please specify your MAILCHIMP API key in Django settings'))
+            raise ImproperlyConfigured('Please specify your MAILCHIMP API key in Django settings')
         self.mc = self.mailchimp_class(MAILCHIMP_API_KEY, True)
 
     @cached_property
@@ -65,4 +60,4 @@ class MailchimpBackend(CampaignBackend):
         self.mc.campaigns.send(campaign['id'])
 
     def _format_slug(self, *args):
-        return u'_'.join([u'%s' % arg for arg in args])
+        return '_'.join([u'%s' % arg for arg in args])
