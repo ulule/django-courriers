@@ -69,17 +69,14 @@ class MailjetRESTBackend(CampaignBackend):
             'Title': subject,
         }
 
-        html = render_to_string('courriers/newsletter_raw_detail.html', {
+        context = {
             'object': newsletter,
             'items': newsletter.items.select_related('newsletter'),
             'options': options
-        })
+        }
 
-        text = render_to_string('courriers/newsletter_raw_detail.txt', {
-            'object': newsletter,
-            'items': newsletter.items.select_related('newsletter'),
-            'options': options
-        })
+        html = render_to_string('courriers/newsletter_raw_detail.html', context)
+        text = render_to_string('courriers/newsletter_raw_detail.txt', context)
 
         for pre_processor in PRE_PROCESSORS:
             html = load_class(pre_processor)(html)
