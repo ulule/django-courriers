@@ -5,7 +5,6 @@ from mailjet_rest import Client
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import cached_property
 from django.template.loader import render_to_string
-from django.utils.encoding import smart_text
 
 from ..settings import (MAILJET_API_KEY,
                         DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME,
@@ -60,7 +59,7 @@ class MailjetRESTBackend(CampaignBackend):
         return ''.join([(u'%s' % arg).replace('-', '') for arg in args])
 
     def _send_campaign(self, newsletter, list_id):
-        subject = smart_text(newsletter.name).encode('utf-8')
+        subject = newsletter.name
 
         options = {
             'Subject': subject,
@@ -68,6 +67,7 @@ class MailjetRESTBackend(CampaignBackend):
             'Locale': 'en',
             'SenderEmail': DEFAULT_FROM_EMAIL,
             'Sender': DEFAULT_FROM_NAME,
+            'SenderName': DEFAULT_FROM_NAME,
             'Title': subject,
         }
 
@@ -78,8 +78,7 @@ class MailjetRESTBackend(CampaignBackend):
         }
 
         html = render_to_string('courriers/newsletter_raw_detail.html', context)
-        text = smart_text(render_to_string('courriers/newsletter_raw_detail.txt',
-                                           context)).encode('utf-8')
+        text = render_to_string('courriers/newsletter_raw_detail.txt', context)
 
         for pre_processor in PRE_PROCESSORS:
             html = load_class(pre_processor)(html)
