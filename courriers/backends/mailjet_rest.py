@@ -9,6 +9,7 @@ from django.utils.encoding import smart_text
 
 from ..settings import (MAILJET_API_KEY,
                         DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME,
+                        MAILJET_CONTACTSLIST_LIMIT,
                         MAILJET_API_SECRET_KEY,
                         PRE_PROCESSORS)
 from .campaign import CampaignBackend
@@ -27,7 +28,7 @@ class MailjetRESTBackend(CampaignBackend):
 
     @cached_property
     def list_ids(self):
-        results = self.client.contactslist.get().json()
+        results = self.client.contactslist.get(filters={'Limit': MAILJET_CONTACTSLIST_LIMIT}).json()
 
         return dict((l['Name'], l['ID']) for l in results['Data'])
 
