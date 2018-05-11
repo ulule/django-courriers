@@ -24,17 +24,13 @@ def get_file_path(instance, filename):
     return os.path.join('courriers', 'uploads', filename)
 
 
-class NewsletterListQuerySet(QuerySet):
-    def has_lang(self, lang):
-        return self.filter(Q(languages__contains=lang) | Q(languages__isnull=True) | Q(languages=''))
+@python_2_unicode_compatible
+class NewsletterSegment(models.Model):
+    segment_id = models.CharField(max_length=255)
+    lang = models.CharField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
 
-
-class NewsletterListManager(models.Manager):
-    def get_queryset(self):
-        return NewsletterListQuerySet(self.model)
-
-    def has_lang(self, lang):
-        return self.get_queryset().has_lang(lang)
+    class Meta:
+        abstract = True
 
 
 @python_2_unicode_compatible
@@ -43,12 +39,9 @@ class NewsletterList(models.Model):
     slug = models.SlugField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    languages = SeparatedValuesField(max_length=50,
-                                     blank=True,
-                                     null=True,
-                                     choices=ALLOWED_LANGUAGES)
 
-    objects = NewsletterListManager()
+    list_id = models.CharField(max_length=255)
+    segment = models.ForeignKey(NewsletterSegment, related_name='segments')
 
     class Meta:
         abstract = True
@@ -63,9 +56,6 @@ class NewsletterList(models.Model):
 
 
 class NewsletterQuerySet(QuerySet):
-    def has_lang(self, lang):
-        return self.filter(Q(languages__contains=lang) | Q(languages__isnull=True) | Q(languages=''))
-
     def status_online(self):
         return (self.filter(status=Newsletter.STATUS_ONLINE,
                             published_at__lt=datetime.now())
@@ -87,9 +77,6 @@ class NewsletterQuerySet(QuerySet):
 class NewsletterManager(models.Manager):
     def get_queryset(self):
         return NewsletterQuerySet(self.model)
-
-    def has_lang(self, lang):
-        return self.get_queryset().has_lang(lang)
 
     def status_online(self):
         return self.get_queryset().status_online()
@@ -119,7 +106,6 @@ class Newsletter(models.Model):
     headline = models.TextField(blank=True, null=True)
     conclusion = models.TextField(blank=True, null=True)
     cover = models.ImageField(upload_to=get_file_path, blank=True, null=True)
-    languages = SeparatedValuesField(max_length=50, blank=True, null=True, choices=ALLOWED_LANGUAGES)
     newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletters')
     sent = models.BooleanField(default=False, db_index=True)
 
@@ -170,20 +156,6 @@ class NewsletterSubscriberQuerySet(QuerySet):
     def subscribed(self):
         return self.filter(is_unsubscribed=False)
 
-    def has_lang(self, lang):
-        return self.filter(lang=lang)
-
-    def has_langs(self, langs):
-        filter_q = None
-
-        for lang in langs:
-            if filter_q is None:
-                filter_q = models.Q(lang=lang)
-            else:
-                filter_q |= models.Q(lang=lang)
-
-        return self.filter(filter_q)
-
 
 class NewsletterSubscriberManager(models.Manager):
     def get_queryset(self):
@@ -191,12 +163,6 @@ class NewsletterSubscriberManager(models.Manager):
 
     def subscribed(self):
         return self.get_queryset().subscribed()
-
-    def has_lang(self, lang):
-        return self.get_queryset().has_lang(lang)
-
-    def has_langs(self, langs):
-        return self.get_queryset().has_langs(langs)
 
 
 @python_2_unicode_compatible
@@ -208,6 +174,7 @@ class NewsletterSubscriber(models.Model):
     email = models.EmailField(max_length=250)
     lang = models.CharField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
     newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletter_subscribers')
+    newsletter_segment = models.ForeignKey(NewsletterSegment, related_name='segment_subscribers')
 
     objects = NewsletterSubscriberManager()
 

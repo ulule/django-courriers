@@ -34,19 +34,16 @@ class NewsletterListView(AJAXResponseMixin, ListView):
     paginate_by = PAGINATE_BY
 
     def dispatch(self, *args, **kwargs):
-        self.lang = kwargs.get('lang', None) or get_language()
-
         return super(NewsletterListView, self).dispatch(*args, **kwargs)
 
     @cached_property
     def newsletter_list(self):
-        return get_object_or_404(NewsletterList.objects.has_lang(self.lang),
+        return get_object_or_404(NewsletterList.objects.all(),
                                  slug=self.kwargs.get('slug'))
 
     def get_queryset(self):
         return (self.newsletter_list.newsletters
                 .status_online()
-                .has_lang(self.lang)
                 .order_by('-published_at'))
 
     def get_context_data(self, **kwargs):
@@ -61,7 +58,7 @@ class NewsletterDetailView(AJAXResponseMixin, DetailView):
     template_name = 'courriers/newsletter_detail.html'
 
     def get_queryset(self):
-        return self.model.objects.status_online().has_lang(get_language())
+        return self.model.objects.status_online()
 
     def get_context_data(self, **kwargs):
         context = super(NewsletterDetailView, self).get_context_data(**kwargs)

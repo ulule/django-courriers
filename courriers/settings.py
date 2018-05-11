@@ -9,6 +9,8 @@ MAILJET_API_KEY = getattr(settings, 'COURRIERS_MAILJET_API_KEY', '')
 
 MAILJET_CONTACTSLIST_LIMIT = getattr(settings, 'COURRIERS_MAILJET_CONTACTSLIST_LIMIT', 1000)
 
+MAILJET_CONTACTFILTER_LIMIT = getattr(settings, 'COURRIERS_MAILJET_CONTACTFILTER_LIMIT', 1000)
+
 MAILJET_API_SECRET_KEY = getattr(settings, 'COURRIERS_MAILJET_API_SECRET_KEY', '')
 
 DEFAULT_FROM_EMAIL = getattr(settings, 'COURRIERS_DEFAULT_FROM_EMAIL', settings.DEFAULT_FROM_EMAIL)
@@ -30,3 +32,5 @@ NEWSLETTER_MODEL = getattr(settings, 'COURRIERS_NEWSLETTER_MODEL', 'courriers.mo
 NEWSLETTERITEM_MODEL = getattr(settings, 'COURRIERS_NEWSLETTERITEM_MODEL', 'courriers.models.newsletteritem.NewsletterItem')
 
 NEWSLETTERSUBSCRIBER_MODEL = getattr(settings, 'COURRIERS_NEWSLETTERSUBSCRIBER_MODEL', 'courriers.models.newslettersubscriber.NewsletterSubscriber')
+
+NEWSLETTERSEGMENT_MODEL = getattr(settings, 'COURRIERS_NEWSLETTERSEGMENT_MODEL', 'courriers.models.newslettersegment.NewsletterSegment')

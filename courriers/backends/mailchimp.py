@@ -34,7 +34,7 @@ class MailchimpBackend(CampaignBackend):
         self.mc.lists.unsubscribe(list_id, {'email': email}, delete_member=False,
                                   send_goodbye=False, send_notify=False)
 
-    def _send_campaign(self, newsletter, list_id):
+    def _send_campaign(self, newsletter, list_id, **kwargs):
         options = {
             'list_id': list_id,
             'subject': newsletter.name,

@@ -9,6 +9,7 @@ from django.template.loader import render_to_string
 from ..settings import (MAILJET_API_KEY,
                         DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME,
                         MAILJET_CONTACTSLIST_LIMIT,
+                        MAILJET_CONTACTFILTER_LIMIT,
                         MAILJET_API_SECRET_KEY,
                         PRE_PROCESSORS)
 from .campaign import CampaignBackend
@@ -28,6 +29,12 @@ class MailjetRESTBackend(CampaignBackend):
     @cached_property
     def list_ids(self):
         results = self.client.contactslist.get(filters={'Limit': MAILJET_CONTACTSLIST_LIMIT}).json()
+
+        return dict((l['Name'], l['ID']) for l in results['Data'])
+
+    @cached_property
+    def segment_ids(self):
+        results = self.client.contactfilter.get(filters={'Limit': MAILJET_CONTACTFILTER_LIMIT}).json()
 
         return dict((l['Name'], l['ID']) for l in results['Data'])
 
@@ -58,7 +65,7 @@ class MailjetRESTBackend(CampaignBackend):
     def _format_slug(self, *args):
         return ''.join([(u'%s' % arg).replace('-', '') for arg in args])
 
-    def _send_campaign(self, newsletter, list_id):
+    def _send_campaign(self, newsletter, list_id, segment_id=None):
         subject = newsletter.name
 
         options = {
@@ -70,6 +77,9 @@ class MailjetRESTBackend(CampaignBackend):
             'SenderName': DEFAULT_FROM_NAME,
             'Title': subject,
         }
+
+        if segment_id:
+            options['SegmentationID'] = segment_id
 
         context = {
             'object': newsletter,

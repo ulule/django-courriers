@@ -65,10 +65,7 @@ class SimpleBackend(BaseBackend):
     def send_mails(self, newsletter, fail_silently=False):
         qs = self.model.objects.filter(newsletter_list=newsletter.newsletter_list).subscribed()
 
-        if newsletter.languages:
-            subscribers = qs.has_langs(newsletter.languages).prefetch_related('user')
-        else:
-            subscribers = qs.prefetch_related('user')
+        subscribers = qs.prefetch_related('user')
 
         connection = mail.get_connection(fail_silently=fail_silently)
 

@@ -29,6 +29,10 @@ class MailjetBackend(CampaignBackend):
     def list_ids(self):
         return dict((l['label'], l['id']) for l in self.mailjet_api.lists.all()['lists'])
 
+    @cached_property
+    def segment_ids(self):
+        pass
+
     def _subscribe(self, list_id, email):
         self.mailjet_api.lists.addcontact(
             contact=email,
@@ -43,7 +47,7 @@ class MailjetBackend(CampaignBackend):
             method='POST'
         )
 
-    def _send_campaign(self, newsletter, list_id):
+    def _send_campaign(self, newsletter, list_id, segment_id=None):
         options = {
             'method': 'POST',
             'subject': smart_text(newsletter.name).encode('utf-8'),

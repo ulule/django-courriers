@@ -118,7 +118,7 @@ class SimpleBackendTests(BaseBackendTests):
         self.backend.register('adele@ulule.com', self.newsletters[0].newsletter_list, 'fr')
 
         self.backend.send_mails(self.newsletters[1])
-        self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().filter(newsletter_list=self.newsletters[1].newsletter_list).has_lang('fr').count())
+        self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().filter(newsletter_list=self.newsletters[1].newsletter_list).count())
         out = len(mail.outbox)
 
         self.backend.register('adele@ulule.com', self.newsletters[0].newsletter_list, 'en-us')

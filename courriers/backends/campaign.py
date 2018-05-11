@@ -16,25 +16,23 @@ class CampaignBackend(SimpleBackend):
         if not newsletter.is_online():
             raise Exception("This newsletter is not online. You can't send it.")
 
-        list_ids = self.list_ids
-        ids = []
+        list_id = self.list_ids[newsletter.newsletter_list.list_id]
 
-        if newsletter.languages:
-            for lang in newsletter.languages:
-                slug = self._format_slug(newsletter.newsletter_list.slug, lang)
-                if slug in list_ids:
-                    ids.append(list_ids[slug])
-        else:
-            ids.append(list_ids[newsletter.newsletter_list.slug])
+        segment_id = None
+        if newsletter.newsletter_list.segment_id:
+            segment_id = self.segment_ids[newsletter.newsletter_list.segment_id.segments_id]
 
-        for list_id in ids:
-            self.send_campaign(newsletter, list_id)
+        self.send_campaign(newsletter, list_id, segments_id=segment_id)
 
     def _format_slug(self, *args):
         raise NotImplementedError
 
     @property
     def list_ids(self):
+        raise NotImplementedError
+
+    @property
+    def segment_ids(self):
         raise NotImplementedError
 
     def register(self, email, newsletter_list, lang=None, user=None):
@@ -97,7 +95,7 @@ class CampaignBackend(SimpleBackend):
             for subscriber in self.all(email, user=user):
                 self.unregister(email, subscriber.newsletter_list, user=user)
 
-    def send_campaign(self, newsletter, list_id):
+    def send_campaign(self, newsletter, list_id, segment_id=None):
         if not DEFAULT_FROM_EMAIL:
             raise ImproperlyConfigured("You have to specify a DEFAULT_FROM_EMAIL in Django settings.")
         if not DEFAULT_FROM_NAME:
@@ -113,7 +111,7 @@ class CampaignBackend(SimpleBackend):
         translation.activate(language)
 
         try:
-            self._send_campaign(newsletter, list_id)
+            self._send_campaign(newsletter, list_id, segment_id=segment_id)
         except Exception as e:
             logger.exception(e)
 
