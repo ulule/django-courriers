@@ -28,6 +28,14 @@ class CampaignBackend(SimpleBackend):
         if not DEFAULT_FROM_NAME:
             raise ImproperlyConfigured("You have to specify a DEFAULT_FROM_NAME in Django settings.")
 
+        old_language = translation.get_language()
+        language = settings.LANGUAGE_CODE
+
+        if newsletter.newsletter_list.segment_id:
+            language = newsletter.newsletter_list.segment.lang
+
+        translation.activate(language)
+
         try:
             self._send_campaign(newsletter, list_id, segment_id=segment_id)
         except Exception as e:
@@ -38,3 +46,6 @@ class CampaignBackend(SimpleBackend):
         else:
             newsletter.sent = True
             newsletter.save(update_fields=('sent', ))
+
+
+        translation.activate(old_language)
