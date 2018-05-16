@@ -26,45 +26,6 @@ class MailjetRESTBackend(CampaignBackend):
 
         self.client = Client(auth=(MAILJET_API_KEY, MAILJET_API_SECRET_KEY))
 
-    @cached_property
-    def list_ids(self):
-        results = self.client.contactslist.get(filters={'Limit': MAILJET_CONTACTSLIST_LIMIT}).json()
-
-        return dict((l['Name'], l['ID']) for l in results['Data'])
-
-    @cached_property
-    def segment_ids(self):
-        results = self.client.contactfilter.get(filters={'Limit': MAILJET_CONTACTFILTER_LIMIT}).json()
-
-        return dict((l['Name'], l['ID']) for l in results['Data'])
-
-    def _subscribe(self, list_id, email):
-        data = {
-            'Action': 'addforce',
-            'Contacts': [
-                {
-                    'Email': email,
-                }
-            ]
-        }
-
-        self.client.contactslist_ManageManyContacts.create(id=list_id, data=data)
-
-    def _unsubscribe(self, list_id, email):
-        data = {
-            'Action': 'unsub',
-            'Contacts': [
-                {
-                    'Email': email,
-                }
-            ]
-        }
-
-        self.client.contactslist_ManageManyContacts.create(id=list_id, data=data)
-
-    def _format_slug(self, *args):
-        return ''.join([(u'%s' % arg).replace('-', '') for arg in args])
-
     def _send_campaign(self, newsletter, list_id, segment_id=None):
         subject = newsletter.name
 

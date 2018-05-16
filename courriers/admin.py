@@ -5,7 +5,7 @@ from django.utils.translation import ugettext as _
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
-from .models import Newsletter, NewsletterItem, NewsletterSubscriber, NewsletterList
+from .models import Newsletter, NewsletterItem, NewsletterList
 
 
 class NewsletterItemInline(admin.TabularInline):
@@ -41,15 +41,9 @@ class NewsletterAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(reverse('admin:courriers_newsletter_change', args=(newsletter.id,)))
 
 
-class NewsletterSubscriberAdmin(admin.ModelAdmin):
-    list_display = ('email', 'user', 'lang', 'is_unsubscribed',)
-    list_filter = ('is_unsubscribed',)
-
-
 class NewsletterListAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'created_at',)
 
 
 admin.site.register(Newsletter, NewsletterAdmin)
-admin.site.register(NewsletterSubscriber, NewsletterSubscriberAdmin)
 admin.site.register(NewsletterList, NewsletterListAdmin)

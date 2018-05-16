@@ -26,7 +26,8 @@ def get_file_path(instance, filename):
 
 @python_2_unicode_compatible
 class NewsletterSegment(models.Model):
-    segment_id = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    segment_id = models.IntegerField()
     lang = models.CharField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
 
     class Meta:
@@ -39,8 +40,7 @@ class NewsletterList(models.Model):
     slug = models.SlugField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    list_id = models.CharField(max_length=255)
+    list_id = models.IntegerField(null=True)
     segment = models.ForeignKey(NewsletterSegment, related_name='segments')
 
     class Meta:
