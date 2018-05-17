@@ -17,7 +17,8 @@ class CampaignBackend(SimpleBackend):
             raise Exception("This newsletter is not online. You can't send it.")
 
         nl_list = newsletter.newsletter_list
-        self.send_campaign(newsletter, nl_list.list_id, nl_list.segment_id)
+        nl_segment = newsletter.newsletter_segment
+        self.send_campaign(newsletter, nl_list.list_id, nl_segment.segment_id)
 
     def _format_slug(self, *args):
         raise NotImplementedError
@@ -29,10 +30,7 @@ class CampaignBackend(SimpleBackend):
             raise ImproperlyConfigured("You have to specify a DEFAULT_FROM_NAME in Django settings.")
 
         old_language = translation.get_language()
-        language = settings.LANGUAGE_CODE
-
-        if newsletter.newsletter_list.segment_id:
-            language = newsletter.newsletter_list.segment.lang
+        language = newsletter.newsletter_segment.lang or settings.LANGUAGE_CODE
 
         translation.activate(language)
 

@@ -25,26 +25,12 @@ def get_file_path(instance, filename):
 
 
 @python_2_unicode_compatible
-class NewsletterSegment(models.Model):
-    name = models.CharField(max_length=255)
-    segment_id = models.IntegerField()
-    lang = models.CharField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
-
-    class Meta:
-        abstract = True
-
-    def __str__(self):
-        return self.name
-
-
-@python_2_unicode_compatible
 class NewsletterList(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     list_id = models.IntegerField(null=True)
-    newsletter_segment = models.ForeignKey(NewsletterSegment, related_name='segments')
 
     class Meta:
         abstract = True
@@ -56,6 +42,20 @@ class NewsletterList(models.Model):
         return reverse('newsletter_list', kwargs={
             'slug': self.slug
         })
+
+
+@python_2_unicode_compatible
+class NewsletterSegment(models.Model):
+    name = models.CharField(max_length=255)
+    segment_id = models.IntegerField()
+    newsletter_list = models.ForeignKey(NewsletterList, related_name='lists')
+    lang = models.CharField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return self.name
 
 
 class NewsletterQuerySet(QuerySet):
@@ -110,6 +110,7 @@ class Newsletter(models.Model):
     conclusion = models.TextField(blank=True, null=True)
     cover = models.ImageField(upload_to=get_file_path, blank=True, null=True)
     newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletters')
+    newsletter_segment = models.ForeignKey(NewsletterSegment, related_name='segments')
     sent = models.BooleanField(default=False, db_index=True)
 
     objects = NewsletterManager()
