@@ -33,6 +33,9 @@ class NewsletterSegment(models.Model):
     class Meta:
         abstract = True
 
+    def __str__(self):
+        return self.name
+
 
 @python_2_unicode_compatible
 class NewsletterList(models.Model):
@@ -41,7 +44,7 @@ class NewsletterList(models.Model):
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     list_id = models.IntegerField(null=True)
-    segment = models.ForeignKey(NewsletterSegment, related_name='segments')
+    newsletter_segment = models.ForeignKey(NewsletterSegment, related_name='segments')
 
     class Meta:
         abstract = True
