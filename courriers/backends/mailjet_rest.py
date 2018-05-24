@@ -67,3 +67,27 @@ class MailjetRESTBackend(CampaignBackend):
 
         self.client.campaigndraft_detailcontent.create(id=campaign_id, data=data)
         self.client.campaigndraft_send.create(id=campaign_id)
+
+    def subscribe(self, list_id, email, lang=None, user=None):
+        data = {
+            'Action': 'addforce',
+            'Contacts': [
+                {
+                    'Email': email,
+                }
+            ]
+        }
+
+        self.client.contactslist_ManageManyContacts.create(id=list_id, data=data)
+
+    def unsubscribe(self, list_id, email, lang=None, user=None):
+        data = {
+            'Action': 'unsub',
+            'Contacts': [
+                {
+                    'Email': email,
+                }
+            ]
+        }
+
+        self.client.contactslist_ManageManyContacts.create(id=list_id, data=data)

@@ -22,14 +22,18 @@ def subscribe(self, email, newsletter_list_id, lang=None, user_id=None):
 
     if user_id is not None:
         user = User.objects.get(pk=user_id)
+    else:
+        user = User.objects.filter(email=email).last()
 
-    try:
-        backend.register(email=email,
-                         newsletter_list=newsletter_list,
-                         lang=lang,
-                         user=user)
-    except Exception as e:
-        raise self.retry(exc=e, countdown=60)
+    if user:
+        user.subscribe(newsletter_list)
+
+    else:
+        try:
+            backend.subscribe(newsletter_list.list_id,
+                              email)
+        except Exception as e:
+            raise self.retry(exc=e, countdown=60)
 
 
 @task(bind=True)
@@ -41,22 +45,24 @@ def unsubscribe(self, email, newsletter_list_id=None, lang=None, user_id=None):
 
     User = get_user_model()
 
-    newsletter_list = None
+    newsletter_lists = NewsletterList.objects.all()
 
     if newsletter_list_id:
-        newsletter_list = NewsletterList.objects.get(pk=newsletter_list_id)
+        newsletter_lists = NewsletterList.objects.filter(pk=newsletter_list_id)
 
     user = None
 
     if user_id is not None:
         user = User.objects.get(pk=user_id)
+    else:
+        user = User.objects.filter(email=email).last()
 
-    backend = get_backend()()
+    if user:
+        user.unsubscribe(newsletter_list_id=newsletter_lists[0] if newsletter_list_id else None)
 
-    try:
-        backend.unregister(email=email,
-                           newsletter_list=newsletter_list,
-                           lang=lang,
-                           user=user)
-    except Exception as e:
-        raise self.retry(exc=e, countdown=60)
+    else:
+        backend = get_backend()()
+
+        for newsletter in newsletter_lists:
+            backend.unsubscribe(newsletter.list_id,
+                                email)

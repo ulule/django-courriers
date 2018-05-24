@@ -14,9 +14,9 @@ from ..utils import load_class
 class SimpleBackend(BaseBackend):
     model = NewsletterSubscriber
 
+
     def subscribe(self, email, newsletter_list, lang=None, user=None):
-        return self.model.objects.create(email=email, user=user,
-                                         newsletter_list=newsletter_list, lang=lang)
+        pass
 
     def register(self, email, newsletter_list, lang=None, user=None):
         if not self.exists(email, newsletter_list, lang=lang):
