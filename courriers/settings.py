@@ -31,6 +31,4 @@ NEWSLETTER_MODEL = getattr(settings, 'COURRIERS_NEWSLETTER_MODEL', 'courriers.mo
 
 NEWSLETTERITEM_MODEL = getattr(settings, 'COURRIERS_NEWSLETTERITEM_MODEL', 'courriers.models.newsletteritem.NewsletterItem')
 
-NEWSLETTERSUBSCRIBER_MODEL = getattr(settings, 'COURRIERS_NEWSLETTERSUBSCRIBER_MODEL', 'courriers.models.newslettersubscriber.NewsletterSubscriber')
-
 NEWSLETTERSEGMENT_MODEL = getattr(settings, 'COURRIERS_NEWSLETTERSEGMENT_MODEL', 'courriers.models.newslettersegment.NewsletterSegment')

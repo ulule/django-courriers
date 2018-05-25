@@ -8,12 +8,13 @@ from django.utils import timezone as datetime
 from django.core import mail
 
 from courriers.forms import SubscriptionForm, UnsubscribeForm
-from courriers.models import Newsletter, NewsletterList, NewsletterSubscriber
+from courriers.models import Newsletter, NewsletterList, NewsletterSegment
+from courriers import settings
 from courriers.tasks import subscribe, unsubscribe
 
-from django.conf import settings as djsettings
+from .models import NewsletterSubscriber
 
-from courriers import settings
+from django.conf import settings as djsettings
 
 
 class BaseBackendTests(TestCase):
@@ -25,33 +26,46 @@ class BaseBackendTests(TestCase):
 
         current = datetime.now().strftime('%Y-%m-%d %H:%M')
 
-        self.monthly = NewsletterList.objects.create(name="TestMonthly", slug="testmonthly", languages=['fr'])
-        self.weekly = NewsletterList.objects.create(name="TestWeekly", slug="testweekly", languages=['fr'])
+        self.monthly = NewsletterList.objects.create(name="TestMonthly", slug="testmonthly", list_id=1)
+        self.weekly = NewsletterList.objects.create(name="TestWeekly", slug="testweekly", list_id=2)
 
-        n1 = Newsletter.objects.create(name="3000 projets financés %s" % current,
-                                       published_at=datetime.now() - datetime.timedelta(hours=2),
-                                       status=Newsletter.STATUS_ONLINE,
-                                       newsletter_list=self.monthly)
+        self.segment_monthly = NewsletterSegment.objects.create(name='monthly', segment_id=3, newsletter_list=self.monthly)
+        self.segment_weekly = NewsletterSegment.objects.create(name='weekly', segment_id=3, newsletter_list=self.weekly)
 
-        n2 = Newsletter.objects.create(name="3000 projets financés %s [monthly][fr]" % current,
+        self.segment_monthly_fr = NewsletterSegment.objects.create(name='monthly fr', segment_id=3, newsletter_list=self.monthly, lang='fr')
+        self.segment_weekly_fr = NewsletterSegment.objects.create(name='weekly fr', segment_id=4, newsletter_list=self.weekly, lang='fr')
+
+        self.segment_monthly_en = NewsletterSegment.objects.create(name='monthly en', segment_id=4, newsletter_list=self.monthly, lang='en-us')
+
+        self.nl_monthly = Newsletter.objects.create(name="3000 projets financés %s" % current,
+                                                    published_at=datetime.now() - datetime.timedelta(hours=2),
+                                                    status=Newsletter.STATUS_ONLINE,
+                                                    newsletter_list=self.monthly,
+                                                    newsletter_segment=self.segment_monthly)
+
+        self.nl_monthly_fr = Newsletter.objects.create(name="3000 projets financés %s [monthly][fr]" % current,
                                        published_at=datetime.now() - datetime.timedelta(hours=2),
                                        status=Newsletter.STATUS_ONLINE,
                                        newsletter_list=self.monthly,
-                                       languages=['fr'])
+                                       newsletter_segment=self.segment_monthly_fr)
+        self.nl_monthly_en = Newsletter.objects.create(name="3000 projects %s" % current,
+                                                       published_at=datetime.now() - datetime.timedelta(hours=2),
+                                                       status=Newsletter.STATUS_ONLINE,
+                                                       newsletter_list=self.monthly,
+                                                       newsletter_segment=self.segment_monthly_en)
 
-        n3 = Newsletter.objects.create(name="3000 projets financés %s [monthly][en-us]" % current,
+
+        self.nl_weekly = Newsletter.objects.create(name="3000 projets financés %s [monthly][en-us]" % current,
                                        published_at=datetime.now() - datetime.timedelta(hours=2),
                                        status=Newsletter.STATUS_ONLINE,
                                        newsletter_list=self.weekly,
-                                       languages=['en-us'])
+                                       newsletter_segment=self.segment_weekly)
 
-        n4 = Newsletter.objects.create(name="3000 projets financés %s [weekly][fr]" % current,
+        self.nl_weekly_fr = Newsletter.objects.create(name="3000 projets financés %s [weekly][fr]" % current,
                                        published_at=datetime.now() - datetime.timedelta(hours=2),
                                        status=Newsletter.STATUS_ONLINE,
                                        newsletter_list=self.weekly,
-                                       languages=['fr'])
-
-        self.newsletters = [n1, n2, n3, n4]
+                                       newsletter_segment=self.segment_weekly_fr)
 
     def test_registration(self):
         self.backend.register('adele@ulule.com', self.monthly, 'fr')
@@ -95,43 +109,42 @@ class BaseBackendTests(TestCase):
                                                            is_unsubscribed=False)
         self.assertEqual(unsubscriber.count(), 1)
 
-        # Subscribe with capital letters
-        self.backend.register('Florent@ulule.com', self.monthly, 'fr')
-
-        self.backend.unregister('florent@ulule.com')
-
-        subscriber = NewsletterSubscriber.objects.filter(email='Florent@ulule.com',
-                                                         is_unsubscribed=True)
-        self.assertEqual(subscriber.count(), 1)
-
 
 class SimpleBackendTests(BaseBackendTests):
     def test_registration(self):
         super(SimpleBackendTests, self).test_registration()
 
-        self.backend.register('adele@ulule.com', self.newsletters[0].newsletter_list)
+        self.backend.register('adele@ulule.com', self.nl_monthly.newsletter_list)
 
-        self.backend.send_mails(self.newsletters[0])
-        self.assertEqual(len(mail.outbox), NewsletterSubscriber.objects.subscribed().filter(newsletter_list=self.newsletters[0].newsletter_list).count())
+        self.backend.send_mails(self.nl_monthly,
+                                subscribers=NewsletterSubscriber.objects.filter(newsletter_list=self.monthly))
+
+        self.assertEqual(len(mail.outbox), 1)
         out = len(mail.outbox)
 
-        self.backend.register('adele@ulule.com', self.newsletters[0].newsletter_list, 'fr')
+        self.backend.register('adele@ulule.com', self.nl_monthly_fr.newsletter_list, 'fr')
 
-        self.backend.send_mails(self.newsletters[1])
-        self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().filter(newsletter_list=self.newsletters[1].newsletter_list).count())
+        self.backend.send_mails(self.nl_monthly_fr,
+                                subscribers=NewsletterSubscriber.objects.filter(newsletter_list=self.monthly))
+
+        self.assertEqual(len(mail.outbox) - out, 1)
         out = len(mail.outbox)
 
-        self.backend.register('adele@ulule.com', self.newsletters[0].newsletter_list, 'en-us')
+        self.backend.register('adele@ulule.com', self.monthly, 'en-us')
 
-        self.backend.send_mails(self.newsletters[2])
-        self.assertEqual(len(mail.outbox) - out, NewsletterSubscriber.objects.subscribed().filter(newsletter_list=self.newsletters[2].newsletter_list).has_lang('en-us').count())
+        self.backend.send_mails(self.nl_monthly_en,
+                                subscribers=NewsletterSubscriber.objects.filter(newsletter_list=self.monthly))
+
+        self.assertEqual(len(mail.outbox) - out, 1)
 
 
 class NewslettersViewsTests(TestCase):
     def setUp(self):
         self.monthly = NewsletterList.objects.create(name="TestMonthly", slug="testmonthly")
+        self.segment_monthly = NewsletterSegment.objects.create(name='monthly fr', segment_id=3, newsletter_list=self.monthly, lang='fr')
         self.n1 = Newsletter.objects.create(name='Newsletter1',
                                             newsletter_list=self.monthly,
+                                            newsletter_segment=self.segment_monthly,
                                             published_at=datetime.now(),
                                             status=Newsletter.STATUS_DRAFT)
 
@@ -197,20 +210,6 @@ class NewslettersViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_newsletter_list_unsubscribe_complete(self):
-        url = reverse('newsletter_list_unsubscribe',
-                      kwargs={'slug': 'testmonthly'}) + '?email=adele@ulule.com'
-
-        # GET
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.post(url, data={
-            'email': 'adele@ulule.com'
-        })
-        self.assertIn('email', response.context['form'].errors)
-        self.assertEqual(response.context['form'].initial['email'], 'adele@ulule.com')
-        self.assertEqual(response.status_code, 200)
-
         # Without email param
         valid_data = {'email': 'adele@ulule.com'}
 
@@ -300,6 +299,7 @@ class SubscribeFormTest(TestCase):
         self.backend = self.backend_klass()
 
         self.monthly = NewsletterList.objects.create(name="TestMonthly", slug="testmonthly")
+        self.segment_monthly = NewsletterSegment.objects.create(name='monthly fr', segment_id=3, newsletter_list=self.monthly, lang='fr')
 
     def test_subscription_logged_out(self):
         valid_data = {'receiver': 'adele@ulule.com'}
@@ -373,11 +373,11 @@ class UnsubscribeFormTest(TestCase):
         self.daily = NewsletterList.objects.create(name="TestDaily", slug="testdaily")
 
     def test_unsubscription(self):
-        self.backend.unregister('adele@ulule.com', self.monthly, 'fr')
+        self.backend.unregister('adele@ulule.com', self.monthly, lang='fr')
 
-        self.backend.register('adele@ulule.com', self.monthly, 'fr')
-        self.backend.register('adele@ulule.com', self.weekly, 'fr')
-        self.backend.register('adele@ulule.com', self.daily, 'fr')
+        self.backend.register('adele@ulule.com', self.monthly, lang='fr')
+        self.backend.register('adele@ulule.com', self.weekly, lang='fr')
+        self.backend.register('adele@ulule.com', self.daily, lang='fr')
 
         # Unsubscribe from monthly
         valid_data = {'email': 'adele@ulule.com', 'from_all': False}
@@ -489,23 +489,28 @@ if hasattr(settings, 'COURRIERS_MAILJET_API_KEY') and hasattr(settings, 'COURRIE
 class NewsletterModelsTest(TestCase):
     def test_navigation(self):
         monthly = NewsletterList.objects.create(name="TestMonthly", slug="testmonthly")
+        segment_monthly = NewsletterSegment.objects.create(name='monthly fr', segment_id=3, newsletter_list=monthly, lang='fr')
 
         Newsletter.objects.create(name='Newsletter4',
                                   status=Newsletter.STATUS_DRAFT,
                                   published_at=datetime.now() - datetime.timedelta(hours=4),
-                                  newsletter_list=monthly)
+                                  newsletter_list=monthly,
+                                  newsletter_segment=segment_monthly)
         n1 = Newsletter.objects.create(name='Newsletter1',
                                        status=Newsletter.STATUS_ONLINE,
                                        published_at=datetime.now() - datetime.timedelta(hours=3),
-                                       newsletter_list=monthly)
+                                       newsletter_list=monthly,
+                                       newsletter_segment=segment_monthly)
         n2 = Newsletter.objects.create(name='Newsletter2',
                                        status=Newsletter.STATUS_ONLINE,
                                        published_at=datetime.now() - datetime.timedelta(hours=2),
-                                       newsletter_list=monthly)
+                                       newsletter_list=monthly,
+                                       newsletter_segment=segment_monthly)
         n3 = Newsletter.objects.create(name='Newsletter3',
                                        status=Newsletter.STATUS_ONLINE,
                                        published_at=datetime.now() - datetime.timedelta(hours=1),
-                                       newsletter_list=monthly)
+                                       newsletter_list=monthly,
+                                       newsletter_segment=segment_monthly)
 
         self.assertEqual(n2.get_previous(), n1)
         self.assertEqual(n2.get_next(), n3)

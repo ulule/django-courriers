@@ -10,5 +10,3 @@ NewsletterSegment = load_class(settings.NEWSLETTERSEGMENT_MODEL)
 Newsletter = load_class(settings.NEWSLETTER_MODEL)
 
 NewsletterItem = load_class(settings.NEWSLETTERITEM_MODEL)
-
-NewsletterSubscriber = load_class(settings.NEWSLETTERSUBSCRIBER_MODEL)

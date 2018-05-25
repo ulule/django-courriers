@@ -2,7 +2,6 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _, get_language
 
 from .backends import get_backend
-from .models import NewsletterSubscriber
 from .tasks import subscribe, unsubscribe
 
 

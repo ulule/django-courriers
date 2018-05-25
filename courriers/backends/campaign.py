@@ -48,7 +48,6 @@ class CampaignBackend(SimpleBackend):
 
         translation.activate(old_language)
 
-
     def subscribe(self, email, list_id):
         pass
 
