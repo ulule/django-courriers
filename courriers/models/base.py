@@ -151,3 +151,6 @@ class NewsletterItem(models.Model):
     class Meta:
         ordering = ['position']
         abstract = True
+
+    def __str__(self):
+        return self.name
