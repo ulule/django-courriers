@@ -28,15 +28,22 @@ class NewsletterSubscriber(models.Model):
         return self.is_unsubscribed is False
 
 
-def subscribed(self, newsletter_list_id):
-    return NewsletterSubscriber.objects.filter(user=self, newsletter_list_id=newsletter_list_id).exists()
+def subscribed(self, newsletter_list_id, lang=None):
+    filters = {
+        'user': self,
+        'newsletter_list_id': newsletter_list_id
+    }
+    if lang:
+        filters['lang'] = lang
+
+    return NewsletterSubscriber.objects.filter(**filters).exists()
 
 
 def subscribe(self, newsletter_list_id, lang=None):
     if isinstance(newsletter_list_id, NewsletterList):
         newsletter_list_id = newsletter_list_id.pk
 
-    if not self.subscribed(newsletter_list_id):
+    if not self.subscribed(newsletter_list_id, lang=lang):
         NewsletterSubscriber.objects.create(subscribed_at=datetime.now(),
                                             user=self,
                                             email=self.email,
@@ -45,7 +52,8 @@ def subscribe(self, newsletter_list_id, lang=None):
     else:
         (NewsletterSubscriber.objects
          .filter(user=self,
-                 newsletter_list_id=newsletter_list_id)
+                 newsletter_list_id=newsletter_list_id,
+                 lang=lang)
          .update(unsubscribed_at=None,
                  is_unsubscribed=False))
 
@@ -58,7 +66,7 @@ def unsubscribe(self, newsletter_list_id=None, lang=None):
     else:
         newsletter_lists = NewsletterList.objects.all().values_list('pk', flat=True)
 
-    qs = NewsletterSubscriber.objects.filter(user=self, newsletter_list_id__in=newsletter_lists)
+    qs = NewsletterSubscriber.objects.filter(user=self, email=self.email, newsletter_list_id__in=newsletter_lists)
 
     if lang:
         qs = qs.filter(lang=lang)

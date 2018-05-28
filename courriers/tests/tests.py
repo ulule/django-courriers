@@ -67,6 +67,8 @@ class BaseBackendTests(TestCase):
                                        newsletter_list=self.weekly,
                                        newsletter_segment=self.segment_weekly_fr)
 
+        self.user = User.objects.create_user('adele', 'adele@ulule.com', '$ecret')
+
     def test_registration(self):
         self.backend.register('adele@ulule.com', self.monthly, 'fr')
         self.backend.register('adele@ulule.com', self.weekly, 'fr')
@@ -180,22 +182,6 @@ class NewslettersViewsTests(TestCase):
 
         self.assertTrue(isinstance(response.context['form'], SubscriptionForm))
 
-    def test_newsletter_list_subscribe_errors(self):
-        subscriber = NewsletterSubscriber.objects.create(newsletter_list=self.monthly,
-                                                         email='adele@ulule.com',
-                                                         lang=djsettings.LANGUAGE_CODE)
-
-        response = self.client.post(reverse('newsletter_list_subscribe',
-                                    kwargs={'slug': self.monthly.slug}),
-                                    HTTP_X_REQUESTED_WITH='XMLHttpRequest',
-                                    data={'receiver': subscriber.email})
-        self.assertEqual(response.status_code, 200)
-
-        self.assertFalse(response.context['form'].is_valid())
-        self.assertTrue('receiver' in response.context['form'].errors)
-
-        subscriber.unsubscribe()
-
     def test_newsletter_list_unsubscribe_view(self):
         url = reverse('newsletter_list_unsubscribe',
                       kwargs={'slug': 'testmonthly'}) + '?email=adele@ulule.com'
@@ -213,7 +199,7 @@ class NewslettersViewsTests(TestCase):
         # Without email param
         valid_data = {'email': 'adele@ulule.com'}
 
-        NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='adele@ulule.com')
+        NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='adele@ulule.com', user=self.user)
 
         response = self.client.post(reverse('newsletter_list_unsubscribe',
                                             kwargs={'slug': 'testmonthly'}),
@@ -233,7 +219,8 @@ class NewslettersViewsTests(TestCase):
         # With capital letters
         valid_data = {'email': 'Florent@ulule.com'}
 
-        NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='florent@ulule.com')
+        user = User.objects.create(email='florent@ulule.com', username='florent-ulule')
+        NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='florent@ulule.com', user=user)
 
         response = self.client.post(reverse('newsletter_list_unsubscribe',
                                             kwargs={'slug': 'testmonthly'}),
@@ -264,8 +251,7 @@ class NewslettersViewsTests(TestCase):
 
     def test_newsletter_list_all_unsubscribe_complete(self):
         url = reverse('newsletter_list_unsubscribe') + '?email=adele@ulule.com'
-
-        NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='adele@ulule.com')
+        NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='adele@ulule.com', user=self.user)
 
         # GET
         response = self.client.get(url)
@@ -372,6 +358,8 @@ class UnsubscribeFormTest(TestCase):
         self.weekly = NewsletterList.objects.create(name="TestWeekly", slug="testweekly")
         self.daily = NewsletterList.objects.create(name="TestDaily", slug="testdaily")
 
+        self.user = User.objects.create_user('adele', 'adele@ulule.com', '$ecret')
+
     def test_unsubscription(self):
         self.backend.unregister('adele@ulule.com', self.monthly, lang='fr')
 
@@ -415,12 +403,6 @@ class UnsubscribeFormTest(TestCase):
         self.assertEqual(old_subscriber2.get().is_unsubscribed, True)
         self.assertEqual(old_subscriber2.get().unsubscribed_at, datetime.now())
 
-        form2 = UnsubscribeForm(data=valid_data, newsletter_list=self.weekly)
-
-        is_valid = form2.is_valid()
-
-        self.assertEqual(is_valid, False)
-
     def test_unsubscription_logged_in(self):
         user = User.objects.create_user('thoas', 'florent@ulule.com', 'secret')
 
@@ -439,7 +421,7 @@ class UnsubscribeFormTest(TestCase):
         self.backend.unregister('florent@ulule.com')
 
     def test_unsubscribe_task(self):
-        NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='adele@ulule.com')
+        NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='adele@ulule.com', user=self.user)
 
         unsubscribe.apply_async(kwargs={'email': 'adele@ulule.com',
                                         'newsletter_list_id': self.monthly.pk})
