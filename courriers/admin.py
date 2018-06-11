@@ -36,7 +36,7 @@ class NewsletterAdminForm(forms.ModelForm):
 class NewsletterAdmin(admin.ModelAdmin):
     change_form_template = "admin/courriers/newsletter/change_form.html"
 
-    list_display = ("name", "headline", "published_at", "status", "newsletter_list")
+    list_display = ("name", "headline", "published_at", "status", "newsletter_list_link")
     list_filter = ("published_at", "status")
     inlines = [NewsletterItemInline]
     form = NewsletterAdminForm
@@ -66,6 +66,14 @@ class NewsletterAdmin(admin.ModelAdmin):
             reverse("admin:courriers_newsletter_change", args=(newsletter.id,))
         )
 
+    def newsletter_list_link(self, obj):
+        url = reverse('admin:courriers_newsletterlist_change', args=(obj.newsletter_list.id,))
+        return '<a href="%(url)s">%(name)s</a>' % {
+            'url': url,
+            'name': obj.newsletter_list.name
+        }
+
+    newsletter_list_link.allow_tags = True
 
 class NewsletterListAdmin(admin.ModelAdmin):
     list_display = ("name", "slug", "created_at")
