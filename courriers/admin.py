@@ -15,11 +15,18 @@ class NewsletterItemInline(admin.TabularInline):
 
 class NewsletterAdminForm(forms.ModelForm):
     def clean(self, *args, **kwargs):
-        segment = self.cleaned_data.get('newsletter_segment')
-        newsletter_list = self.cleaned_data.get('newsletter_list')
+        segment = self.cleaned_data.get("newsletter_segment")
+        newsletter_list = self.cleaned_data.get("newsletter_list")
 
-        if segment and newsletter_list and segment.newsletter_list_id != newsletter_list.pk:
-            self.add_error('newsletter_segment', 'The segment is not attached to this newsletter list')
+        if (
+            segment
+            and newsletter_list
+            and segment.newsletter_list_id != newsletter_list.pk
+        ):
+            self.add_error(
+                "newsletter_segment",
+                "The segment is not attached to this newsletter list",
+            )
 
     class Meta:
         model = Newsletter
@@ -27,19 +34,21 @@ class NewsletterAdminForm(forms.ModelForm):
 
 
 class NewsletterAdmin(admin.ModelAdmin):
-    change_form_template = 'admin/courriers/newsletter/change_form.html'
+    change_form_template = "admin/courriers/newsletter/change_form.html"
 
-    list_display = ('name', 'headline', 'published_at', 'status', 'newsletter_list',)
-    list_filter = ('published_at', 'status',)
+    list_display = ("name", "headline", "published_at", "status", "newsletter_list")
+    list_filter = ("published_at", "status")
     inlines = [NewsletterItemInline]
     form = NewsletterAdminForm
 
     def get_urls(self):
         urls = super(NewsletterAdmin, self).get_urls()
         my_urls = [
-            url(r'^send/(?P<newsletter_id>(\d+))/$',
+            url(
+                r"^send/(?P<newsletter_id>(\d+))/$",
                 self.send_newsletter,
-                name="send_newsletter")
+                name="send_newsletter",
+            )
         ]
         return my_urls + urls
 
@@ -53,15 +62,17 @@ class NewsletterAdmin(admin.ModelAdmin):
         backend.send_mails(newsletter)
 
         self.message_user(request, _('The newsletter "%s" has been sent.') % newsletter)
-        return HttpResponseRedirect(reverse('admin:courriers_newsletter_change', args=(newsletter.id,)))
+        return HttpResponseRedirect(
+            reverse("admin:courriers_newsletter_change", args=(newsletter.id,))
+        )
 
 
 class NewsletterListAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'created_at',)
+    list_display = ("name", "slug", "created_at")
 
 
 class NewsletterSegmentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'newsletter_list', 'lang')
+    list_display = ("name", "newsletter_list", "lang")
 
 
 admin.site.register(Newsletter, NewsletterAdmin)
