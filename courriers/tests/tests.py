@@ -216,27 +216,6 @@ class NewslettersViewsTests(TestCase):
 
         self.assertFalse(subscriber.subscribed)
 
-        # With capital letters
-        valid_data = {'email': 'Florent@ulule.com'}
-
-        user = User.objects.create(email='florent@ulule.com', username='florent-ulule')
-        NewsletterSubscriber.objects.create(newsletter_list=self.monthly, email='florent@ulule.com', user=user)
-
-        response = self.client.post(reverse('newsletter_list_unsubscribe',
-                                            kwargs={'slug': 'testmonthly'}),
-                                    data=valid_data)
-
-        self.assertRedirects(
-            response,
-            expected_url=reverse('newsletter_list_unsubscribe_done', args=[self.monthly.slug]),
-            status_code=302,
-            target_status_code=200
-        )
-
-        subscriber = NewsletterSubscriber.objects.get(email='florent@ulule.com')
-
-        self.assertFalse(subscriber.subscribed)
-
     def test_newsletter_list_all_unsubscribe_view(self):
         url = reverse('newsletter_list_unsubscribe') + '?email=adele@ulule.com'
 
@@ -287,29 +266,6 @@ class SubscribeFormTest(TestCase):
         self.monthly = NewsletterList.objects.create(name="TestMonthly", slug="testmonthly")
         self.segment_monthly = NewsletterSegment.objects.create(name='monthly fr', segment_id=3, newsletter_list=self.monthly, lang='fr')
 
-    def test_subscription_logged_out(self):
-        valid_data = {'receiver': 'adele@ulule.com'}
-
-        form = SubscriptionForm(data=valid_data, **{'newsletter_list': self.monthly})
-
-        self.assertTrue(form.is_valid())
-
-        form.save()
-
-        new_subscriber = NewsletterSubscriber.objects.filter(email=valid_data['receiver'])
-
-        self.assertEqual(new_subscriber.count(), 1)
-        self.assertNotEqual(new_subscriber.get().lang, None)
-
-        # Test duplicate
-        form2 = SubscriptionForm(data=valid_data, **{'newsletter_list': self.monthly})
-
-        is_valid = form2.is_valid()
-
-        self.assertEqual(is_valid, False)
-
-        self.backend.unregister('adele@ulule.com')
-
     def test_subscription_logged_in(self):
         self.client.login(username='thoas', password='secret')
 
@@ -319,18 +275,18 @@ class SubscribeFormTest(TestCase):
 
         self.assertTrue(form.is_valid())
 
-        user = User.objects.create(username='thoas')
+        user = User.objects.create(username='thoas', email='florent@ulule.com')
 
         form.save(user)
 
         new_subscriber = NewsletterSubscriber.objects.filter(email=valid_data['receiver'], user=user)
 
         self.assertEqual(new_subscriber.count(), 1)
-        self.assertNotEqual(new_subscriber.get().lang, None)
 
         self.backend.unregister('florent@ulule.com')
 
     def test_subscribe_task(self):
+        user = User.objects.create(username='adele-ulule', email='adele@ulule.com')
         subscribe.apply_async(kwargs={'email': 'adele@ulule.com',
                                       'newsletter_list_id': self.monthly.pk,
                                       'lang': 'fr'})
