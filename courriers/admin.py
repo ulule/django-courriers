@@ -41,6 +41,9 @@ class NewsletterAdmin(admin.ModelAdmin):
     inlines = [NewsletterItemInline]
     form = NewsletterAdminForm
 
+    def get_queryset(self, request):
+        return super(NewsletterAdmin, self).get_queryset(request).select_related('newsletter_list')
+
     def get_urls(self):
         urls = super(NewsletterAdmin, self).get_urls()
         my_urls = [
