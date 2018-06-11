@@ -60,7 +60,6 @@ def unsubscribe(self, email, newsletter_list_id=None, lang=None, user_id=None):
         user.unsubscribe(
             newsletter_list_id=newsletter_lists[0] if newsletter_list_id else None
         )
-
     else:
         backend = get_backend()()
 

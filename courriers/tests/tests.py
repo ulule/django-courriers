@@ -14,8 +14,6 @@ from courriers.tasks import subscribe, unsubscribe
 
 from .models import NewsletterSubscriber
 
-from django.conf import settings as djsettings
-
 
 class BaseBackendTests(TestCase):
     def setUp(self):

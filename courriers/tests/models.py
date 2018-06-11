@@ -7,8 +7,6 @@ from courriers.compat import AUTH_USER_MODEL
 from courriers.settings import ALLOWED_LANGUAGES
 from courriers.models import NewsletterList
 
-from separatedvaluesfield.models import SeparatedValuesField
-
 
 @python_2_unicode_compatible
 class NewsletterSubscriber(models.Model):
