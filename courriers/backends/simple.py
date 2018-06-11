@@ -44,30 +44,38 @@ class SimpleBackend(BaseBackend):
         old_language = translation.get_language()
 
         for subscriber in subscribers:
-            if newsletter.newsletter_segment.lang and newsletter.newsletter_segment.lang != subscriber.lang:
+            if (
+                newsletter.newsletter_segment.lang
+                and newsletter.newsletter_segment.lang != subscriber.lang
+            ):
                 continue
 
             translation.activate(subscriber.lang)
 
-            email = EmailMultiAlternatives(newsletter.name,
-                                           render_to_string('courriers/newsletter_raw_detail.txt', {
-                                               'object': newsletter,
-                                               'subscriber': subscriber
-                                           }),
-                                           DEFAULT_FROM_EMAIL,
-                                           [subscriber.email, ],
-                                           connection=connection)
+            email = EmailMultiAlternatives(
+                newsletter.name,
+                render_to_string(
+                    "courriers/newsletter_raw_detail.txt",
+                    {"object": newsletter, "subscriber": subscriber},
+                ),
+                DEFAULT_FROM_EMAIL,
+                [subscriber.email],
+                connection=connection,
+            )
 
-            html = render_to_string('courriers/newsletter_raw_detail.html', {
-                'object': newsletter,
-                'items': newsletter.items.all().prefetch_related('newsletter'),
-                'subscriber': subscriber
-            })
+            html = render_to_string(
+                "courriers/newsletter_raw_detail.html",
+                {
+                    "object": newsletter,
+                    "items": newsletter.items.all().prefetch_related("newsletter"),
+                    "subscriber": subscriber,
+                },
+            )
 
             for pre_processor in PRE_PROCESSORS:
                 html = load_class(pre_processor)(html)
 
-            email.attach_alternative(html, 'text/html')
+            email.attach_alternative(html, "text/html")
 
             emails.append(email)
 
@@ -76,6 +84,6 @@ class SimpleBackend(BaseBackend):
         results = connection.send_messages(emails)
 
         newsletter.sent = True
-        newsletter.save(update_fields=('sent', ))
+        newsletter.save(update_fields=("sent",))
 
         return results

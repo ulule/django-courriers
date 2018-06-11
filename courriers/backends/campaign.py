@@ -8,7 +8,7 @@ from django.utils import translation
 
 from .simple import SimpleBackend
 
-logger = logging.getLogger('courriers')
+logger = logging.getLogger("courriers")
 
 
 class CampaignBackend(SimpleBackend):
@@ -25,9 +25,13 @@ class CampaignBackend(SimpleBackend):
 
     def send_campaign(self, newsletter, list_id, segment_id):
         if not DEFAULT_FROM_EMAIL:
-            raise ImproperlyConfigured("You have to specify a DEFAULT_FROM_EMAIL in Django settings.")
+            raise ImproperlyConfigured(
+                "You have to specify a DEFAULT_FROM_EMAIL in Django settings."
+            )
         if not DEFAULT_FROM_NAME:
-            raise ImproperlyConfigured("You have to specify a DEFAULT_FROM_NAME in Django settings.")
+            raise ImproperlyConfigured(
+                "You have to specify a DEFAULT_FROM_NAME in Django settings."
+            )
 
         old_language = translation.get_language()
         language = newsletter.newsletter_segment.lang or settings.LANGUAGE_CODE
@@ -43,8 +47,7 @@ class CampaignBackend(SimpleBackend):
                 raise e
         else:
             newsletter.sent = True
-            newsletter.save(update_fields=('sent', ))
-
+            newsletter.save(update_fields=("sent",))
 
         translation.activate(old_language)
 

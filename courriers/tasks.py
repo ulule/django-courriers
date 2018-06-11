@@ -30,8 +30,7 @@ def subscribe(self, email, newsletter_list_id, lang=None, user_id=None):
 
     else:
         try:
-            backend.subscribe(newsletter_list.list_id,
-                              email)
+            backend.subscribe(newsletter_list.list_id, email)
         except Exception as e:
             raise self.retry(exc=e, countdown=60)
 
@@ -58,11 +57,12 @@ def unsubscribe(self, email, newsletter_list_id=None, lang=None, user_id=None):
         user = User.objects.filter(email=email).last()
 
     if user:
-        user.unsubscribe(newsletter_list_id=newsletter_lists[0] if newsletter_list_id else None)
+        user.unsubscribe(
+            newsletter_list_id=newsletter_lists[0] if newsletter_list_id else None
+        )
 
     else:
         backend = get_backend()()
 
         for newsletter in newsletter_lists:
-            backend.unsubscribe(newsletter.list_id,
-                                email)
+            backend.unsubscribe(newsletter.list_id, email)

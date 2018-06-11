@@ -17,11 +17,15 @@ class NewsletterSubscriber(models.Model):
     is_unsubscribed = models.BooleanField(default=False, db_index=True)
     unsubscribed_at = models.DateTimeField(blank=True, null=True)
     email = models.EmailField(max_length=250)
-    lang = models.CharField(max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES)
-    newsletter_list = models.ForeignKey(NewsletterList, related_name='newsletter_subscribers')
+    lang = models.CharField(
+        max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES
+    )
+    newsletter_list = models.ForeignKey(
+        NewsletterList, related_name="newsletter_subscribers"
+    )
 
     def __str__(self):
-        return '%s for %s' % (self.email, self.newsletter_list)
+        return "%s for %s" % (self.email, self.newsletter_list)
 
     @property
     def subscribed(self):
@@ -29,12 +33,9 @@ class NewsletterSubscriber(models.Model):
 
 
 def subscribed(self, newsletter_list_id, lang=None):
-    filters = {
-        'user': self,
-        'newsletter_list_id': newsletter_list_id
-    }
+    filters = {"user": self, "newsletter_list_id": newsletter_list_id}
     if lang:
-        filters['lang'] = lang
+        filters["lang"] = lang
 
     return NewsletterSubscriber.objects.filter(**filters).exists()
 
@@ -44,29 +45,34 @@ def subscribe(self, newsletter_list_id, lang=None):
         newsletter_list_id = newsletter_list_id.pk
 
     if not self.subscribed(newsletter_list_id, lang=lang):
-        NewsletterSubscriber.objects.create(subscribed_at=datetime.now(),
-                                            user=self,
-                                            email=self.email,
-                                            lang=lang,
-                                            newsletter_list_id=newsletter_list_id)
+        NewsletterSubscriber.objects.create(
+            subscribed_at=datetime.now(),
+            user=self,
+            email=self.email,
+            lang=lang,
+            newsletter_list_id=newsletter_list_id,
+        )
     else:
-        (NewsletterSubscriber.objects
-         .filter(user=self,
-                 newsletter_list_id=newsletter_list_id,
-                 lang=lang)
-         .update(unsubscribed_at=None,
-                 is_unsubscribed=False))
+        (
+            NewsletterSubscriber.objects.filter(
+                user=self, newsletter_list_id=newsletter_list_id, lang=lang
+            ).update(unsubscribed_at=None, is_unsubscribed=False)
+        )
 
 
 def unsubscribe(self, newsletter_list_id=None, lang=None):
     if isinstance(newsletter_list_id, NewsletterList):
         newsletter_lists = [newsletter_list_id.pk]
     elif newsletter_list_id:
-        newsletter_lists = NewsletterList.objects.filter(pk=newsletter_list_id).values_list('pk', flat=True)
+        newsletter_lists = NewsletterList.objects.filter(
+            pk=newsletter_list_id
+        ).values_list("pk", flat=True)
     else:
-        newsletter_lists = NewsletterList.objects.all().values_list('pk', flat=True)
+        newsletter_lists = NewsletterList.objects.all().values_list("pk", flat=True)
 
-    qs = NewsletterSubscriber.objects.filter(user=self, email=self.email, newsletter_list_id__in=newsletter_lists)
+    qs = NewsletterSubscriber.objects.filter(
+        user=self, email=self.email, newsletter_list_id__in=newsletter_lists
+    )
 
     if lang:
         qs = qs.filter(lang=lang)
@@ -74,7 +80,6 @@ def unsubscribe(self, newsletter_list_id=None, lang=None):
     qs.update(unsubscribed_at=datetime.now(), is_unsubscribed=True)
 
 
-
-User.add_to_class('subscribed', subscribed)
-User.add_to_class('subscribe', subscribe)
-User.add_to_class('unsubscribe', unsubscribe)
+User.add_to_class("subscribed", subscribed)
+User.add_to_class("subscribe", subscribe)
+User.add_to_class("unsubscribe", unsubscribe)
