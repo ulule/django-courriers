@@ -43,7 +43,6 @@ You have the choice between three backends to manage and send your emails:
 
 - ``SimpleBackend``, a simple backend to send emails with Django and
   your current smtp configuration
-- ``MailchimpBackend``, a `Mailchimp`_ backend which uses `mailchimp library`_
 - ``MailJetBackend``, a `Mailjet`_ backend which uses `mailjet library`_
 
 
@@ -75,31 +74,10 @@ courriers.backends.simple.SimpleBackend
 A simple backend to send your emails with Django and
 your current smtp configuration
 
-courriers.backends.mailchimp.MailchimpBackend
-..............................................
-
-A backend to manage your newsletters with Mailchimp.
-
 courriers.backends.mailjet.MailjetBackend
 ..............................................
 
 A backend to manage your newsletters with Mailjet.
-
-
-What you need to do for mailchimp
-.................................
-
-- Create an account on Mailchimp
-- Get your API key
-- Add it to your settings with others options as described below
-- Install the `mailchimp library`_
-- Create a list or more if you have users
-  from different countries
-
-With this backend you have to provide additional settings ::
-
-    COURRIERS_MAILCHIMP_API_KEY = 'Your API key'
-    COURRIERS_DEFAULT_FROM_NAME = 'Your name'
 
 
 What you need to do for mailjet
@@ -119,7 +97,5 @@ With this backend you have to provide additional settings ::
     COURRIERS_DEFAULT_FROM_NAME = 'Your name'
 
 .. _GitHub: https://github.com/ulule/django-courriers
-.. _Mailchimp: http://mailchimp.com/
 .. _Mailjet: https://eu.mailjet.com/
-.. _mailchimp library: https://pypi.python.org/pypi/mailchimp
 .. _mailjet library: https://pypi.python.org/pypi/mailjet/

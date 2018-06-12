@@ -1,11 +1,13 @@
 from __future__ import absolute_import
+
 from celery.task import task
 
 
 @task(bind=True)
-def subscribe(self, email, newsletter_list_id, lang=None, user_id=None):
+def subscribe(self, email, newsletter_list_id, user_id=None, **kwargs):
     from courriers.backends import get_backend
     from courriers.models import NewsletterList
+    from courriers import signals
 
     from django.contrib.auth import get_user_model
 
@@ -22,41 +24,48 @@ def subscribe(self, email, newsletter_list_id, lang=None, user_id=None):
 
     if user_id is not None:
         user = User.objects.get(pk=user_id)
+    else:
+        user = User.objects.filter(email=email).last()
 
-    try:
-        backend.register(email=email,
-                         newsletter_list=newsletter_list,
-                         lang=lang,
-                         user=user)
-    except Exception as e:
-        raise self.retry(exc=e, countdown=60)
+    if user:
+        signals.subscribed.send(sender=User, user=user, newsletter_list=newsletter_list)
+
+    else:
+        try:
+            backend.subscribe(newsletter_list.list_id, email)
+        except Exception as e:
+            raise self.retry(exc=e, countdown=60)
 
 
 @task(bind=True)
-def unsubscribe(self, email, newsletter_list_id=None, lang=None, user_id=None):
+def unsubscribe(self, email, newsletter_list_id=None, user_id=None, **kwargs):
     from courriers.backends import get_backend
     from courriers.models import NewsletterList
+    from courriers import signals
 
     from django.contrib.auth import get_user_model
 
     User = get_user_model()
 
-    newsletter_list = None
+    newsletter_lists = NewsletterList.objects.all()
 
     if newsletter_list_id:
-        newsletter_list = NewsletterList.objects.get(pk=newsletter_list_id)
+        newsletter_lists = NewsletterList.objects.filter(pk=newsletter_list_id)
 
     user = None
 
     if user_id is not None:
         user = User.objects.get(pk=user_id)
+    else:
+        user = User.objects.filter(email=email).last()
 
-    backend = get_backend()()
+    if user:
+        for newsletter_list in newsletter_lists:
+            signals.unsubscribed.send(
+                sender=User, user=user, newsletter_list=newsletter_list
+            )
+    else:
+        backend = get_backend()()
 
-    try:
-        backend.unregister(email=email,
-                           newsletter_list=newsletter_list,
-                           lang=lang,
-                           user=user)
-    except Exception as e:
-        raise self.retry(exc=e, countdown=60)
+        for newsletter in newsletter_lists:
+            backend.unsubscribe(newsletter.list_id, email)
