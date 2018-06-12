@@ -7,6 +7,7 @@ from celery.task import task
 def subscribe(self, email, newsletter_list_id, user_id=None, **kwargs):
     from courriers.backends import get_backend
     from courriers.models import NewsletterList
+    from courriers import signals
 
     from django.contrib.auth import get_user_model
 
@@ -27,7 +28,7 @@ def subscribe(self, email, newsletter_list_id, user_id=None, **kwargs):
         user = User.objects.filter(email=email).last()
 
     if user:
-        user.subscribe(newsletter_list)
+        signals.subscribed.send(sender=User, user=user, newsletter_list=newsletter_list)
 
     else:
         try:
@@ -40,6 +41,7 @@ def subscribe(self, email, newsletter_list_id, user_id=None, **kwargs):
 def unsubscribe(self, email, newsletter_list_id=None, user_id=None, **kwargs):
     from courriers.backends import get_backend
     from courriers.models import NewsletterList
+    from courriers import signals
 
     from django.contrib.auth import get_user_model
 
@@ -58,9 +60,8 @@ def unsubscribe(self, email, newsletter_list_id=None, user_id=None, **kwargs):
         user = User.objects.filter(email=email).last()
 
     if user:
-        user.unsubscribe(
-            newsletter_list_id=newsletter_lists[0] if newsletter_list_id else None
-        )
+        for newsletter_list in newsletter_lists:
+            signals.unsubscribed.send(sender=User, user=user, newsletter_list=newsletter_list)
     else:
         backend = get_backend()()
 

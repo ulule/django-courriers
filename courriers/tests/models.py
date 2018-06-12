@@ -2,10 +2,22 @@ from django.db import models
 from django.utils import timezone as datetime
 from django.utils.encoding import python_2_unicode_compatible
 from django.contrib.auth.models import AbstractUser, UserManager
+from django.dispatch import receiver
 
 from courriers.compat import AUTH_USER_MODEL
 from courriers.settings import ALLOWED_LANGUAGES
 from courriers.models import NewsletterList
+from courriers import signals
+
+
+@receiver(signals.unsubscribed)
+def handle_unsubscribed(user, newsletter_list=None, **kwargs):
+    user.unsubscribe(newsletter_list.pk if newsletter_list else None)
+
+
+@receiver(signals.subscribed)
+def handle_subscribed(user, newsletter_list=None, **kwargs):
+    user.subscribe(newsletter_list.pk if newsletter_list else None)
 
 
 class User(AbstractUser):
