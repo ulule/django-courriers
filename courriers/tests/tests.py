@@ -2,7 +2,7 @@
 import mock
 
 from django.test import TestCase
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.utils import timezone as datetime
 from django.core import mail
@@ -13,6 +13,8 @@ from courriers import settings
 from courriers.tasks import subscribe, unsubscribe
 
 from .models import NewsletterSubscriber
+
+User = get_user_model()
 
 
 class BaseBackendTests(TestCase):

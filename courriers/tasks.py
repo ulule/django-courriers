@@ -1,9 +1,10 @@
 from __future__ import absolute_import
+
 from celery.task import task
 
 
 @task(bind=True)
-def subscribe(self, email, newsletter_list_id, lang=None, user_id=None):
+def subscribe(self, email, newsletter_list_id, user_id=None, **kwargs):
     from courriers.backends import get_backend
     from courriers.models import NewsletterList
 
@@ -36,7 +37,7 @@ def subscribe(self, email, newsletter_list_id, lang=None, user_id=None):
 
 
 @task(bind=True)
-def unsubscribe(self, email, newsletter_list_id=None, lang=None, user_id=None):
+def unsubscribe(self, email, newsletter_list_id=None, user_id=None, **kwargs):
     from courriers.backends import get_backend
     from courriers.models import NewsletterList
 

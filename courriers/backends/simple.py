@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 from .base import BaseBackend
 
-from django.contrib.auth.models import User
 from django.core import mail
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils import translation
+from django.contrib.auth import get_user_model
 
 from ..settings import DEFAULT_FROM_EMAIL, PRE_PROCESSORS
 from ..utils import load_class
+
+User = get_user_model()
 
 
 class SimpleBackend(BaseBackend):

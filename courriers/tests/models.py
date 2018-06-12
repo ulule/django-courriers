@@ -1,11 +1,63 @@
 from django.db import models
 from django.utils import timezone as datetime
 from django.utils.encoding import python_2_unicode_compatible
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser, UserManager
 
 from courriers.compat import AUTH_USER_MODEL
 from courriers.settings import ALLOWED_LANGUAGES
 from courriers.models import NewsletterList
+
+
+class User(AbstractUser):
+    class Meta:
+        abstract = False
+
+    objects = UserManager()
+
+    def subscribed(self, newsletter_list_id, lang=None):
+        filters = {"user": self, "newsletter_list_id": newsletter_list_id}
+        if lang:
+            filters["lang"] = lang
+
+        return NewsletterSubscriber.objects.filter(**filters).exists()
+
+    def subscribe(self, newsletter_list_id, lang=None):
+        if isinstance(newsletter_list_id, NewsletterList):
+            newsletter_list_id = newsletter_list_id.pk
+
+        if not self.subscribed(newsletter_list_id, lang=lang):
+            NewsletterSubscriber.objects.create(
+                subscribed_at=datetime.now(),
+                user=self,
+                email=self.email,
+                lang=lang,
+                newsletter_list_id=newsletter_list_id,
+            )
+        else:
+            (
+                NewsletterSubscriber.objects.filter(
+                    user=self, newsletter_list_id=newsletter_list_id, lang=lang
+                ).update(unsubscribed_at=None, is_unsubscribed=False)
+            )
+
+    def unsubscribe(self, newsletter_list_id=None, lang=None):
+        if isinstance(newsletter_list_id, NewsletterList):
+            newsletter_lists = [newsletter_list_id.pk]
+        elif newsletter_list_id:
+            newsletter_lists = NewsletterList.objects.filter(
+                pk=newsletter_list_id
+            ).values_list("pk", flat=True)
+        else:
+            newsletter_lists = NewsletterList.objects.all().values_list("pk", flat=True)
+
+        qs = NewsletterSubscriber.objects.filter(
+            user=self, email=self.email, newsletter_list_id__in=newsletter_lists
+        )
+
+        if lang:
+            qs = qs.filter(lang=lang)
+
+        qs.update(unsubscribed_at=datetime.now(), is_unsubscribed=True)
 
 
 @python_2_unicode_compatible
@@ -28,56 +80,3 @@ class NewsletterSubscriber(models.Model):
     @property
     def subscribed(self):
         return self.is_unsubscribed is False
-
-
-def subscribed(self, newsletter_list_id, lang=None):
-    filters = {"user": self, "newsletter_list_id": newsletter_list_id}
-    if lang:
-        filters["lang"] = lang
-
-    return NewsletterSubscriber.objects.filter(**filters).exists()
-
-
-def subscribe(self, newsletter_list_id, lang=None):
-    if isinstance(newsletter_list_id, NewsletterList):
-        newsletter_list_id = newsletter_list_id.pk
-
-    if not self.subscribed(newsletter_list_id, lang=lang):
-        NewsletterSubscriber.objects.create(
-            subscribed_at=datetime.now(),
-            user=self,
-            email=self.email,
-            lang=lang,
-            newsletter_list_id=newsletter_list_id,
-        )
-    else:
-        (
-            NewsletterSubscriber.objects.filter(
-                user=self, newsletter_list_id=newsletter_list_id, lang=lang
-            ).update(unsubscribed_at=None, is_unsubscribed=False)
-        )
-
-
-def unsubscribe(self, newsletter_list_id=None, lang=None):
-    if isinstance(newsletter_list_id, NewsletterList):
-        newsletter_lists = [newsletter_list_id.pk]
-    elif newsletter_list_id:
-        newsletter_lists = NewsletterList.objects.filter(
-            pk=newsletter_list_id
-        ).values_list("pk", flat=True)
-    else:
-        newsletter_lists = NewsletterList.objects.all().values_list("pk", flat=True)
-
-    qs = NewsletterSubscriber.objects.filter(
-        user=self, email=self.email, newsletter_list_id__in=newsletter_lists
-    )
-
-    if lang:
-        qs = qs.filter(lang=lang)
-
-    qs.update(unsubscribed_at=datetime.now(), is_unsubscribed=True)
-
-
-User.add_to_class("subscribed", subscribed)
-User.add_to_class("subscribe", subscribe)
-User.add_to_class("unsubscribe", unsubscribe)
