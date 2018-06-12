@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     "courriers.tests",
 ]
 
-AUTH_USER_MODEL = 'tests.User'
+AUTH_USER_MODEL = "tests.User"
 
 SECRET_KEY = "blabla"
 

@@ -61,7 +61,9 @@ def unsubscribe(self, email, newsletter_list_id=None, user_id=None, **kwargs):
 
     if user:
         for newsletter_list in newsletter_lists:
-            signals.unsubscribed.send(sender=User, user=user, newsletter_list=newsletter_list)
+            signals.unsubscribed.send(
+                sender=User, user=user, newsletter_list=newsletter_list
+            )
     else:
         backend = get_backend()()
 

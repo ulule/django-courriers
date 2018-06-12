@@ -340,7 +340,7 @@ class SubscribeFormTest(TestCase):
 
         self.assertTrue(form.is_valid())
 
-        user = User.objects.create(username='thoas', email='florent@ulule.com')
+        user = User.objects.create(username="thoas", email="florent@ulule.com")
         form.save(user)
 
         new_subscriber = NewsletterSubscriber.objects.filter(
@@ -352,7 +352,7 @@ class SubscribeFormTest(TestCase):
         self.backend.unregister("florent@ulule.com")
 
     def test_subscribe_task(self):
-        user = User.objects.create(username='adele-ulule', email='adele@ulule.com')
+        user = User.objects.create(username="adele-ulule", email="adele@ulule.com")
         subscribe.apply_async(
             kwargs={
                 "email": "adele@ulule.com",

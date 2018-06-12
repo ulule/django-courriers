@@ -36,13 +36,23 @@ class NewsletterAdminForm(forms.ModelForm):
 class NewsletterAdmin(admin.ModelAdmin):
     change_form_template = "admin/courriers/newsletter/change_form.html"
 
-    list_display = ("name", "headline", "published_at", "status", "newsletter_list_link")
+    list_display = (
+        "name",
+        "headline",
+        "published_at",
+        "status",
+        "newsletter_list_link",
+    )
     list_filter = ("published_at", "status")
     inlines = [NewsletterItemInline]
     form = NewsletterAdminForm
 
     def get_queryset(self, request):
-        return super(NewsletterAdmin, self).get_queryset(request).select_related('newsletter_list')
+        return (
+            super(NewsletterAdmin, self)
+            .get_queryset(request)
+            .select_related("newsletter_list")
+        )
 
     def get_urls(self):
         urls = super(NewsletterAdmin, self).get_urls()
@@ -70,13 +80,16 @@ class NewsletterAdmin(admin.ModelAdmin):
         )
 
     def newsletter_list_link(self, obj):
-        url = reverse('admin:courriers_newsletterlist_change', args=(obj.newsletter_list.id,))
+        url = reverse(
+            "admin:courriers_newsletterlist_change", args=(obj.newsletter_list.id,)
+        )
         return '<a href="%(url)s">%(name)s</a>' % {
-            'url': url,
-            'name': obj.newsletter_list.name
+            "url": url,
+            "name": obj.newsletter_list.name,
         }
 
     newsletter_list_link.allow_tags = True
+
 
 class NewsletterListAdmin(admin.ModelAdmin):
     list_display = ("name", "slug", "created_at")
