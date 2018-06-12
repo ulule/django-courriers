@@ -480,31 +480,6 @@ class UnsubscribeFormTest(TestCase):
         self.assertEqual(new_subscriber.count(), 1)
 
 
-if hasattr(settings, "COURRIERS_MAILCHIMP_API_KEY"):
-
-    @mock.patch.object(
-        settings, "BACKEND_CLASS", "courriers.backends.mailchimp.MailchimpBackend"
-    )
-    class SubscribeMailchimpFormTest(SubscribeFormTest):
-        pass
-
-    @mock.patch.object(
-        settings, "BACKEND_CLASS", "courriers.backends.mailchimp.MailchimpBackend"
-    )
-    class UnsubscribeMailchimpFormTest(UnsubscribeFormTest):
-        pass
-
-    @mock.patch.object(
-        settings, "BACKEND_CLASS", "courriers.backends.mailchimp.MailchimpBackend"
-    )
-    class MailchimpBackendTests(BaseBackendTests):
-        def test_registration(self):
-            super(MailchimpBackendTests, self).test_registration()
-
-            for newsletter in self.newsletters:
-                self.backend.send_mails(newsletter)
-
-
 if hasattr(settings, "COURRIERS_MAILJET_API_KEY") and hasattr(
     settings, "COURRIERS_MAILJET_API_SECRET_KEY"
 ):
