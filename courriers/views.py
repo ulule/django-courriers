@@ -47,14 +47,8 @@ class NewsletterListView(AJAXResponseMixin, ListView):
         lang = translation.get_language()
         qs = self.newsletter_list.newsletters.status_online()
         if lang:
-            qs = list(
-                qs.filter(newsletter_segment__lang=lang).order_by("-published_at")
-            ) + list(
-                qs.filter(newsletter_segment_id__isnull=True).order_by("-published_at")
-            )
-        else:
-            qs = qs.order_by("-published_at")
-
+            qs = qs.filter(newsletter_segment__lang=lang)
+        qs = qs.order_by("-published_at")
         return qs
 
     def get_context_data(self, **kwargs):
