@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.views.generic import ListView, DetailView, FormView, TemplateView
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
@@ -44,10 +45,17 @@ class NewsletterListView(AJAXResponseMixin, ListView):
 
     def get_queryset(self):
         lang = translation.get_language()
-        return self.newsletter_list.newsletters.status_online().filter(
-            newsletter_segment__lang=lang).order_by(
-                "-published_at"
+        qs = self.newsletter_list.newsletters.status_online()
+        if lang:
+            qs = list(
+                qs.filter(newsletter_segment__lang=lang).order_by("-published_at")
+            ) + list(
+                qs.filter(newsletter_segment_id__isnull=True).order_by("-published_at")
             )
+        else:
+            qs = qs.order_by("-published_at")
+
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super(NewsletterListView, self).get_context_data(**kwargs)
