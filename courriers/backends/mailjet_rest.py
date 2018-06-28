@@ -3,15 +3,12 @@ from __future__ import absolute_import, unicode_literals
 from mailjet_rest import Client
 
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.functional import cached_property
 from django.template.loader import render_to_string
 
 from ..settings import (
     MAILJET_API_KEY,
     DEFAULT_FROM_EMAIL,
     DEFAULT_FROM_NAME,
-    MAILJET_CONTACTSLIST_LIMIT,
-    MAILJET_CONTACTFILTER_LIMIT,
     MAILJET_API_SECRET_KEY,
     PRE_PROCESSORS,
 )
