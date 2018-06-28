@@ -34,7 +34,7 @@ class NewsletterList(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.name
+        return self.name or ''
 
     def get_absolute_url(self):
         return reverse("newsletter_list", kwargs={"slug": self.slug})
@@ -53,7 +53,7 @@ class NewsletterSegment(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.name
+        return self.name or ''
 
 
 class NewsletterQuerySet(QuerySet):
@@ -118,7 +118,7 @@ class Newsletter(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.name
+        return self.name or ''
 
     def get_previous(self):
         return self.__class__.objects.filter(
@@ -154,4 +154,4 @@ class NewsletterItem(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.name
+        return self.name or ''
