@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import os
 
 from django.db import models
@@ -15,7 +17,7 @@ from ..settings import ALLOWED_LANGUAGES
 
 def get_file_path(instance, filename):
     fname, ext = os.path.splitext(filename)
-    filename = unicode("%s%s" % (slugify(truncatechars(fname, 50)), ext))
+    filename = "{}{}".format(slugify(truncatechars(fname, 50)), ext)
 
     return os.path.join("courriers", "uploads", filename)
 
