@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 from django.views.generic.base import TemplateResponseMixin
+from django.utils import translation
 
 from .settings import PAGINATE_BY
 from .models import Newsletter, NewsletterList
@@ -42,9 +43,12 @@ class NewsletterListView(AJAXResponseMixin, ListView):
         )
 
     def get_queryset(self):
-        return self.newsletter_list.newsletters.status_online().order_by(
-            "-published_at"
-        )
+        lang = translation.get_language()
+        qs = self.newsletter_list.newsletters.status_online()
+        if lang:
+            qs = qs.filter(newsletter_segment__lang=lang)
+        qs = qs.order_by("-published_at")
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super(NewsletterListView, self).get_context_data(**kwargs)
