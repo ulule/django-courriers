@@ -4,7 +4,7 @@ from django import forms
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from .models import Newsletter, NewsletterItem, NewsletterList, NewsletterSegment
 
