@@ -34,7 +34,7 @@ class NewsletterList(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.name or ''
+        return self.name or ""
 
     def get_absolute_url(self):
         return reverse("newsletter_list", kwargs={"slug": self.slug})
@@ -44,7 +44,9 @@ class NewsletterList(models.Model):
 class NewsletterSegment(models.Model):
     name = models.CharField(max_length=255)
     segment_id = models.IntegerField()
-    newsletter_list = models.ForeignKey(NewsletterList, related_name="lists")
+    newsletter_list = models.ForeignKey(
+        NewsletterList, on_delete=models.PROTECT, related_name="lists"
+    )
     lang = models.CharField(
         max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES
     )
@@ -53,7 +55,7 @@ class NewsletterSegment(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.name or ''
+        return self.name or ""
 
 
 class NewsletterQuerySet(QuerySet):
@@ -108,8 +110,12 @@ class Newsletter(models.Model):
     headline = models.TextField(blank=True, null=True)
     conclusion = models.TextField(blank=True, null=True)
     cover = models.ImageField(upload_to=get_file_path, blank=True, null=True)
-    newsletter_list = models.ForeignKey(NewsletterList, related_name="newsletters")
-    newsletter_segment = models.ForeignKey(NewsletterSegment, related_name="segments")
+    newsletter_list = models.ForeignKey(
+        NewsletterList, related_name="newsletters", on_delete=models.PROTECT
+    )
+    newsletter_segment = models.ForeignKey(
+        NewsletterSegment, related_name="segments", on_delete=models.PROTECT
+    )
     sent = models.BooleanField(default=False, db_index=True)
 
     objects = NewsletterManager()
@@ -118,7 +124,7 @@ class Newsletter(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.name or ''
+        return self.name or ""
 
     def get_previous(self):
         return self.__class__.objects.filter(
@@ -139,8 +145,12 @@ class Newsletter(models.Model):
 
 @python_2_unicode_compatible
 class NewsletterItem(models.Model):
-    newsletter = models.ForeignKey(Newsletter, related_name="items")
-    content_type = models.ForeignKey(ContentType, blank=True, null=True)
+    newsletter = models.ForeignKey(
+        Newsletter, related_name="items", on_delete=models.CASCADE
+    )
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.PROTECT, blank=True, null=True
+    )
     object_id = models.PositiveIntegerField(blank=True, null=True)
     content_object = GenericForeignKey("content_type", "object_id")
     name = models.CharField(max_length=255, blank=True, null=True)
@@ -154,4 +164,4 @@ class NewsletterItem(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.name or ''
+        return self.name or ""
