@@ -8,7 +8,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.template.defaultfilters import slugify, truncatechars
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone as datetime
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.encoding import python_2_unicode_compatible
 from django.db.models.query import QuerySet
 
