@@ -7,27 +7,6 @@ django-courriers
 
 A generic application to manage your newsletters
 
-Compatibility
--------------
-
-This library is compatible with:
-
-- python2.6, django1.4
-- python2.6, django1.5
-- python2.6, django1.6
-- python2.7, django1.4
-- python2.7, django1.5
-- python2.7, django1.6
-- python2.7, django1.7
-- python2.7, django1.8
-- python3.3, django1.5
-- python3.3, django1.6
-- python3.3, django1.7
-- python3.3, django1.8
-- python3.4, django1.6
-- python3.4, django1.7
-- python3.4, django1.8
-
 What it does?
 -------------
 
