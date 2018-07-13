@@ -113,7 +113,7 @@ class BaseNewsletterListFormView(AJAXResponseMixin, FormView):
         return context
 
     def form_valid(self, form):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             form.save(self.request.user)
         else:
             form.save()
