@@ -1,7 +1,6 @@
-dist: trusty
 sudo: required
 language: python
-python: 3.6
+python: 3.7
 
 install: pip install tox
 script: tox

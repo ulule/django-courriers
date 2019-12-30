@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import os
 
 from django.db import models
@@ -9,7 +7,6 @@ from django.template.defaultfilters import slugify, truncatechars
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone as datetime
 from django.urls import reverse
-from django.utils.encoding import python_2_unicode_compatible
 from django.db.models.query import QuerySet
 
 from ..settings import ALLOWED_LANGUAGES
@@ -22,7 +19,6 @@ def get_file_path(instance, filename):
     return os.path.join("courriers", "uploads", filename)
 
 
-@python_2_unicode_compatible
 class NewsletterList(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
@@ -40,7 +36,6 @@ class NewsletterList(models.Model):
         return reverse("newsletter_list", kwargs={"slug": self.slug})
 
 
-@python_2_unicode_compatible
 class NewsletterSegment(models.Model):
     name = models.CharField(max_length=255)
     segment_id = models.IntegerField()
@@ -95,7 +90,6 @@ class NewsletterManager(models.Manager):
         return self.get_queryset().get_next(current_date)
 
 
-@python_2_unicode_compatible
 class Newsletter(models.Model):
     STATUS_ONLINE = 1
     STATUS_DRAFT = 2
@@ -143,7 +137,6 @@ class Newsletter(models.Model):
         return reverse("newsletter_detail", args=[self.pk])
 
 
-@python_2_unicode_compatible
 class NewsletterItem(models.Model):
     newsletter = models.ForeignKey(
         Newsletter, related_name="items", on_delete=models.CASCADE

@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils import timezone as datetime
-from django.utils.encoding import python_2_unicode_compatible
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.dispatch import receiver
 
@@ -72,7 +71,6 @@ class User(AbstractUser):
         qs.update(unsubscribed_at=datetime.now(), is_unsubscribed=True)
 
 
-@python_2_unicode_compatible
 class NewsletterSubscriber(models.Model):
     subscribed_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(
