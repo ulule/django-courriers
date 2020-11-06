@@ -1,6 +1,7 @@
-from __future__ import absolute_import
-
-from celery.task import task
+try:
+    from celery.task import task
+except ImportError:
+    from celery import shared_task as task
 
 
 @task(bind=True)
