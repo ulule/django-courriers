@@ -6,4 +6,4 @@ test:
 	coverage report --omit=courriers/test* --omit=courriers/migrations/*
 
 release:
-	python setup.py sdist register upload -s
+	python setup.py register sdist upload
