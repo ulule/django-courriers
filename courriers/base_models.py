@@ -9,7 +9,7 @@ from django.utils import timezone as datetime
 from django.urls import reverse
 from django.db.models.query import QuerySet
 
-from ..settings import ALLOWED_LANGUAGES
+from courriers.settings import ALLOWED_LANGUAGES
 
 
 def get_file_path(instance, filename):
@@ -40,7 +40,7 @@ class NewsletterSegment(models.Model):
     name = models.CharField(max_length=255)
     segment_id = models.IntegerField()
     newsletter_list = models.ForeignKey(
-        NewsletterList, on_delete=models.PROTECT, related_name="lists"
+        "courriers.NewsletterList", on_delete=models.PROTECT, related_name="lists"
     )
     lang = models.CharField(
         max_length=10, blank=True, null=True, choices=ALLOWED_LANGUAGES
@@ -105,10 +105,10 @@ class Newsletter(models.Model):
     conclusion = models.TextField(blank=True, null=True)
     cover = models.ImageField(upload_to=get_file_path, blank=True, null=True)
     newsletter_list = models.ForeignKey(
-        NewsletterList, related_name="newsletters", on_delete=models.PROTECT
+        "courriers.NewsletterList", related_name="newsletters", on_delete=models.PROTECT
     )
     newsletter_segment = models.ForeignKey(
-        NewsletterSegment, related_name="segments", on_delete=models.PROTECT
+        "courriers.NewsletterSegment", related_name="segments", on_delete=models.PROTECT
     )
     sent = models.BooleanField(default=False, db_index=True)
 
@@ -139,7 +139,7 @@ class Newsletter(models.Model):
 
 class NewsletterItem(models.Model):
     newsletter = models.ForeignKey(
-        Newsletter, related_name="items", on_delete=models.CASCADE
+        "courriers.Newsletter", related_name="items", on_delete=models.CASCADE
     )
     content_type = models.ForeignKey(
         ContentType, on_delete=models.PROTECT, blank=True, null=True
