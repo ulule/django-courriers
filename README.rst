@@ -10,7 +10,7 @@ A generic application to manage your newsletters
 What it does?
 -------------
 
-django-courriers has three models:
+django-courriers has four models:
 
 - ``NewsletterList`` which represents a newsletter list
 - ``Newsletter`` which represents a newsletter
@@ -18,7 +18,7 @@ django-courriers has three models:
 - ``NewsletterSubscriber`` which represents a user who is subscribed to a newsletter
 
 
-You have the choice between three backends to manage and send your emails:
+You have the choice between two backends to manage and send your emails:
 
 - ``SimpleBackend``, a simple backend to send emails with Django and
   your current smtp configuration
